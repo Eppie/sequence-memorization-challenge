@@ -1,0 +1,522 @@
+{
+  "n_attempts": 3,
+  "ds": [
+    16,
+    32,
+    64
+  ],
+  "records": [
+    {
+      "condition": "hc-ridge",
+      "d": 16,
+      "threshold": 1.0,
+      "max_facts": 69,
+      "best_S": 4,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 8,
+      "seconds": 0.7,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          true
+        ],
+        [
+          96,
+          false
+        ],
+        [
+          80,
+          false
+        ],
+        [
+          72,
+          false
+        ],
+        [
+          68,
+          true
+        ],
+        [
+          70,
+          false
+        ],
+        [
+          69,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hc-ridge",
+      "d": 32,
+      "threshold": 1.0,
+      "max_facts": 152,
+      "best_S": 5,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 8,
+      "seconds": 1.5,
+      "trace": [
+        [
+          256,
+          false
+        ],
+        [
+          128,
+          true
+        ],
+        [
+          192,
+          false
+        ],
+        [
+          160,
+          false
+        ],
+        [
+          144,
+          true
+        ],
+        [
+          152,
+          true
+        ],
+        [
+          156,
+          false
+        ],
+        [
+          154,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-ridge",
+      "d": 64,
+      "threshold": 1.0,
+      "max_facts": 328,
+      "best_S": 11,
+      "best_top_fraction": 0.1,
+      "n_evaluations": 8,
+      "seconds": 5.3,
+      "trace": [
+        [
+          512,
+          false
+        ],
+        [
+          256,
+          true
+        ],
+        [
+          384,
+          false
+        ],
+        [
+          320,
+          true
+        ],
+        [
+          352,
+          false
+        ],
+        [
+          336,
+          false
+        ],
+        [
+          328,
+          true
+        ],
+        [
+          332,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-ridge",
+      "d": 16,
+      "threshold": 0.9,
+      "max_facts": 100,
+      "best_S": 2,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 7,
+      "seconds": 0.5,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          true
+        ],
+        [
+          96,
+          true
+        ],
+        [
+          112,
+          false
+        ],
+        [
+          104,
+          false
+        ],
+        [
+          100,
+          true
+        ],
+        [
+          102,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-ridge",
+      "d": 32,
+      "threshold": 0.9,
+      "max_facts": 276,
+      "best_S": 7,
+      "best_top_fraction": 0.2,
+      "n_evaluations": 8,
+      "seconds": 1.9,
+      "trace": [
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          false
+        ],
+        [
+          384,
+          false
+        ],
+        [
+          320,
+          false
+        ],
+        [
+          288,
+          false
+        ],
+        [
+          272,
+          true
+        ],
+        [
+          280,
+          false
+        ],
+        [
+          276,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hc-ridge",
+      "d": 64,
+      "threshold": 0.9,
+      "max_facts": 800,
+      "best_S": 7,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 7,
+      "seconds": 6.7,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          false
+        ],
+        [
+          768,
+          true
+        ],
+        [
+          896,
+          false
+        ],
+        [
+          832,
+          false
+        ],
+        [
+          800,
+          true
+        ],
+        [
+          816,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-tiebreak",
+      "d": 16,
+      "threshold": 1.0,
+      "max_facts": 78,
+      "best_S": 4,
+      "best_top_fraction": 0.2,
+      "n_evaluations": 8,
+      "seconds": 0.6,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          true
+        ],
+        [
+          96,
+          false
+        ],
+        [
+          80,
+          false
+        ],
+        [
+          72,
+          true
+        ],
+        [
+          76,
+          true
+        ],
+        [
+          78,
+          true
+        ],
+        [
+          79,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-tiebreak",
+      "d": 32,
+      "threshold": 1.0,
+      "max_facts": 168,
+      "best_S": 5,
+      "best_top_fraction": 0.2,
+      "n_evaluations": 8,
+      "seconds": 1.7,
+      "trace": [
+        [
+          256,
+          false
+        ],
+        [
+          128,
+          true
+        ],
+        [
+          192,
+          false
+        ],
+        [
+          160,
+          true
+        ],
+        [
+          176,
+          false
+        ],
+        [
+          168,
+          true
+        ],
+        [
+          172,
+          false
+        ],
+        [
+          170,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-tiebreak",
+      "d": 64,
+      "threshold": 1.0,
+      "max_facts": 388,
+      "best_S": 11,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 8,
+      "seconds": 6.1,
+      "trace": [
+        [
+          512,
+          false
+        ],
+        [
+          256,
+          true
+        ],
+        [
+          384,
+          true
+        ],
+        [
+          448,
+          false
+        ],
+        [
+          416,
+          false
+        ],
+        [
+          400,
+          false
+        ],
+        [
+          392,
+          false
+        ],
+        [
+          388,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hc-tiebreak",
+      "d": 16,
+      "threshold": 0.9,
+      "max_facts": 116,
+      "best_S": 4,
+      "best_top_fraction": 0.1,
+      "n_evaluations": 7,
+      "seconds": 0.5,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          true
+        ],
+        [
+          96,
+          true
+        ],
+        [
+          112,
+          true
+        ],
+        [
+          120,
+          false
+        ],
+        [
+          116,
+          true
+        ],
+        [
+          118,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-tiebreak",
+      "d": 32,
+      "threshold": 0.9,
+      "max_facts": 316,
+      "best_S": 4,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 8,
+      "seconds": 1.4,
+      "trace": [
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          false
+        ],
+        [
+          384,
+          false
+        ],
+        [
+          320,
+          false
+        ],
+        [
+          288,
+          true
+        ],
+        [
+          304,
+          true
+        ],
+        [
+          312,
+          true
+        ],
+        [
+          316,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hc-tiebreak",
+      "d": 64,
+      "threshold": 0.9,
+      "max_facts": 1008,
+      "best_S": 8,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 7,
+      "seconds": 2.7,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          false
+        ],
+        [
+          768,
+          true
+        ],
+        [
+          896,
+          true
+        ],
+        [
+          960,
+          true
+        ],
+        [
+          992,
+          true
+        ],
+        [
+          1008,
+          true
+        ]
+      ]
+    }
+  ]
+}

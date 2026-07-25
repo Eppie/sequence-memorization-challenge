@@ -1,0 +1,16 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Test / tooling caches
+.pytest_cache/
+
+# Regenerable: connection matrices from precompute_conn.py (~29 MB, ~1 min to rebuild)
+results/conn_cache/

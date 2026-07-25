@@ -1,0 +1,3751 @@
+{
+  "n_attempts": 3,
+  "ds": [
+    16,
+    32,
+    64,
+    128
+  ],
+  "records": [
+    {
+      "condition": "coin-ridge",
+      "d": 16,
+      "threshold": 1.0,
+      "max_facts": 93,
+      "best_S": 2,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 8,
+      "seconds": 0.0,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          true
+        ],
+        [
+          96,
+          false
+        ],
+        [
+          80,
+          true
+        ],
+        [
+          88,
+          true
+        ],
+        [
+          92,
+          true
+        ],
+        [
+          94,
+          false
+        ],
+        [
+          93,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "coin-ridge",
+      "d": 32,
+      "threshold": 1.0,
+      "max_facts": 174,
+      "best_S": 4,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 8,
+      "seconds": 0.1,
+      "trace": [
+        [
+          256,
+          false
+        ],
+        [
+          128,
+          true
+        ],
+        [
+          192,
+          false
+        ],
+        [
+          160,
+          true
+        ],
+        [
+          176,
+          false
+        ],
+        [
+          168,
+          true
+        ],
+        [
+          172,
+          true
+        ],
+        [
+          174,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "coin-ridge",
+      "d": 64,
+      "threshold": 1.0,
+      "max_facts": 344,
+      "best_S": 12,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 8,
+      "seconds": 0.3,
+      "trace": [
+        [
+          512,
+          false
+        ],
+        [
+          256,
+          true
+        ],
+        [
+          384,
+          false
+        ],
+        [
+          320,
+          true
+        ],
+        [
+          352,
+          false
+        ],
+        [
+          336,
+          true
+        ],
+        [
+          344,
+          true
+        ],
+        [
+          348,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "coin-ridge",
+      "d": 128,
+      "threshold": 1.0,
+      "max_facts": 1136,
+      "best_S": 9,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 8,
+      "seconds": 2.6,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          false
+        ],
+        [
+          1536,
+          false
+        ],
+        [
+          1280,
+          false
+        ],
+        [
+          1152,
+          false
+        ],
+        [
+          1088,
+          true
+        ],
+        [
+          1120,
+          true
+        ],
+        [
+          1136,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "coin-ridge",
+      "d": 16,
+      "threshold": 0.9,
+      "max_facts": 118,
+      "best_S": 1,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 7,
+      "seconds": 0.0,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          true
+        ],
+        [
+          96,
+          true
+        ],
+        [
+          112,
+          true
+        ],
+        [
+          120,
+          false
+        ],
+        [
+          116,
+          true
+        ],
+        [
+          118,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "coin-ridge",
+      "d": 32,
+      "threshold": 0.9,
+      "max_facts": 316,
+      "best_S": 4,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 8,
+      "seconds": 0.1,
+      "trace": [
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          false
+        ],
+        [
+          384,
+          false
+        ],
+        [
+          320,
+          false
+        ],
+        [
+          288,
+          true
+        ],
+        [
+          304,
+          true
+        ],
+        [
+          312,
+          true
+        ],
+        [
+          316,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "coin-ridge",
+      "d": 64,
+      "threshold": 0.9,
+      "max_facts": 928,
+      "best_S": 3,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 7,
+      "seconds": 0.4,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          false
+        ],
+        [
+          768,
+          true
+        ],
+        [
+          896,
+          true
+        ],
+        [
+          960,
+          false
+        ],
+        [
+          928,
+          true
+        ],
+        [
+          944,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "coin-ridge",
+      "d": 128,
+      "threshold": 0.9,
+      "max_facts": 2848,
+      "best_S": 3,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 9,
+      "seconds": 5.3,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          false
+        ],
+        [
+          3072,
+          false
+        ],
+        [
+          2560,
+          true
+        ],
+        [
+          2816,
+          true
+        ],
+        [
+          2944,
+          false
+        ],
+        [
+          2880,
+          false
+        ],
+        [
+          2848,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "coin-tiebreak",
+      "d": 16,
+      "threshold": 1.0,
+      "max_facts": 93,
+      "best_S": 2,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 8,
+      "seconds": 0.0,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          true
+        ],
+        [
+          96,
+          false
+        ],
+        [
+          80,
+          true
+        ],
+        [
+          88,
+          true
+        ],
+        [
+          92,
+          true
+        ],
+        [
+          94,
+          false
+        ],
+        [
+          93,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "coin-tiebreak",
+      "d": 32,
+      "threshold": 1.0,
+      "max_facts": 174,
+      "best_S": 4,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 8,
+      "seconds": 0.1,
+      "trace": [
+        [
+          256,
+          false
+        ],
+        [
+          128,
+          true
+        ],
+        [
+          192,
+          false
+        ],
+        [
+          160,
+          true
+        ],
+        [
+          176,
+          false
+        ],
+        [
+          168,
+          true
+        ],
+        [
+          172,
+          true
+        ],
+        [
+          174,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "coin-tiebreak",
+      "d": 64,
+      "threshold": 1.0,
+      "max_facts": 344,
+      "best_S": 12,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 8,
+      "seconds": 0.3,
+      "trace": [
+        [
+          512,
+          false
+        ],
+        [
+          256,
+          true
+        ],
+        [
+          384,
+          false
+        ],
+        [
+          320,
+          true
+        ],
+        [
+          352,
+          false
+        ],
+        [
+          336,
+          true
+        ],
+        [
+          344,
+          true
+        ],
+        [
+          348,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "coin-tiebreak",
+      "d": 128,
+      "threshold": 1.0,
+      "max_facts": 1136,
+      "best_S": 9,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 8,
+      "seconds": 2.9,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          false
+        ],
+        [
+          1536,
+          false
+        ],
+        [
+          1280,
+          false
+        ],
+        [
+          1152,
+          false
+        ],
+        [
+          1088,
+          true
+        ],
+        [
+          1120,
+          true
+        ],
+        [
+          1136,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "coin-tiebreak",
+      "d": 16,
+      "threshold": 0.9,
+      "max_facts": 118,
+      "best_S": 1,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 7,
+      "seconds": 0.0,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          true
+        ],
+        [
+          96,
+          true
+        ],
+        [
+          112,
+          true
+        ],
+        [
+          120,
+          false
+        ],
+        [
+          116,
+          true
+        ],
+        [
+          118,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "coin-tiebreak",
+      "d": 32,
+      "threshold": 0.9,
+      "max_facts": 316,
+      "best_S": 4,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 8,
+      "seconds": 0.1,
+      "trace": [
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          false
+        ],
+        [
+          384,
+          false
+        ],
+        [
+          320,
+          false
+        ],
+        [
+          288,
+          true
+        ],
+        [
+          304,
+          true
+        ],
+        [
+          312,
+          true
+        ],
+        [
+          316,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "coin-tiebreak",
+      "d": 64,
+      "threshold": 0.9,
+      "max_facts": 928,
+      "best_S": 3,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 7,
+      "seconds": 0.4,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          false
+        ],
+        [
+          768,
+          true
+        ],
+        [
+          896,
+          true
+        ],
+        [
+          960,
+          false
+        ],
+        [
+          928,
+          true
+        ],
+        [
+          944,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "coin-tiebreak",
+      "d": 128,
+      "threshold": 0.9,
+      "max_facts": 2848,
+      "best_S": 3,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 9,
+      "seconds": 6.0,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          false
+        ],
+        [
+          3072,
+          false
+        ],
+        [
+          2560,
+          true
+        ],
+        [
+          2816,
+          true
+        ],
+        [
+          2944,
+          false
+        ],
+        [
+          2880,
+          false
+        ],
+        [
+          2848,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hand-coded",
+      "d": 16,
+      "threshold": 1.0,
+      "max_facts": 53,
+      "best_S": 4,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 8,
+      "seconds": 0.4,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          false
+        ],
+        [
+          32,
+          true
+        ],
+        [
+          48,
+          true
+        ],
+        [
+          56,
+          false
+        ],
+        [
+          52,
+          true
+        ],
+        [
+          54,
+          false
+        ],
+        [
+          53,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hand-coded",
+      "d": 32,
+      "threshold": 1.0,
+      "max_facts": 130,
+      "best_S": 10,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 8,
+      "seconds": 1.7,
+      "trace": [
+        [
+          256,
+          false
+        ],
+        [
+          128,
+          true
+        ],
+        [
+          192,
+          false
+        ],
+        [
+          160,
+          false
+        ],
+        [
+          144,
+          false
+        ],
+        [
+          136,
+          false
+        ],
+        [
+          132,
+          false
+        ],
+        [
+          130,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hand-coded",
+      "d": 64,
+      "threshold": 1.0,
+      "max_facts": 216,
+      "best_S": 15,
+      "best_top_fraction": 0.2,
+      "n_evaluations": 8,
+      "seconds": 4.7,
+      "trace": [
+        [
+          512,
+          false
+        ],
+        [
+          256,
+          false
+        ],
+        [
+          128,
+          true
+        ],
+        [
+          192,
+          true
+        ],
+        [
+          224,
+          false
+        ],
+        [
+          208,
+          true
+        ],
+        [
+          216,
+          true
+        ],
+        [
+          220,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hand-coded",
+      "d": 128,
+      "threshold": 1.0,
+      "max_facts": 776,
+      "best_S": 20,
+      "best_top_fraction": 0.1,
+      "n_evaluations": 8,
+      "seconds": 12.4,
+      "trace": [
+        [
+          1024,
+          false
+        ],
+        [
+          512,
+          true
+        ],
+        [
+          768,
+          true
+        ],
+        [
+          896,
+          false
+        ],
+        [
+          832,
+          false
+        ],
+        [
+          800,
+          false
+        ],
+        [
+          784,
+          false
+        ],
+        [
+          776,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hand-coded",
+      "d": 256,
+      "threshold": 1.0,
+      "max_facts": 2304,
+      "best_S": 34,
+      "best_top_fraction": 0.1,
+      "n_evaluations": 8,
+      "seconds": 868.9,
+      "trace": [
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          false
+        ],
+        [
+          3072,
+          false
+        ],
+        [
+          2560,
+          false
+        ],
+        [
+          2304,
+          true
+        ],
+        [
+          2432,
+          false
+        ],
+        [
+          2368,
+          false
+        ],
+        [
+          2336,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hand-coded",
+      "d": 16,
+      "threshold": 0.9,
+      "max_facts": 86,
+      "best_S": 4,
+      "best_top_fraction": 0.2,
+      "n_evaluations": 8,
+      "seconds": 0.4,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          true
+        ],
+        [
+          96,
+          false
+        ],
+        [
+          80,
+          true
+        ],
+        [
+          88,
+          false
+        ],
+        [
+          84,
+          true
+        ],
+        [
+          86,
+          true
+        ],
+        [
+          87,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hand-coded",
+      "d": 32,
+      "threshold": 0.9,
+      "max_facts": 244,
+      "best_S": 5,
+      "best_top_fraction": 0.1,
+      "n_evaluations": 7,
+      "seconds": 0.7,
+      "trace": [
+        [
+          256,
+          false
+        ],
+        [
+          128,
+          true
+        ],
+        [
+          192,
+          true
+        ],
+        [
+          224,
+          true
+        ],
+        [
+          240,
+          true
+        ],
+        [
+          248,
+          false
+        ],
+        [
+          244,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hand-coded",
+      "d": 64,
+      "threshold": 0.9,
+      "max_facts": 768,
+      "best_S": 9,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 8,
+      "seconds": 10.5,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          false
+        ],
+        [
+          768,
+          true
+        ],
+        [
+          896,
+          false
+        ],
+        [
+          832,
+          false
+        ],
+        [
+          800,
+          false
+        ],
+        [
+          784,
+          false
+        ],
+        [
+          776,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hand-coded",
+      "d": 128,
+      "threshold": 0.9,
+      "max_facts": 2592,
+      "best_S": 11,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 9,
+      "seconds": 24.2,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          false
+        ],
+        [
+          3072,
+          false
+        ],
+        [
+          2560,
+          true
+        ],
+        [
+          2816,
+          false
+        ],
+        [
+          2688,
+          false
+        ],
+        [
+          2624,
+          false
+        ],
+        [
+          2592,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hand-coded",
+      "d": 256,
+      "threshold": 0.9,
+      "max_facts": 9728,
+      "best_S": 16,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 10,
+      "seconds": 893.3,
+      "trace": [
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          true
+        ],
+        [
+          16384,
+          false
+        ],
+        [
+          12288,
+          false
+        ],
+        [
+          10240,
+          false
+        ],
+        [
+          9216,
+          true
+        ],
+        [
+          9728,
+          true
+        ],
+        [
+          9984,
+          false
+        ],
+        [
+          9856,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-ridge",
+      "d": 16,
+      "threshold": 1.0,
+      "max_facts": 69,
+      "best_S": 4,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 8,
+      "seconds": 0.7,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          true
+        ],
+        [
+          96,
+          false
+        ],
+        [
+          80,
+          false
+        ],
+        [
+          72,
+          false
+        ],
+        [
+          68,
+          true
+        ],
+        [
+          70,
+          false
+        ],
+        [
+          69,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hc-ridge",
+      "d": 32,
+      "threshold": 1.0,
+      "max_facts": 152,
+      "best_S": 5,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 8,
+      "seconds": 1.5,
+      "trace": [
+        [
+          256,
+          false
+        ],
+        [
+          128,
+          true
+        ],
+        [
+          192,
+          false
+        ],
+        [
+          160,
+          false
+        ],
+        [
+          144,
+          true
+        ],
+        [
+          152,
+          true
+        ],
+        [
+          156,
+          false
+        ],
+        [
+          154,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-ridge",
+      "d": 64,
+      "threshold": 1.0,
+      "max_facts": 328,
+      "best_S": 11,
+      "best_top_fraction": 0.1,
+      "n_evaluations": 8,
+      "seconds": 5.3,
+      "trace": [
+        [
+          512,
+          false
+        ],
+        [
+          256,
+          true
+        ],
+        [
+          384,
+          false
+        ],
+        [
+          320,
+          true
+        ],
+        [
+          352,
+          false
+        ],
+        [
+          336,
+          false
+        ],
+        [
+          328,
+          true
+        ],
+        [
+          332,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-ridge",
+      "d": 128,
+      "threshold": 1.0,
+      "max_facts": 864,
+      "best_S": 20,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 7,
+      "seconds": 22.9,
+      "trace": [
+        [
+          1024,
+          false
+        ],
+        [
+          512,
+          true
+        ],
+        [
+          768,
+          true
+        ],
+        [
+          896,
+          false
+        ],
+        [
+          832,
+          true
+        ],
+        [
+          864,
+          true
+        ],
+        [
+          880,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-ridge",
+      "d": 16,
+      "threshold": 0.9,
+      "max_facts": 100,
+      "best_S": 2,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 7,
+      "seconds": 0.5,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          true
+        ],
+        [
+          96,
+          true
+        ],
+        [
+          112,
+          false
+        ],
+        [
+          104,
+          false
+        ],
+        [
+          100,
+          true
+        ],
+        [
+          102,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-ridge",
+      "d": 32,
+      "threshold": 0.9,
+      "max_facts": 276,
+      "best_S": 7,
+      "best_top_fraction": 0.2,
+      "n_evaluations": 8,
+      "seconds": 1.9,
+      "trace": [
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          false
+        ],
+        [
+          384,
+          false
+        ],
+        [
+          320,
+          false
+        ],
+        [
+          288,
+          false
+        ],
+        [
+          272,
+          true
+        ],
+        [
+          280,
+          false
+        ],
+        [
+          276,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hc-ridge",
+      "d": 64,
+      "threshold": 0.9,
+      "max_facts": 800,
+      "best_S": 7,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 7,
+      "seconds": 6.7,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          false
+        ],
+        [
+          768,
+          true
+        ],
+        [
+          896,
+          false
+        ],
+        [
+          832,
+          false
+        ],
+        [
+          800,
+          true
+        ],
+        [
+          816,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-ridge",
+      "d": 128,
+      "threshold": 0.9,
+      "max_facts": 2336,
+      "best_S": 10,
+      "best_top_fraction": 0.1,
+      "n_evaluations": 9,
+      "seconds": 74.0,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          false
+        ],
+        [
+          3072,
+          false
+        ],
+        [
+          2560,
+          false
+        ],
+        [
+          2304,
+          true
+        ],
+        [
+          2432,
+          false
+        ],
+        [
+          2368,
+          false
+        ],
+        [
+          2336,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hc-tiebreak",
+      "d": 16,
+      "threshold": 1.0,
+      "max_facts": 78,
+      "best_S": 4,
+      "best_top_fraction": 0.2,
+      "n_evaluations": 8,
+      "seconds": 0.6,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          true
+        ],
+        [
+          96,
+          false
+        ],
+        [
+          80,
+          false
+        ],
+        [
+          72,
+          true
+        ],
+        [
+          76,
+          true
+        ],
+        [
+          78,
+          true
+        ],
+        [
+          79,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-tiebreak",
+      "d": 32,
+      "threshold": 1.0,
+      "max_facts": 168,
+      "best_S": 5,
+      "best_top_fraction": 0.2,
+      "n_evaluations": 8,
+      "seconds": 1.7,
+      "trace": [
+        [
+          256,
+          false
+        ],
+        [
+          128,
+          true
+        ],
+        [
+          192,
+          false
+        ],
+        [
+          160,
+          true
+        ],
+        [
+          176,
+          false
+        ],
+        [
+          168,
+          true
+        ],
+        [
+          172,
+          false
+        ],
+        [
+          170,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-tiebreak",
+      "d": 64,
+      "threshold": 1.0,
+      "max_facts": 388,
+      "best_S": 11,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 8,
+      "seconds": 6.1,
+      "trace": [
+        [
+          512,
+          false
+        ],
+        [
+          256,
+          true
+        ],
+        [
+          384,
+          true
+        ],
+        [
+          448,
+          false
+        ],
+        [
+          416,
+          false
+        ],
+        [
+          400,
+          false
+        ],
+        [
+          392,
+          false
+        ],
+        [
+          388,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hc-tiebreak",
+      "d": 128,
+      "threshold": 1.0,
+      "max_facts": 1232,
+      "best_S": 27,
+      "best_top_fraction": 0.2,
+      "n_evaluations": 8,
+      "seconds": 43.8,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          false
+        ],
+        [
+          1536,
+          false
+        ],
+        [
+          1280,
+          false
+        ],
+        [
+          1152,
+          true
+        ],
+        [
+          1216,
+          true
+        ],
+        [
+          1248,
+          false
+        ],
+        [
+          1232,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hc-tiebreak",
+      "d": 16,
+      "threshold": 0.9,
+      "max_facts": 116,
+      "best_S": 4,
+      "best_top_fraction": 0.1,
+      "n_evaluations": 7,
+      "seconds": 0.5,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          true
+        ],
+        [
+          96,
+          true
+        ],
+        [
+          112,
+          true
+        ],
+        [
+          120,
+          false
+        ],
+        [
+          116,
+          true
+        ],
+        [
+          118,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hc-tiebreak",
+      "d": 32,
+      "threshold": 0.9,
+      "max_facts": 316,
+      "best_S": 4,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 8,
+      "seconds": 1.4,
+      "trace": [
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          false
+        ],
+        [
+          384,
+          false
+        ],
+        [
+          320,
+          false
+        ],
+        [
+          288,
+          true
+        ],
+        [
+          304,
+          true
+        ],
+        [
+          312,
+          true
+        ],
+        [
+          316,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hc-tiebreak",
+      "d": 64,
+      "threshold": 0.9,
+      "max_facts": 1008,
+      "best_S": 8,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 7,
+      "seconds": 2.7,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          false
+        ],
+        [
+          768,
+          true
+        ],
+        [
+          896,
+          true
+        ],
+        [
+          960,
+          true
+        ],
+        [
+          992,
+          true
+        ],
+        [
+          1008,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hc-tiebreak",
+      "d": 128,
+      "threshold": 0.9,
+      "max_facts": 3200,
+      "best_S": 12,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 8,
+      "seconds": 83.4,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          false
+        ],
+        [
+          3072,
+          true
+        ],
+        [
+          3584,
+          false
+        ],
+        [
+          3328,
+          false
+        ],
+        [
+          3200,
+          true
+        ],
+        [
+          3264,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hybrid",
+      "d": 16,
+      "threshold": 1.0,
+      "max_facts": 150,
+      "best_S": 1,
+      "best_top_fraction": 0.2,
+      "n_evaluations": 8,
+      "seconds": 77.3,
+      "trace": [
+        [
+          128,
+          true
+        ],
+        [
+          256,
+          false
+        ],
+        [
+          192,
+          false
+        ],
+        [
+          160,
+          false
+        ],
+        [
+          144,
+          true
+        ],
+        [
+          152,
+          false
+        ],
+        [
+          148,
+          true
+        ],
+        [
+          150,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hybrid",
+      "d": 32,
+      "threshold": 1.0,
+      "max_facts": 544,
+      "best_S": 3,
+      "best_top_fraction": 0.15,
+      "n_evaluations": 9,
+      "seconds": 371.1,
+      "trace": [
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          false
+        ],
+        [
+          768,
+          false
+        ],
+        [
+          640,
+          false
+        ],
+        [
+          576,
+          false
+        ],
+        [
+          544,
+          true
+        ],
+        [
+          560,
+          false
+        ],
+        [
+          552,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hybrid",
+      "d": 64,
+      "threshold": 1.0,
+      "max_facts": 2176,
+      "best_S": 7,
+      "best_top_fraction": 0.25,
+      "n_evaluations": 10,
+      "seconds": 2940.5,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          false
+        ],
+        [
+          3072,
+          false
+        ],
+        [
+          2560,
+          false
+        ],
+        [
+          2304,
+          false
+        ],
+        [
+          2176,
+          true
+        ],
+        [
+          2240,
+          false
+        ],
+        [
+          2208,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hybrid",
+      "d": 16,
+      "threshold": 0.9,
+      "max_facts": 198,
+      "best_S": 3,
+      "best_top_fraction": 0.2,
+      "n_evaluations": 8,
+      "seconds": 81.5,
+      "trace": [
+        [
+          128,
+          true
+        ],
+        [
+          256,
+          false
+        ],
+        [
+          192,
+          true
+        ],
+        [
+          224,
+          false
+        ],
+        [
+          208,
+          false
+        ],
+        [
+          200,
+          false
+        ],
+        [
+          196,
+          true
+        ],
+        [
+          198,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "hybrid",
+      "d": 32,
+      "threshold": 0.9,
+      "max_facts": 688,
+      "best_S": 4,
+      "best_top_fraction": 0.2,
+      "n_evaluations": 9,
+      "seconds": 247.8,
+      "trace": [
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          false
+        ],
+        [
+          768,
+          false
+        ],
+        [
+          640,
+          true
+        ],
+        [
+          704,
+          false
+        ],
+        [
+          672,
+          true
+        ],
+        [
+          688,
+          true
+        ],
+        [
+          696,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "hybrid",
+      "d": 64,
+      "threshold": 0.9,
+      "max_facts": 2400,
+      "best_S": 6,
+      "best_top_fraction": 0.25,
+      "n_evaluations": 10,
+      "seconds": 1727.2,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          false
+        ],
+        [
+          3072,
+          false
+        ],
+        [
+          2560,
+          false
+        ],
+        [
+          2304,
+          true
+        ],
+        [
+          2432,
+          false
+        ],
+        [
+          2368,
+          true
+        ],
+        [
+          2400,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "linsolve",
+      "d": 16,
+      "threshold": 1.0,
+      "max_facts": 384,
+      "best_S": 8,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 9,
+      "seconds": 3.3,
+      "trace": [
+        [
+          128,
+          true
+        ],
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          false
+        ],
+        [
+          384,
+          true
+        ],
+        [
+          448,
+          false
+        ],
+        [
+          416,
+          false
+        ],
+        [
+          400,
+          false
+        ],
+        [
+          392,
+          false
+        ],
+        [
+          388,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "linsolve",
+      "d": 32,
+      "threshold": 1.0,
+      "max_facts": 1408,
+      "best_S": 4,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 10,
+      "seconds": 10.9,
+      "trace": [
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          false
+        ],
+        [
+          1536,
+          false
+        ],
+        [
+          1280,
+          true
+        ],
+        [
+          1408,
+          true
+        ],
+        [
+          1472,
+          false
+        ],
+        [
+          1440,
+          false
+        ],
+        [
+          1424,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "linsolve",
+      "d": 64,
+      "threshold": 1.0,
+      "max_facts": 6016,
+      "best_S": 4,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 11,
+      "seconds": 73.6,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          false
+        ],
+        [
+          6144,
+          false
+        ],
+        [
+          5120,
+          true
+        ],
+        [
+          5632,
+          true
+        ],
+        [
+          5888,
+          true
+        ],
+        [
+          6016,
+          true
+        ],
+        [
+          6080,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "linsolve",
+      "d": 128,
+      "threshold": 1.0,
+      "max_facts": 24832,
+      "best_S": 8,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 12,
+      "seconds": 725.2,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          true
+        ],
+        [
+          16384,
+          true
+        ],
+        [
+          32768,
+          false
+        ],
+        [
+          24576,
+          true
+        ],
+        [
+          28672,
+          false
+        ],
+        [
+          26624,
+          false
+        ],
+        [
+          25600,
+          false
+        ],
+        [
+          25088,
+          false
+        ],
+        [
+          24832,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "linsolve",
+      "d": 256,
+      "threshold": 1.0,
+      "max_facts": 110592,
+      "best_S": 6,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 12,
+      "seconds": 3808.3,
+      "trace": [
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          true
+        ],
+        [
+          16384,
+          true
+        ],
+        [
+          32768,
+          true
+        ],
+        [
+          65536,
+          true
+        ],
+        [
+          131072,
+          false
+        ],
+        [
+          98304,
+          true
+        ],
+        [
+          114688,
+          false
+        ],
+        [
+          106496,
+          true
+        ],
+        [
+          110592,
+          true
+        ],
+        [
+          112640,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "linsolve",
+      "d": 16,
+      "threshold": 0.9,
+      "max_facts": 520,
+      "best_S": 8,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 10,
+      "seconds": 3.8,
+      "trace": [
+        [
+          128,
+          true
+        ],
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          false
+        ],
+        [
+          768,
+          false
+        ],
+        [
+          640,
+          false
+        ],
+        [
+          576,
+          false
+        ],
+        [
+          544,
+          false
+        ],
+        [
+          528,
+          false
+        ],
+        [
+          520,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "linsolve",
+      "d": 32,
+      "threshold": 0.9,
+      "max_facts": 2144,
+      "best_S": 6,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 11,
+      "seconds": 16.7,
+      "trace": [
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          false
+        ],
+        [
+          3072,
+          false
+        ],
+        [
+          2560,
+          false
+        ],
+        [
+          2304,
+          false
+        ],
+        [
+          2176,
+          false
+        ],
+        [
+          2112,
+          true
+        ],
+        [
+          2144,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "linsolve",
+      "d": 64,
+      "threshold": 0.9,
+      "max_facts": 8704,
+      "best_S": 6,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 12,
+      "seconds": 182.7,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          true
+        ],
+        [
+          16384,
+          false
+        ],
+        [
+          12288,
+          false
+        ],
+        [
+          10240,
+          false
+        ],
+        [
+          9216,
+          false
+        ],
+        [
+          8704,
+          true
+        ],
+        [
+          8960,
+          false
+        ],
+        [
+          8832,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "linsolve",
+      "d": 128,
+      "threshold": 0.9,
+      "max_facts": 34816,
+      "best_S": 8,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 13,
+      "seconds": 1238.3,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          true
+        ],
+        [
+          16384,
+          true
+        ],
+        [
+          32768,
+          true
+        ],
+        [
+          65536,
+          false
+        ],
+        [
+          49152,
+          false
+        ],
+        [
+          40960,
+          false
+        ],
+        [
+          36864,
+          false
+        ],
+        [
+          34816,
+          true
+        ],
+        [
+          35840,
+          false
+        ],
+        [
+          35328,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "linsolve",
+      "d": 256,
+      "threshold": 0.9,
+      "max_facts": 126976,
+      "best_S": 6,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 12,
+      "seconds": 3399.9,
+      "trace": [
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          true
+        ],
+        [
+          16384,
+          true
+        ],
+        [
+          32768,
+          true
+        ],
+        [
+          65536,
+          true
+        ],
+        [
+          131072,
+          false
+        ],
+        [
+          98304,
+          true
+        ],
+        [
+          114688,
+          true
+        ],
+        [
+          122880,
+          true
+        ],
+        [
+          126976,
+          true
+        ],
+        [
+          129024,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "rand-emb",
+      "d": 16,
+      "threshold": 1.0,
+      "max_facts": 23,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 8,
+      "seconds": 3.0,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          false
+        ],
+        [
+          32,
+          false
+        ],
+        [
+          16,
+          true
+        ],
+        [
+          24,
+          false
+        ],
+        [
+          20,
+          true
+        ],
+        [
+          22,
+          true
+        ],
+        [
+          23,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "rand-emb",
+      "d": 32,
+      "threshold": 1.0,
+      "max_facts": 76,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 9,
+      "seconds": 4.8,
+      "trace": [
+        [
+          256,
+          false
+        ],
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          true
+        ],
+        [
+          96,
+          false
+        ],
+        [
+          80,
+          false
+        ],
+        [
+          72,
+          true
+        ],
+        [
+          76,
+          true
+        ],
+        [
+          78,
+          false
+        ],
+        [
+          77,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "rand-emb",
+      "d": 64,
+      "threshold": 1.0,
+      "max_facts": 400,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 7,
+      "seconds": 16.0,
+      "trace": [
+        [
+          512,
+          false
+        ],
+        [
+          256,
+          true
+        ],
+        [
+          384,
+          true
+        ],
+        [
+          448,
+          false
+        ],
+        [
+          416,
+          false
+        ],
+        [
+          400,
+          true
+        ],
+        [
+          408,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "rand-emb",
+      "d": 128,
+      "threshold": 1.0,
+      "max_facts": 1376,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 8,
+      "seconds": 37.1,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          false
+        ],
+        [
+          1536,
+          false
+        ],
+        [
+          1280,
+          true
+        ],
+        [
+          1408,
+          false
+        ],
+        [
+          1344,
+          true
+        ],
+        [
+          1376,
+          true
+        ],
+        [
+          1392,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "rand-emb",
+      "d": 16,
+      "threshold": 0.9,
+      "max_facts": 36,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 8,
+      "seconds": 1.7,
+      "trace": [
+        [
+          128,
+          false
+        ],
+        [
+          64,
+          false
+        ],
+        [
+          32,
+          true
+        ],
+        [
+          48,
+          false
+        ],
+        [
+          40,
+          false
+        ],
+        [
+          36,
+          true
+        ],
+        [
+          38,
+          false
+        ],
+        [
+          37,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "rand-emb",
+      "d": 32,
+      "threshold": 0.9,
+      "max_facts": 228,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 7,
+      "seconds": 8.6,
+      "trace": [
+        [
+          256,
+          false
+        ],
+        [
+          128,
+          true
+        ],
+        [
+          192,
+          true
+        ],
+        [
+          224,
+          true
+        ],
+        [
+          240,
+          false
+        ],
+        [
+          232,
+          false
+        ],
+        [
+          228,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "rand-emb",
+      "d": 64,
+      "threshold": 0.9,
+      "max_facts": 776,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 8,
+      "seconds": 49.9,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          false
+        ],
+        [
+          768,
+          true
+        ],
+        [
+          896,
+          false
+        ],
+        [
+          832,
+          false
+        ],
+        [
+          800,
+          false
+        ],
+        [
+          784,
+          false
+        ],
+        [
+          776,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "rand-emb",
+      "d": 128,
+      "threshold": 0.9,
+      "max_facts": 2592,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 9,
+      "seconds": 149.0,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          false
+        ],
+        [
+          3072,
+          false
+        ],
+        [
+          2560,
+          true
+        ],
+        [
+          2816,
+          false
+        ],
+        [
+          2688,
+          false
+        ],
+        [
+          2624,
+          false
+        ],
+        [
+          2592,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "trained",
+      "d": 16,
+      "threshold": 1.0,
+      "max_facts": 496,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 8,
+      "seconds": 3.8,
+      "trace": [
+        [
+          128,
+          true
+        ],
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          false
+        ],
+        [
+          384,
+          true
+        ],
+        [
+          448,
+          true
+        ],
+        [
+          480,
+          true
+        ],
+        [
+          496,
+          true
+        ],
+        [
+          504,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "trained",
+      "d": 32,
+      "threshold": 1.0,
+      "max_facts": 2080,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 11,
+      "seconds": 63.5,
+      "trace": [
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          false
+        ],
+        [
+          3072,
+          false
+        ],
+        [
+          2560,
+          false
+        ],
+        [
+          2304,
+          false
+        ],
+        [
+          2176,
+          false
+        ],
+        [
+          2112,
+          false
+        ],
+        [
+          2080,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "trained",
+      "d": 64,
+      "threshold": 1.0,
+      "max_facts": 7296,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 10,
+      "seconds": 218.4,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          false
+        ],
+        [
+          6144,
+          true
+        ],
+        [
+          7168,
+          true
+        ],
+        [
+          7680,
+          false
+        ],
+        [
+          7424,
+          false
+        ],
+        [
+          7296,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "trained",
+      "d": 128,
+      "threshold": 1.0,
+      "max_facts": 25088,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 12,
+      "seconds": 1649.9,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          true
+        ],
+        [
+          16384,
+          true
+        ],
+        [
+          32768,
+          false
+        ],
+        [
+          24576,
+          true
+        ],
+        [
+          28672,
+          false
+        ],
+        [
+          26624,
+          false
+        ],
+        [
+          25600,
+          false
+        ],
+        [
+          25088,
+          true
+        ],
+        [
+          25344,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "trained",
+      "d": 16,
+      "threshold": 0.9,
+      "max_facts": 760,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 10,
+      "seconds": 10.9,
+      "trace": [
+        [
+          128,
+          true
+        ],
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          false
+        ],
+        [
+          768,
+          false
+        ],
+        [
+          640,
+          true
+        ],
+        [
+          704,
+          true
+        ],
+        [
+          736,
+          true
+        ],
+        [
+          752,
+          true
+        ],
+        [
+          760,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "trained",
+      "d": 32,
+      "threshold": 0.9,
+      "max_facts": 2528,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 11,
+      "seconds": 61.0,
+      "trace": [
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          false
+        ],
+        [
+          3072,
+          false
+        ],
+        [
+          2560,
+          false
+        ],
+        [
+          2304,
+          true
+        ],
+        [
+          2432,
+          true
+        ],
+        [
+          2496,
+          true
+        ],
+        [
+          2528,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "trained",
+      "d": 64,
+      "threshold": 0.9,
+      "max_facts": 8320,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 12,
+      "seconds": 458.4,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          true
+        ],
+        [
+          16384,
+          false
+        ],
+        [
+          12288,
+          false
+        ],
+        [
+          10240,
+          false
+        ],
+        [
+          9216,
+          false
+        ],
+        [
+          8704,
+          false
+        ],
+        [
+          8448,
+          false
+        ],
+        [
+          8320,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "trained",
+      "d": 128,
+      "threshold": 0.9,
+      "max_facts": 27648,
+      "best_S": null,
+      "best_top_fraction": null,
+      "n_evaluations": 11,
+      "seconds": 1675.7,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          true
+        ],
+        [
+          16384,
+          true
+        ],
+        [
+          32768,
+          false
+        ],
+        [
+          24576,
+          true
+        ],
+        [
+          28672,
+          false
+        ],
+        [
+          26624,
+          true
+        ],
+        [
+          27648,
+          true
+        ],
+        [
+          28160,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "twosided",
+      "d": 16,
+      "threshold": 1.0,
+      "max_facts": 696,
+      "best_S": 1,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 10,
+      "seconds": 35.1,
+      "trace": [
+        [
+          128,
+          true
+        ],
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          false
+        ],
+        [
+          768,
+          false
+        ],
+        [
+          640,
+          true
+        ],
+        [
+          704,
+          false
+        ],
+        [
+          672,
+          true
+        ],
+        [
+          688,
+          true
+        ],
+        [
+          696,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "twosided",
+      "d": 32,
+      "threshold": 1.0,
+      "max_facts": 3168,
+      "best_S": 1,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 11,
+      "seconds": 153.7,
+      "trace": [
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          false
+        ],
+        [
+          3072,
+          true
+        ],
+        [
+          3584,
+          false
+        ],
+        [
+          3328,
+          false
+        ],
+        [
+          3200,
+          false
+        ],
+        [
+          3136,
+          true
+        ],
+        [
+          3168,
+          true
+        ]
+      ]
+    },
+    {
+      "condition": "twosided",
+      "d": 64,
+      "threshold": 1.0,
+      "max_facts": 12800,
+      "best_S": 1,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 11,
+      "seconds": 836.3,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          true
+        ],
+        [
+          16384,
+          false
+        ],
+        [
+          12288,
+          true
+        ],
+        [
+          14336,
+          false
+        ],
+        [
+          13312,
+          false
+        ],
+        [
+          12800,
+          true
+        ],
+        [
+          13056,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "twosided",
+      "d": 16,
+      "threshold": 0.9,
+      "max_facts": 928,
+      "best_S": 1,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 9,
+      "seconds": 104.2,
+      "trace": [
+        [
+          128,
+          true
+        ],
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          false
+        ],
+        [
+          768,
+          true
+        ],
+        [
+          896,
+          true
+        ],
+        [
+          960,
+          false
+        ],
+        [
+          928,
+          true
+        ],
+        [
+          944,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "twosided",
+      "d": 32,
+      "threshold": 0.9,
+      "max_facts": 3904,
+      "best_S": 1,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 10,
+      "seconds": 212.3,
+      "trace": [
+        [
+          256,
+          true
+        ],
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          false
+        ],
+        [
+          3072,
+          true
+        ],
+        [
+          3584,
+          true
+        ],
+        [
+          3840,
+          true
+        ],
+        [
+          3968,
+          false
+        ],
+        [
+          3904,
+          true
+        ]
+      ]
+    }
+  ]
+}
