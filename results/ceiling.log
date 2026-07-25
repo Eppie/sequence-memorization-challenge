@@ -1,0 +1,6 @@
+Accuracy at n = 4d^2, the ENTIRE fact space (2d)^2 -- if this is below
+0.9 the acc>=0.9 capacity search is not censored by the dataset.
+  d= 16  n=4d^2=  1024  best acc=0.8516  at rho=0.7, mu=0.01, keep=0.85
+  d= 32  n=4d^2=  4096  best acc=0.8518  at rho=0.53, mu=0.01, keep=0.85
+  d= 64  n=4d^2= 16384  best acc=0.8520  at rho=0.53, mu=1e-08, keep=0.85
+  d=128  n=4d^2= 65536  best acc=0.8508  at rho=0.35, mu=1, keep=0.85

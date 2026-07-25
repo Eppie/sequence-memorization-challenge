@@ -143,8 +143,21 @@ converged. At d=32, single seed:
 | 3168 | 0.6133 | 0.7080 | 0.7465 |
 
 So converged gradient descent reaches ~2560 at acc=1, not 2080, and the honest d=32 acc=1
-ratio is **~1.24×, not 1.52×**. acc≥0.9 barely moves (2528 → ~2700). The d=64 version of
-this check was still running at session end (7296 confirmed at 1.0000 by epoch 1613).
+ratio is **~1.24×, not 1.52×**. acc≥0.9 barely moves (2528 → ~2700).
+
+**This is a small-`d` artifact — the same check at d=64 clears the baseline:**
+
+| n_facts | 5k epochs | 60k |
+|---|---|---|
+| 7296 (reported capacity) | 1.0000 (@1613) | 1.0000 (@1429) |
+| 9600 | 0.7168 | 0.7765 |
+| 11200 | 0.5380 | 0.6300 |
+| 12800 (the construction's) | 0.4237 | 0.4909 |
+
+At d=64 the recipe is already converged: 7296 is reached by epoch ~1600 whatever the budget,
+and 9600 plateaus at 0.78 with twelve times the epochs. So **the d=64 ratio of 1.75× stands
+against converged gradient descent**; only the d=16 and d=32 acc=1 points are inflated. The
+d=128 version was not run (each point is hours).
 
 **A number worth explaining.** Run the construction at exactly `n = 4d²` — every pair that
 exists — and the best accuracy is 0.8516 / 0.8518 / 0.8520 / 0.8508 at d=16/32/64/128. That
@@ -161,9 +174,11 @@ as such.
 **Open items**
 
 * `twosided` d=128 acc≥0.9 was still searching at session end. `run_scaling.py` is resumable
-  and merges with what is on disk, so re-running the same command finishes it.
-* The d=64 long-training check (`/tmp/longtrain64.log`) had done only its first row.
-* Both are cosmetic for the argument; every claim above rests on completed measurements.
+  and merges with what is on disk, so re-running the same command finishes it. This is the
+  only missing cell; every claim above rests on completed measurements.
+* The long-training check was not run at d=128 (hours per point). Given that the effect
+  shrinks from d=32 to d=64 rather than growing, the d=128 ratio of 2.04× is unlikely to be
+  budget-inflated, but that is an inference, not a measurement.
 
 **Layout additions**
 

@@ -362,7 +362,19 @@ the post. But that recipe is not converged. At d=32, single seed:
 
 A model trained 40× longer reaches roughly 2560 at acc=1 rather than 2080, so the honest
 d=32 acc=1 ratio against *converged* gradient descent is about **1.24×, not 1.52×**. The
-acc≥0.9 baseline barely moves (2528 → ~2700, since 2880 plateaus at 0.83). The construction
-still wins at every point measured, and gradient descent still plateaus well below it — at
-3168 it reaches 0.75 after 200k epochs — but the headline multiples are against the post's
-recipe, not against gradient descent's limit, and those are not the same number.
+acc≥0.9 baseline barely moves (2528 → ~2700, since 2880 plateaus at 0.83).
+
+**This turns out to be a small-`d` artifact, not a general one.** The same check at d=64:
+
+| n_facts | 5k epochs | 60k |
+|---|---|---|
+| 7296 (reported capacity) | 1.0000 (@1613) | 1.0000 (@1429) |
+| 9600 | 0.7168 | 0.7765 |
+| 11200 | 0.5380 | 0.6300 |
+| 12800 (the construction's) | 0.4237 | 0.4909 |
+
+Here the recipe is already converged — 7296 is reached by epoch ~1600 whatever the budget,
+and 9600 plateaus at 0.78 with twelve times the epochs. So the d=64 ratio of **1.75× stands
+against converged gradient descent**, and only the d=16 and d=32 acc=1 points are inflated
+by the training budget. Worth stating precisely rather than either ignoring it or letting it
+discredit the larger sizes.

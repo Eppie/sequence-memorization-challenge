@@ -254,12 +254,13 @@ label — so they are magnitude codes and binarising destroys the label outright
 * **The trained baseline is partly budget-limited, which shrinks the acc=1 ratios.** The
   comparison uses the post's recipe — Adam, lr 1e-2, full batch, ≤5000 epochs, early stop
   after 100 epochs without improvement — and reproduces their published curves to 0.95–1.05
-  per point, so it is like-for-like *against the post*. But that recipe is not converged. At
-  d=32, a model trained 40× longer reaches ~2560 facts at acc=1 rather than 2080, so the
-  honest d=32 acc=1 ratio against converged gradient descent is **~1.24×, not 1.52×**. The
-  acc≥0.9 baseline barely moves (2528 → ~2700). Gradient descent still plateaus well below
-  the construction — 0.75 at 3168 facts after 200k epochs — but the headline multiples are
-  against the post's recipe, not against gradient descent's limit.
+  per point, so it is like-for-like *against the post*. But at small `d` that recipe is not
+  converged: at d=32 a model trained 40× longer reaches ~2560 facts at acc=1 rather than
+  2080, making the honest d=32 acc=1 ratio **~1.24×, not 1.52×** (acc≥0.9 barely moves,
+  2528 → ~2700). **This is a small-`d` artifact.** At d=64 the recipe is already converged —
+  7296 is reached by epoch ~1600 at any budget, and 9600 plateaus at 0.78 with 12× the
+  epochs — so the d=64 ratio of 1.75× stands against converged gradient descent. Only the
+  d=16 and d=32 acc=1 points are inflated by the training budget.
 * **`twosided`'s iteration count is the part a referee should push on.** Every weight comes
   from a ridge regression and no gradient of any loss is computed, but it runs 150
   freeze-and-solve rounds with a step-length rule. The argument that this is a construction
