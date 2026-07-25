@@ -11,6 +11,20 @@ optimises L2 while the metric is argmax. Gradient descent is used for these
 *probes* only -- that is analysis, not a challenge entry, so the no-gradient
 rule does not apply to it.
 
+**The retrained-readout probe is not a valid instrument for a value code.** Its
+`full` column reads 0.07-0.10 for `linsolve` and `twosided`, whose own readouts
+score 1.000 on the very same activations. Neither a small random init nor a
+closed-form ridge start recovers the decode those constructions are *known* to
+have: it is a narrow, large-weight solution and the probe's objective does not
+lead to it. That is a failure to re-derive the readout, not an absence of
+information, and any ratio built on it is meaningless. Those two rows are marked
+`n/a` below; their coding scheme is known analytically instead -- the decoded sum
+*is* the label, so they are magnitude codes by construction, and binarising
+their activations destroys the label outright.
+
+The columns that *are* valid for every construction are the ones that need no
+retraining: accuracy, density, and weight scale.
+
     uv run python probe_coding.py --d 64
 """
 
@@ -33,7 +47,7 @@ LOADS = {
     "trained": 6566,
     "hand-coded": 194,
     "linsolve": 5414,
-    "twosided": 11059,
+    "twosided": 11520,
 }
 
 
@@ -66,17 +80,35 @@ def train_keeping_weights(
 
 
 def retrain_readout(
-    hidden: torch.Tensor, targets: torch.Tensor, n_classes: int, seed: int = 0,
+    hidden: torch.Tensor, targets: torch.Tensor, n_classes: int,
     n_epochs: int = 3000, lr: float = 1e-2,
 ) -> float:
-    """Best accuracy a linear readout can reach on fixed features."""
-    generator = torch.Generator().manual_seed(seed)
-    bound = 1.0 / hidden.shape[1] ** 0.5
-    down = ((torch.rand(n_classes, hidden.shape[1], generator=generator) * 2 - 1) * bound)
-    down.requires_grad_(True)
-    optimizer = torch.optim.Adam([down], lr=lr)
+    """Best accuracy a linear readout can reach on fixed features.
 
-    best, since = 0.0, 0
+    Adam is started from the closed-form ridge fit rather than from a small
+    random init, and the learning rate is scaled to the features. Without this
+    the probe silently measures the *optimiser* instead of the features: a value
+    code needs readout weights of order `1e4`, Adam will not travel that far
+    from a `1/sqrt(d)` init, and the probe reports 0.07 for a construction whose
+    own readout scores 1.000. That is an optimisation failure, not an
+    information one, and it makes every ratio computed from it meaningless.
+    """
+    from handcode.readouts import ridge_down
+
+    best_start, best_acc = None, -1.0
+    for alpha in (1e-6, 1e-4, 1e-2, 1.0):
+        candidate = ridge_down(hidden, targets, n_classes, alpha)
+        acc = ((hidden @ candidate.T).argmax(-1) == targets).float().mean().item()
+        if acc > best_acc:
+            best_start, best_acc = candidate, acc
+
+    down = best_start.clone().requires_grad_(True)
+    # Adam's step size is absolute, so it has to be scaled to the weights it is
+    # refining -- a 1e-2 step is a no-op on weights of size 1e4.
+    scale = max(1.0, float(down.detach().abs().max()))
+    optimizer = torch.optim.Adam([down], lr=lr * scale)
+
+    best, since = best_acc, 0
     for _ in range(n_epochs):
         optimizer.zero_grad()
         logits = hidden @ down.T
@@ -152,7 +184,7 @@ def build(condition: str, shape: ModelShape, facts: dict, seed: int = 1000):
             for mu in MU_VALUES:
                 params = TwoSidedParams(rho=rho, mu=mu)
                 solution = solve_two_sided(shape, facts, params, seed)
-                weights = assemble(shape, solution, params.delta, float(shape.d_mlp))
+                weights = assemble(shape, solution, params.delta)
                 score = accuracy(*weights, facts)
                 if best is None or score > best[0]:
                     best = (score, weights)
@@ -200,16 +232,35 @@ def main() -> None:
             row[f"probe_{levels}"] = retrain_readout(
                 quantise(hidden, levels), facts["targets"], shape.output_vocab_size
             )
+        # A construction whose readout scores far above what the probe can
+        # re-derive has defeated the probe, not revealed anything about its
+        # features; see the module docstring.
+        row["probe_valid"] = row["probe_full"] >= 0.9 * row["accuracy"]
         row["binary_over_full"] = (
-            row["probe_1"] / row["probe_full"] if row["probe_full"] else float("nan")
+            row["probe_1"] / row["probe_full"]
+            if row["probe_valid"] and row["probe_full"]
+            else float("nan")
         )
         records.append(row)
+        cells = (
+            "".join(f"{row['probe_' + str(L)]:>7.3f}" for L in args.levels)
+            if row["probe_valid"]
+            else "".join(f"{'n/a':>7s}" for _ in args.levels)
+        )
+        ratio = f"{row['binary_over_full']:>10.2f}" if row["probe_valid"] else f"{'n/a':>10s}"
+        full = f"{row['probe_full']:>7.3f}" if row["probe_valid"] else f"{'n/a':>7s}"
         print(
             f"{condition:<13s}{n_facts:>7d}{row['accuracy']:>7.3f}{row['density']:>9.3f}"
-            f"{row['max_up']:>10.4g}{row['max_down']:>11.4g}{row['probe_full']:>7.3f}"
-            + "".join(f"{row['probe_' + str(L)]:>7.3f}" for L in args.levels)
-            + f"{row['binary_over_full']:>10.2f}",
+            f"{row['max_up']:>10.4g}{row['max_down']:>11.4g}{full}{cells}{ratio}",
             flush=True,
+        )
+
+    if any(not r["probe_valid"] for r in records):
+        print(
+            "\nn/a: the retrained readout scored far below the construction's own,"
+            "\n     so it failed to re-derive a decode that demonstrably exists."
+            "\n     These are magnitude codes analytically -- the decoded sum is the"
+            "\n     label -- so binarising destroys it. See the module docstring."
         )
 
     os.makedirs(RESULTS_DIR, exist_ok=True)

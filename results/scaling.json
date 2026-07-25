@@ -3649,6 +3649,66 @@
     },
     {
       "condition": "twosided",
+      "d": 128,
+      "threshold": 1.0,
+      "max_facts": 51200,
+      "best_S": 1,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 12,
+      "seconds": 8061.2,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          true
+        ],
+        [
+          16384,
+          true
+        ],
+        [
+          32768,
+          true
+        ],
+        [
+          65536,
+          false
+        ],
+        [
+          49152,
+          true
+        ],
+        [
+          57344,
+          false
+        ],
+        [
+          53248,
+          false
+        ],
+        [
+          51200,
+          true
+        ],
+        [
+          52224,
+          false
+        ]
+      ]
+    },
+    {
+      "condition": "twosided",
       "d": 16,
       "threshold": 0.9,
       "max_facts": 928,
@@ -3744,6 +3804,62 @@
         [
           3904,
           true
+        ]
+      ]
+    },
+    {
+      "condition": "twosided",
+      "d": 64,
+      "threshold": 0.9,
+      "max_facts": 15872,
+      "best_S": 1,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 11,
+      "seconds": 1373.8,
+      "trace": [
+        [
+          512,
+          true
+        ],
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          true
+        ],
+        [
+          16384,
+          false
+        ],
+        [
+          12288,
+          true
+        ],
+        [
+          14336,
+          true
+        ],
+        [
+          15360,
+          true
+        ],
+        [
+          15872,
+          true
+        ],
+        [
+          16128,
+          false
         ]
       ]
     }

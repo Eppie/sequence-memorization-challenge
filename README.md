@@ -4,11 +4,19 @@ A reproduction of [Linsefors & Bushnaq, *Challenge: Hand coding weights for effi
 sequence memorisation*](https://www.lesswrong.com/posts/KWtchKwwnJkd4bwCi/challenge-hand-coding-weights-for-efficient-sequence-1)
 (LessWrong, 2026-07-23), and an entry to the challenge it poses.
 
-**Result: a hand-coded construction storing 6–13× more facts than the authors', which
-overtakes the gradient-trained model from d≈60 upward — 1.26× it at d=128** — with no
-gradient descent anywhere.
+**Result: a hand-coded construction that stores more than the gradient-trained model at
+every size tested — 1.4× at d=16 rising to 1.9× at d=64 — and 13–59× the authors' own
+construction**, with no gradient descent anywhere.
 
-It is a capacity result, not a mechanism result: see [Caveats](#caveats).
+The reason it wins is a single structural change, and it is the interesting part: every
+value code in this family so far *builds* a gate, which spends one whole embedding matrix
+and caps the fact-carrying parameters at `2d²`. Letting the ReLU's own sign pattern be the
+gate costs nothing and doubles the budget to `4d²`. The full account is in
+[docs/twosided-construction.md](docs/twosided-construction.md), written to be readable as a
+contribution back to the post.
+
+Measured directly, the constructions store `~C·d²` facts while the trained model stores
+`~C·d^1.8` — so this is an exponent difference, not a constant, and the gap widens with `d`.
 
 ## The task
 
@@ -132,6 +140,84 @@ capacities sit at 83–91% of that bound at every `d`. Matching a trained model 
 `9.42·d²/ln d` therefore needs `2 ln d > 9.42`, i.e. **d > 111** for an exact solve — the
 greedy drop pushes the crossover down to d≈60 by trading exactness for the error budget.
 Below that, no construction in this family matches it, whatever the tuning.
+
+## The construction that fixes it: let the ReLU be the gate
+
+`handcode/twosided.py`. Full write-up in
+[docs/twosided-construction.md](docs/twosided-construction.md); the short version:
+
+The `2d²` bound above is not about value codes, it is about *built* gates. If the active set
+`S_a` depends only on the first token, then
+
+```
+s = Σ_{i ∈ S_a} (u_i[a] + v_i[b])  =  [Σ_{i ∈ S_a} u_i[a]]  +  [Σ_{i ∈ S_a} v_i[b]]
+                                       one number per first token
+```
+
+so the entire first embedding contributes `2d` numbers to the fact equations rather than
+`2d·d`, whatever its entries are. Building a two-token gate explicitly does not help either:
+a gated neuron must output a *positive* value to be seen at all, and that constraint costs
+enough rank to cap the budget near `2.48d²`.
+
+So build no gate. Take the active set to be `A(a,b) = {i : u_i[a] + v_i[b] > 0}` — the
+ReLU's own sign pattern. It depends on both tokens by construction, and the positivity
+constraint evaporates, because a neuron that would go negative simply switches off. Both
+embeddings now carry facts: `4d²` unknowns against one equation per fact.
+
+The equations are nonlinear, since the active set moves with the weights, but only
+*piecewise* — freezing the pattern makes them exactly linear, and the frozen system
+decomposes into one independent ridge regression per token. So: freeze, solve, re-read the
+pattern, repeat. The one non-obvious ingredient is the step rule; taking the full solve
+flips 43% of the pattern and collapses the whole thing to chance, via a one-sided ratchet
+described in the write-up. Capping the step so that at most 2% of the pattern flips fixes
+it, and the cap is an order statistic of per-neuron zero-crossing times, so it needs no
+search.
+
+### Results
+
+| max facts | d=16 | d=32 | d=64 | d=128 |
+|---|---|---|---|---|
+| their hand-coded, acc=1 | 53 | 130 | 216 | 776 |
+| trained, acc=1 | 496 | 2080 | 7296 | 25088 |
+| **twosided, acc=1** | **696** | **3168** | **12800** | **51200** |
+| ratio to trained | 1.40× | 1.52× | 1.75× | **2.04×** |
+| trained, acc≥0.9 | 760 | 2528 | 8320 | 27648 |
+| **twosided, acc≥0.9** | **928** | **3904** | **15872** | *(pending)* |
+| ratio to trained | 1.22× | 1.54× | **1.91×** | |
+| whole fact space, `4d²` | 1024 | 4096 | 16384 | 65536 |
+
+Two results in that table say more than the ratios.
+
+**The counting argument reproduces itself to four decimal places.** Run the construction at
+exactly `n = 4d²` — every pair that exists — and the best accuracy is 0.8516, 0.8518,
+0.8520, 0.8508 at d=16/32/64/128. That is the `keep=0.85` greedy-drop schedule returning
+precisely what it was asked to keep: drop 15% and the remaining `3.4d²` equations fit inside
+`4d²` unknowns, so all of them are satisfied and nothing else is.
+
+**Fitted as a plain power law, the constructions and the trained model differ in exponent,
+not constant:** `twosided` and `linsolve` both scale as `d^2.0`–`d^2.1` (capacity ×4.1 per
+doubling of `d`), the trained model as `d^1.73`–`d^1.88` (×3.3), the authors' construction as
+`d^1.35`–`d^1.71`. The post's `a·d^b/ln d` form obscures this — a pure `C·d²` law fits it
+with `b ≈ 2.28`, so `twosided`'s `b = 2.3` is not super-quadratic.
+
+### How it compares to a trained model
+
+`probe_coding.py`, at ~90% of each construction's own acc=1 capacity, d=64:
+
+| | trained | their hand-coded | linsolve | **twosided** |
+|---|---|---|---|---|
+| density | 0.53 | 0.82 | 0.08 | **0.44** |
+| binarise activations → | 0.11× accuracy | 1.00× | n/a | n/a |
+| max abs embedding weight | 6.4 | 1 | 4.7e2 | **5.4e2** |
+| max abs unembedding weight | 6.3 | 2 | 4.2e4 | **6.4e1** |
+| parameters carrying facts | all `5d²` | — | `2d²` | `4d²` |
+
+Density and unembedding scale both move a long way toward the trained model relative to
+`linsolve`. The `n/a`s are a limitation of the probe, not a result: it retrains a linear
+readout, and on a value code it scores 0.07–0.10 where the construction's own readout scores
+1.000 on the same activations, so it has failed to re-derive a decode that demonstrably
+exists. For those two the coding scheme is known analytically — the decoded sum *is* the
+label — so they are magnitude codes and binarising destroys the label outright.
 
 ## Caveats
 
