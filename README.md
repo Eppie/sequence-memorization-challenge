@@ -5,8 +5,9 @@ sequence memorisation*](https://www.lesswrong.com/posts/KWtchKwwnJkd4bwCi/challe
 (LessWrong, 2026-07-23), and an entry to the challenge it poses.
 
 **Result: a hand-coded construction that stores more than the gradient-trained model at
-every size tested — 1.4× at d=16 rising to 1.9× at d=64 — and 13–59× the authors' own
-construction**, with no gradient descent anywhere.
+every size tested — 1.2× at d=16 rising to 2.3× at d=128 — and 11–66× the authors' own
+construction**, with no gradient descent anywhere. At acc≥0.9 it stores 90–97% of every
+fact that exists.
 
 The reason it wins is a single structural change, and it is the interesting part: every
 value code in this family so far *builds* a gate, which spends one whole embedding matrix
@@ -16,7 +17,8 @@ gate costs nothing and doubles the budget to `4d²`. The full account is in
 contribution back to the post.
 
 Measured directly, the constructions store `~C·d²` facts while the trained model stores
-`~C·d^1.8` — so this is an exponent difference, not a constant, and the gap widens with `d`.
+`~C·d^1.73`–`d^1.88` — so this is an exponent difference, not a constant, and the gap
+widens with `d`.
 
 ## The task
 
@@ -182,8 +184,9 @@ search.
 | **twosided, acc=1** | **696** | **3168** | **12800** | **51200** |
 | ratio to trained | 1.40× | 1.52× | 1.75× | **2.04×** |
 | trained, acc≥0.9 | 760 | 2528 | 8320 | 27648 |
-| **twosided, acc≥0.9** | **928** | **3904** | **15872** | *(pending)* |
-| ratio to trained | 1.22× | 1.54× | **1.91×** | |
+| **twosided, acc≥0.9** | **928** | **3904** | **15872** | **63488** |
+| ratio to trained | 1.22× | 1.54× | 1.91× | **2.30×** |
+| — as % of the whole fact space | 90.6% | 95.3% | 96.9% | 96.9% |
 | whole fact space, `4d²` | 1024 | 4096 | 16384 | 65536 |
 
 Two results in that table say more than the ratios.

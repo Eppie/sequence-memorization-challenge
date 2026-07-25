@@ -1,7 +1,7 @@
 # Handoff — the two-sided value code, and why gradient descent won't go there
 
 **Date:** 2026-07-25
-**Repo:** `/Users/eppie/claude_projects/handcode` (now a git repo — `main`, two commits)
+**Repo:** `/Users/eppie/claude_projects/handcode` (now a git repo — `main`)
 **Previous handoff:** `2026-07-25-001-sequence-memorisation-challenge.md`
 **Subject:** Implementing that handoff's "concrete proposal", and what the result says about
 the authors' actual question
@@ -20,7 +20,8 @@ the authors' actual question
 | **twosided, acc=1** | **696** | **3168** | **12800** | **51200** |
 | ratio to trained | 1.40× | 1.52× | 1.75× | **2.04×** |
 | trained, acc≥0.9 | 760 | 2528 | 8320 | 27648 |
-| **twosided, acc≥0.9** | **928** | **3904** | **15872** | *(see open items)* |
+| **twosided, acc≥0.9** | **928** | **3904** | **15872** | **63488** |
+| ratio to trained | 1.22× | 1.54× | 1.91× | **2.30×** |
 | whole fact space `4d²` | 1024 | 4096 | 16384 | 65536 |
 
 The previous session's `linsolve` beat the *exponent* but lost 2× on the *prefactor*, so its
@@ -173,9 +174,7 @@ as such.
 
 **Open items**
 
-* `twosided` d=128 acc≥0.9 was still searching at session end. `run_scaling.py` is resumable
-  and merges with what is on disk, so re-running the same command finishes it. This is the
-  only missing cell; every claim above rests on completed measurements.
+* All eight `twosided` cells completed; `results/scaling.json` is current.
 * The long-training check was not run at d=128 (hours per point). Given that the effect
   shrinks from d=32 to d=64 rather than growing, the d=128 ratio of 2.04× is unlikely to be
   budget-inflated, but that is an inference, not a measurement.

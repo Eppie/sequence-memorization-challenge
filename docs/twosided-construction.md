@@ -181,7 +181,8 @@ Capacity, best over the hyperparameter sweep and 3 seeds, as in the post:
 | **twosided, acc=1** | **696** | **3168** | **12800** | **51200** |
 | ratio to trained | 1.40× | 1.52× | 1.75× | **2.04×** |
 | trained, acc≥0.9 | 760 | 2528 | 8320 | 27648 |
-| **twosided, acc≥0.9** | **928** | **3904** | **15872** | *(running)* |
+| **twosided, acc≥0.9** | **928** | **3904** | **15872** | **63488** |
+| ratio to trained | 1.22× | 1.54× | 1.91× | **2.30×** |
 | whole fact space `4d²` | 1024 | 4096 | 16384 | 65536 |
 
 Three things in that table are worth more than the headline ratio.
@@ -199,12 +200,12 @@ super-quadratic. It is not: a pure `C·d²` law fitted in that form over d=16–
 `b ≈ 2.28`, because the `/ln d` has to be absorbed somewhere. Dropping the `ln d` and fitting
 `C·d^p` directly is much more legible:
 
-| condition | `p`, acc=1 | `p`, acc≥0.9 | capacity doubles by |
+| condition | `p`, acc=1 | `p`, acc≥0.9 | capacity grows by |
 |---|---|---|---|
-| their hand-coded | 1.35 | 1.71 | ~3.2× per doubling of `d` |
+| their hand-coded | 1.23 | 1.64 | ~2.4–3.1× per doubling of `d` |
 | **trained** | **1.88** | **1.73** | **~3.3×** |
-| linsolve | 2.05 | 1.99 | ~4.0× |
-| **twosided** | **2.10** | **2.05** | **~4.1×** |
+| linsolve | 2.01 | 2.02 | ~4.0× |
+| **twosided** | **2.06** | **2.03** | **~4.1×** |
 
 Both value codes are clean `d²` laws — capacity multiplies by 4.0–4.1 every time `d`
 doubles, which is exactly what "one equation per fact against `C·d²` free parameters"

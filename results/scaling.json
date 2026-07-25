@@ -3862,6 +3862,66 @@
           false
         ]
       ]
+    },
+    {
+      "condition": "twosided",
+      "d": 128,
+      "threshold": 0.9,
+      "max_facts": 63488,
+      "best_S": 1,
+      "best_top_fraction": 0.0,
+      "n_evaluations": 12,
+      "seconds": 10969.3,
+      "trace": [
+        [
+          1024,
+          true
+        ],
+        [
+          2048,
+          true
+        ],
+        [
+          4096,
+          true
+        ],
+        [
+          8192,
+          true
+        ],
+        [
+          16384,
+          true
+        ],
+        [
+          32768,
+          true
+        ],
+        [
+          65536,
+          false
+        ],
+        [
+          49152,
+          true
+        ],
+        [
+          57344,
+          true
+        ],
+        [
+          61440,
+          true
+        ],
+        [
+          63488,
+          true
+        ],
+        [
+          64512,
+          false
+        ]
+      ]
     }
   ]
 }
