@@ -377,6 +377,10 @@ reference/              the authors' own source, fetched for cross-checking
 reference_post.md       the full post text
 ```
 
+`reference/` and `reference_post.md` are **not my work** — they are Linsefors & Bushnaq's,
+included so the differential test can check against their code rather than against my
+reading of their post. See [reference/README.md](reference/README.md) for provenance.
+
 ## Deviations from the original
 
 * **3 attempts per cell, not 11.** Fewer attempts can only lower measured capacity. At

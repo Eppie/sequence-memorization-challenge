@@ -14,3 +14,4 @@ wheels/
 
 # Regenerable: connection matrices from precompute_conn.py (~29 MB, ~1 min to rebuild)
 results/conn_cache/
+reference/__pycache__/
