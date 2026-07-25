@@ -284,9 +284,14 @@ def init_embeddings(
 
     With `u, v ~ N(m, 1)` independent, `z = u[a] + v[b] ~ N(2m, 2)`, so
     `P(z > 0) = Phi(m * sqrt(2))` and the offset that hits a density is
-    `m = Phi^-1(rho) / sqrt(2)`, split evenly over the two embeddings. The
-    overall scale is left to `_rescale`, which is a separate step because the
-    pattern -- the only thing the initialisation is really choosing -- is
+    `m = Phi^-1(rho) / sqrt(2)`. Note that `m` goes on *each* embedding, not
+    half of it on each: the sum already carries the factor of two, and halving
+    it here is a silent error that compresses the whole density sweep towards
+    0.5 (rho=0.2 comes out at 0.33). `test_init_embeddings_hit_the_requested_density`
+    pins this down.
+
+    The overall scale is left to `_rescale`, which is a separate step because
+    the pattern -- the only thing the initialisation is really choosing -- is
     invariant to it.
     """
     quantile = torch.special.ndtri(torch.tensor(rho, dtype=torch.float64))

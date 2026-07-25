@@ -251,6 +251,22 @@ label — so they are magnitude codes and binarising destroys the label outright
 * **`trained` uses 3 seeds, not their 11.** This costs the baseline ~20% at d=16 (496 vs
   600); from d=32 up the two agree exactly, and the fitted curve matches their published
   one to 0.95–1.02 per point.
+* **The trained baseline is partly budget-limited, which shrinks the acc=1 ratios.** The
+  comparison uses the post's recipe — Adam, lr 1e-2, full batch, ≤5000 epochs, early stop
+  after 100 epochs without improvement — and reproduces their published curves to 0.95–1.05
+  per point, so it is like-for-like *against the post*. But that recipe is not converged. At
+  d=32, a model trained 40× longer reaches ~2560 facts at acc=1 rather than 2080, so the
+  honest d=32 acc=1 ratio against converged gradient descent is **~1.24×, not 1.52×**. The
+  acc≥0.9 baseline barely moves (2528 → ~2700). Gradient descent still plateaus well below
+  the construction — 0.75 at 3168 facts after 200k epochs — but the headline multiples are
+  against the post's recipe, not against gradient descent's limit.
+* **`twosided`'s iteration count is the part a referee should push on.** Every weight comes
+  from a ridge regression and no gradient of any loss is computed, but it runs 150
+  freeze-and-solve rounds with a step-length rule. The argument that this is a construction
+  rather than an optimiser — the search direction is determined, not explored, and what it
+  searches for is a self-consistent *active set* — is set out in
+  [docs/twosided-construction.md](docs/twosided-construction.md) §9, along with the reasons
+  it might not persuade.
 
 ## Two smaller constructions
 
@@ -328,11 +344,13 @@ concurrently, so the tail of a search does not leave cores idle.
 
 ```bash
 uv sync
-uv run pytest                                          # 38 checks incl. differential vs reference/
+uv run pytest                                          # 53 checks incl. differential vs reference/
 uv run python precompute_conn.py --ds 16 32 64 128     # ~1 min, cached to results/conn_cache
 uv run python run_scaling.py --ds 16 32 64 128         # the experiment (resumable)
 uv run python run_scaling.py --ds 16 32 64 128 --report-only
 uv run python plot.py                                  # results/scaling.png
+uv run python probe_coding.py --d 64                   # density, weight scale, pattern-vs-value
+uv run python probe_reachability.py --d 32             # why gradient descent does not find it
 ```
 
 ## Layout
@@ -346,7 +364,11 @@ handcode/readouts.py    closed-form unembeddings (ridge, tie-break correction)
 handcode/coincidence.py the active-pattern rectangle-detector embedding
 handcode/linsolve.py    the value code (reference implementation)
 handcode/fastsolve.py   batched solver for the value code
+handcode/twosided.py    the two-sided value code -- the ReLU is the gate
 handcode/capacity.py    binary search over n_facts, sweeps, scaling fit
+probe_coding.py         density, weight scale, pattern-vs-magnitude probes
+probe_reachability.py   does gradient descent stay at the construction?
+docs/twosided-construction.md   why the two-sided construction works
 reference/              the authors' own source, fetched for cross-checking
 reference_post.md       the full post text
 ```
