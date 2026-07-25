@@ -2,8 +2,8 @@
 
 **Date:** 2026-07-25
 **Repo:** `/Users/eppie/claude_projects/handcode` → **published** at
-<https://github.com/Eppie/sequence-memorization-challenge> (public, `main`, 6 commits, in
-sync with `origin`)
+<https://github.com/Eppie/sequence-memorization-challenge> (public, `main`, in sync
+with `origin`)
 **Supersedes:** `2026-07-25-002-two-sided-value-code.md` — that doc was written mid-session
 before the last measurements landed. Its numbers have since been patched to final, and its
 "ruled out — do not re-litigate" list is still the authoritative one. **Read 002 before
