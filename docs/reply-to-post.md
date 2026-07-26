@@ -56,7 +56,11 @@ converged Adam (SGD+momentum and L-BFGS both do worse), so the missing capacity 
 reachable by a better generic trainer. (3) A redundant "digit code" family
 (label digits carried by neuron groups, still ridge-only) recovers about two of the
 three-and-a-half orders of magnitude of the robustness gap at 76% of trained capacity;
-the residual ~30× is precisely the inequality-packing/margin work. (4) The max-margin
+exact max-margin ascent plus a single flip-capped drift step on its gate narrows the
+residual to a measured ~14× — and every attempt to *iterate* that drift, under
+worst-fact or every-fact pressure, destroys the gate, so the last ~14× is
+specifically the value of gradient descent's coupled dynamics, not of margin
+optimization per se. (4) The max-margin
 linear program on a trained model's own frozen pattern and readout reproduces the
 trained model's robustness (σ90 4.6e-2 vs 4.8e-2 at d=16; 1.5e-2 vs 1.6e-2 at d=32) —
 to first order, the trained model *is* the max-margin point of its own active-set

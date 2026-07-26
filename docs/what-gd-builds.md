@@ -3,8 +3,10 @@
 *Toward the constructive account the challenge is really asking for. Everything here is
 measured on the Figure-4 toy model; sections cite the probe that produced each number.
 Status: the negative half of the account is established; the constructive half has hit
-a measured wall — gate quality is real, decisive, and (per `FINDINGS.md` §14) neither
-statistically characterizable nor reachable by exact-solve co-adaptation.*
+a measured wall — gate quality is real, decisive, and (per `FINDINGS.md` §§14–15)
+neither statistically characterizable nor reachable by exact-solve co-adaptation under
+either pressure structure. §§15–16 relocate where gradient descent builds it: in a
+narrow window at the end of the fitting phase, not the late consolidation.*
 
 The challenge asks for an algorithm that stores facts the way a trained model does. The
 capacity benchmark turned out to be answerable without answering that question — the
@@ -131,11 +133,14 @@ joint adaptation of gate and codebook that gradient descent performs on the way.
 Quantitatively: of the ~1300× robustness gap between the best capacity construction
 and the trained model at matched load, ~100× is now constructively recovered by a
 ridge-only algorithm (the pedestal-optimized digit code: 76% of trained capacity at
-30× less robustness), a further ~2× by exact margin ascent plus one flip-capped drift
-step on its gate (σ90 2.96e-3, `FINDINGS.md` §14), and the remaining ~15× is the
-gate-quality deficit that no exact solve in this family crosses — the part of
-gradient descent's implicit bias that lives in its coupled dynamics rather than in
-its optimum. Its two known inefficiencies — first-order convergence (`FINDINGS.md` §7)
+30× less robustness), a further ~2.5× by exact margin ascent plus one flip-capped
+drift step on its gate (σ90 3.18e-3, under spread pressure; `FINDINGS.md` §§14–15),
+and the remaining ~14× is the gate-quality deficit that no exact solve in this family
+crosses — the part of gradient descent's implicit bias that lives in its coupled
+dynamics rather than in its optimum. §15 adds where those dynamics do the work: the
+gate at the *first* 100%-accuracy epoch already ascends to σ90 4.07e-2 against the
+full-budget gate's 4.40e-2, so the quality is built during error-driven fitting, and
+the long margin phase that follows adds only ~8%. Its two known inefficiencies — first-order convergence (`FINDINGS.md` §7)
 and spending parameters on margin the metric never scores (§5) — are the price and the
 point, respectively.
 
@@ -161,11 +166,25 @@ point, respectively.
    therefore not an intrinsic property of the binary pattern; it is the relational
    property that the cone of embeddings realizing the pattern's signs contains
    good value embeddings. And the constructive imitation of gradient descent's
-   mechanism — pattern drift under exact max-margin pressure with twosided's flip
-   cap — buys exactly one step (σ90 1.27e-3 → 2.96e-3, the best constructed gate to
-   date) before iterating destroys the gate entirely. The remaining ~15× is the
-   measured value of gradient descent's coupled small-step dynamics: pattern and
-   values moving together, continuously, under pressure from every fact at once.
+   mechanism — pattern drift under exact margin pressure with twosided's flip cap —
+   buys exactly one step before iterating destroys the gate entirely, under *both*
+   pressure structures: worst-fact max-min (σ90 2.96e-3) and per-fact capped-sum,
+   the exact-solve analog of softmax's saturating every-fact pull (σ90 3.18e-3, the
+   best constructed gate to date; `FINDINGS.md` §15). So "pressure from every fact
+   at once" is not the missing ingredient either. The remaining ~14× is the
+   measured value of gradient descent's coupled small-step dynamics, and §15
+   locates where they pay: the first-acc=1 gate already ascends to 4.07e-2 of the
+   full-budget 4.40e-2, so the quality is built during error-driven *fitting* —
+   before the margin phase every imitation so far has targeted. The first step of
+   the trajectory-measurement program has now run (`FINDINGS.md` §16): the
+   gate-quality curve over training checkpoints shows the gate is *infeasible*
+   through train accuracy 0.77, crosses to 4.5× the best construction's ceiling in
+   a ~50-epoch window (train accuracy 0.77 → 0.90, only 4.6% of pattern bits), and
+   reaches 92% of its final ceiling at first-acc=1 — the gate becomes good before
+   the model does, and the long §12 consolidation is polish worth ~8%. What would
+   finish this item: the implicit flip-selection policy inside that window, then a
+   construction that starts from infeasibility with fit pressure rather than from
+   feasibility with margin pressure.
 2. **Codebook targets instead of digit targets.** §1's readout measurement says trained
    labels live on ~12–18 random-ish directions, not on `m` ladders. The digit solver
    generalizes: replace the per-group digit targets with margin *inequality* targets

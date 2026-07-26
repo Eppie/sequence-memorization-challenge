@@ -481,6 +481,105 @@ own coupled small-step dynamics — and the residual ~15× robustness gap betwee
 best constructed gate (2.96e-3) and the trained gate (4.40e-2) at matched load is now
 the measured price of not having that mechanism in constructive form.
 
+## 15. Spread pressure collapses the same way, and the gate is built during fitting
+
+`probe_gatequality.py --phase drift --pressure spread` (and `predict` for
+`trained_early`). §14's drift experiment left one natural alternative open: its
+max-min-margin objective concentrates all pressure on the single worst fact, where
+gradient descent's softmax loss pulls on *every* fact at once with saturating
+strength. The spread-pressure variant makes that exact-solve-precise: per-fact margin
+variables m_f, maximize Σ m_f subject to the same margin rows, bounded m_f ≤ τ = 0.5
+so satisfied facts stop pulling (`solve_max_margin(..., spread_tau=τ)`). Everything
+else — the 2% flip cap, the readout-LP refit, no memory across rounds — is identical
+to §14, so the outcome is attributable to pressure structure alone.
+
+Seeded from the digit gate at n=1584, the first step is again the best constructed
+gate to date — σ90 1.27e-3 → **3.18e-3**, beating minmax drift's 2.96e-3 — and
+iteration again destroys it: σ90 declines monotonically every round, accuracy erodes
+from round 4, and the run early-stops at round 12 with accuracy 0.983, min margin
+−1.68, σ90 5.9e-5, at 8.6% cumulative drift. The ledger shows the same churn
+signature: every round spends its full 1013-flip quota, and the LP reports *every*
+fact at the τ cap every round — mean m_f pinned at 0.5 from round 0 to the end —
+while the realized model's minimum margin falls from +0.86 to −1.68. The solve's
+belief and the stepped-and-re-read reality diverge immediately; spread pressure
+degrades more gracefully than minmax (accuracy 0.983 at 8.6% drift vs 0.73 at 7.9%)
+but the shape is identical. **All-facts saturating pressure was not the missing
+ingredient.** What separates gradient descent from every exact-solve imitation tried
+is not *what* it pressures but *how*: its direction is recomputed continuously, and
+its flips happen only where a pre-activation happens to cross zero — near-ties,
+locally almost free — where the capped LP step forces exactly the flips a distant
+vertex wants most, valid only under the stale signs the step itself invalidates.
+
+The second result relocates where that process does its work. `trained_early` — the
+gate snapshotted at the *first* epoch training reaches 100% — was the zoo's one
+unascended member; its two-LP ceiling comes out at **σ90 4.07e-2** (its own model
+directly: 4.30e-2), against 4.40e-2 for the full-budget trained gate. The init gate
+is infeasible (§14); the first-acc=1 gate is already at ~full quality. **The gate's
+quality is built almost entirely during the fitting phase**, and the remaining ~4500
+epochs of margin growth and continued drift — the long consolidation §12 measured —
+add only ~8% in σ90 terms. Since the two-LP ascent defines gate quality as a function
+of the pattern alone, gradient descent's quality trajectory moves only at flip
+events; both §14's and this section's constructions failed while imitating the *late*
+phase, which builds almost nothing. The object of study is the flip sequence of the
+fitting phase — which flips the error-driven dynamics make between infeasibility and
+first-acc=1, and why those flips enrich the cone.
+
+Net: the residual between the best constructed gate (3.18e-3) and the trained ceiling
+(4.40e-2) at matched load stands at a measured **~14×**, and the process thesis — the
+good gate exists only as the fixed point of a coupled dynamics — has survived its
+natural alternative. (Same caveat as §14: one seed, one d, one load; the headline
+rows want a d=64 or second-seed spot check before anything is published from them.)
+
+## 16. The gate becomes good in a narrow window at the end of fitting
+
+`probe_gatequality.py --phase curve`. §15 located gate quality in the fitting phase
+by its endpoints (init infeasible, first-acc=1 ≈ full). The curve phase resolves the
+inside: re-run the post's recipe with the zoo's seed, snapshot 23 checkpoints (dense
+early), and give every checkpoint's frozen pattern the same two-LP ascent the zoo got
+— the σ90 ceiling of that gate with embeddings *and* readout exactly optimal. The
+checkpoints are independent, so the ascents run in parallel worker processes; the
+endpoint rows reproduce the zoo's numbers (first acc=1 at epoch 355 → ceiling
+4.06e-2 vs the independently built trained_early's 4.07e-2; epoch 5000 → 4.40e-2).
+
+| epoch | train acc | gate ceiling σ90 | net drift from init |
+|---|---|---|---|
+| 0–150 | 0.03–0.77 | **infeasible** (LP acc 0.032, γ = 0) | 0 → 0.389 |
+| 200 | 0.90 | 1.44e-2 | 0.391 |
+| 300 | 0.99 | 3.84e-2 | 0.395 |
+| 355 (first acc=1) | 1.00 | 4.06e-2 | 0.396 |
+| 500–5000 | 1.00 | 4.21e-2 → 4.40e-2 | 0.396 → 0.400 |
+
+Three readings:
+
+**Feasibility is won in a ~50-epoch window at the end of fitting.** Through epoch 150
+— train accuracy already 0.77 — the gate still cannot store the fact set at any
+positive margin, full stop. By epoch 200 (train accuracy 0.90) the ceiling is
+1.44e-2: the gate becomes good *before the model does* — while ~150 facts are still
+misclassified, the pattern already supports acc=1 at 4.5× the robustness of the best
+constructed gate (3.18e-3). By epoch 300 it is at 87% of its final ceiling.
+
+**The decisive bits are few.** The infeasible → feasible transition crosses only 4.6%
+of pattern bits (epochs 150→200) — while the immediately preceding 50 epochs moved
+*more* bits (6.9%, epochs 100→150) with the ceiling pinned at infeasible. Bit count
+is not quality; §14's negative result (family statistics blind to quality) has a
+dynamic counterpart here: the cone becomes rich through a small set of decisive,
+relational flips, invisible in the aggregate flip budget.
+
+**Net drift is a fitting-phase phenomenon; the margin phase polishes.** 39.1 of the
+final 40.0 points of net drift-from-init are in place by epoch 200. After first
+acc=1, 4800 epochs of ~0.55%/epoch churn — gross flipping totaling 28× the pattern
+size over the full run — move the pattern only 5.6% net while the ceiling rises
+4.06e-2 → 4.40e-2 (+8%). §12's long consolidation is real, but it is polish;
+construction happens in the window where gradient descent is fighting for its last
+~360 facts.
+
+So the object of study narrows once more: epochs ~150–355, train accuracy 0.77 → 1.0,
+where the error-driven dynamics make the flips that turn an unusable pattern into a
+near-optimal one. The open questions are the flip-selection policy inside that window
+and whether a fit-pressure construction started from infeasibility (rather than
+margin pressure from feasibility, which §§14–15 refuted) can reproduce it. Caveats as
+§§14–15: one seed, one d, one load.
+
 ## Why this matters for the challenge
 
 The post frames its construction and the trained model as differing in *which* neurons

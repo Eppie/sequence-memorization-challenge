@@ -60,12 +60,21 @@ def solve_max_margin(
     box: float,
     wrong_sets: list | None = None,  # per-fact wrong-class subsets (cutting plane)
     pattern_rows: bool = True,  # False: masked-linear margins only, signs free
+    spread_tau: float | None = None,  # per-fact capped-sum objective (see below)
 ) -> tuple[np.ndarray, np.ndarray, float, dict]:
     """Max-min-margin embeddings for a frozen (pattern, readout). Returns
-    (u, v, gamma*, info); u and v are (n_vocab, d)."""
+    (u, v, gamma*, info); u and v are (n_vocab, d).
+
+    spread_tau switches the objective from the shared min margin to spread
+    pressure: one margin variable m_f per fact, the same rows written against
+    m_f instead of gamma, bounds m_f <= tau (free below), maximize sum m_f.
+    Every fact then pulls until it reaches tau, instead of all pressure
+    concentrating on the single worst fact. Returns (u, v, sum m_f, info)
+    with the per-fact m in info["m"]."""
     n, d = active.shape
     n_labels = readout.shape[0]
-    nvar = 2 * n_vocab * d + 1  # u, v, gamma
+    emb_cols = 2 * n_vocab * d
+    nvar = emb_cols + (n if spread_tau is not None else 1)  # u, v, margins
     gamma_col = nvar - 1
 
     rows, cols, data = [], [], []
@@ -90,7 +99,8 @@ def solve_max_margin(
         r = row_count + np.repeat(np.arange(n_rows), 2 * k + 1)
         cu = a * d + act
         cv = n_vocab * d + b * d + act
-        c_all = np.concatenate([cu, cv, [gamma_col]])
+        margin_col = gamma_col if spread_tau is None else emb_cols + f
+        c_all = np.concatenate([cu, cv, [margin_col]])
         cc = np.tile(c_all, n_rows)
         dd = np.concatenate(
             [wdiff, wdiff, np.ones((n_rows, 1))], axis=1
@@ -118,8 +128,12 @@ def solve_max_margin(
     )
     b_ub = np.zeros(row_count)
     c = np.zeros(nvar)
-    c[gamma_col] = -1.0  # maximize gamma
-    bounds = [(-box, box)] * (nvar - 1) + [(None, None)]
+    if spread_tau is None:
+        c[gamma_col] = -1.0  # maximize gamma
+        bounds = [(-box, box)] * (nvar - 1) + [(None, None)]
+    else:
+        c[emb_cols:] = -1.0  # maximize sum of per-fact margins
+        bounds = [(-box, box)] * emb_cols + [(None, spread_tau)] * n
 
     t = time.time()
     res = linprog(c, A_ub=A, b_ub=b_ub, bounds=bounds, method="highs-ipm",
@@ -134,6 +148,8 @@ def solve_max_margin(
     x = res.x
     u = x[: n_vocab * d].reshape(n_vocab, d)
     v = x[n_vocab * d : 2 * n_vocab * d].reshape(n_vocab, d)
+    if spread_tau is not None:
+        info["m"] = x[emb_cols:].copy()
     return u, v, float(-res.fun), info
 
 

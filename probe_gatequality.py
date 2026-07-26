@@ -39,6 +39,8 @@ and the per-token value solves are ill-conditioned):
 
     uv run python probe_gatequality.py --phase metrics
     uv run python probe_gatequality.py --phase predict
+    uv run python probe_gatequality.py --phase drift --pressure spread
+    uv run python probe_gatequality.py --phase curve --workers 11
 """
 
 import argparse
@@ -373,6 +375,17 @@ def predict_one(name, pattern, up0, down0, facts, shape):
 # margins, signs free), then step toward the LP point only as far as
 # twosided's flip cap allows, re-read the pattern, refit the readout-LP,
 # repeat. No gradient of any loss; the search direction is an exact solve.
+#
+# Two pressure structures, differing only in the emb-LP objective:
+#
+#   minmax   maximize the shared min margin gamma. All pressure concentrates
+#            on the single worst fact; every round spends its full flip quota
+#            chasing it (FINDINGS.md 14: churn, then collapse).
+#
+#   spread   per-fact margin variables m_f, maximize sum m_f with m_f <= tau
+#            (free below). Facts at tau stop pulling, so pressure spreads
+#            over every fact still below the cap -- the LP analog of the
+#            saturating per-fact pull a softmax loss gives gradient descent.
 
 def lp_free(pattern, inputs, targets, readout, n_vocab, box, logits_hint,
             k0=12, max_rounds=2):
@@ -408,6 +421,43 @@ def lp_free(pattern, inputs, targets, readout, n_vocab, box, logits_hint,
     return u, v, gamma, info
 
 
+def lp_spread(pattern, inputs, targets, readout, n_vocab, box, logits_hint,
+              tau, k0=12, max_rounds=2):
+    """Cutting-plane capped-sum margins over embeddings, signs free. Same
+    hints and rounds as lp_free; only the objective differs. The cut rule is
+    per fact: a left-out class must beat that fact's own solved m_f."""
+    from probe_maxmargin import solve_max_margin
+
+    n = len(targets)
+    hint = logits_hint.copy()
+    hint[np.arange(n), targets] = -np.inf
+    wrong_sets = [list(row) for row in np.argsort(-hint, axis=1)[:, :k0]]
+    u = v = m = None
+    obj = float("-inf")
+    for _ in range(max_rounds):
+        u, v, obj, info = solve_max_margin(
+            pattern, inputs, targets, readout, n_vocab, box,
+            wrong_sets=wrong_sets, pattern_rows=False, spread_tau=tau,
+        )
+        if u is None:
+            return None, None, obj, None, info
+        m = info["m"]
+        h = pattern * (u[inputs[:, 0]] + v[inputs[:, 1]])
+        logits = h @ readout.T
+        correct = logits[np.arange(n), targets]
+        logits[np.arange(n), targets] = -np.inf
+        gaps = correct[:, None] - logits
+        new = 0
+        for f in np.flatnonzero((gaps < m[:, None] - 1e-7).any(1)):
+            for c in np.flatnonzero(gaps[f] < m[f] - 1e-7):
+                if c != targets[f] and c not in wrong_sets[f]:
+                    wrong_sets[f].append(int(c))
+                    new += 1
+        if new == 0:
+            break
+    return u, v, obj, m, info
+
+
 def capped_step(u, v, u_star, v_star, inputs, flip_cap):
     """Step from (u, v) toward the LP point, capped so at most flip_cap of
     the (fact, neuron) signs flip -- twosided's order-statistic step rule."""
@@ -422,7 +472,8 @@ def capped_step(u, v, u_star, v_star, inputs, flip_cap):
     return u + t * (u_star - u), v + t * (v_star - v), t, int(min(len(ts), allowed))
 
 
-def drift(name, facts, shape, rounds, flip_cap=0.02):
+def drift(name, facts, shape, rounds, flip_cap=0.02, pressure="minmax",
+          tau=0.5):
     """Margin-driven gate drift from a feasible construction's gate."""
     pattern0, up0, down0 = get_gate(name, shape, facts)
     inputs, targets = facts["inputs"].numpy(), facts["targets"].numpy()
@@ -458,10 +509,21 @@ def drift(name, facts, shape, rounds, flip_cap=0.02):
     bad_rounds = 0
     for r in range(rounds):
         h = pattern * (u[inputs[:, 0]] + v[inputs[:, 1]])
-        u_star, v_star, g_free, info = lp_free(
-            pattern, inputs, targets, W, shape.input_vocab_size, box_e,
-            logits_hint=h @ W.T,
-        )
+        if pressure == "spread":
+            u_star, v_star, obj, m, info = lp_spread(
+                pattern, inputs, targets, W, shape.input_vocab_size, box_e,
+                logits_hint=h @ W.T, tau=tau,
+            )
+            lp_line = (None if u_star is None else
+                       f"lp_mean_m={obj / len(targets):.4f} "
+                       f"min_m={m.min():.4f} "
+                       f"at_cap={float((m > tau - 1e-6).mean()):.3f}")
+        else:
+            u_star, v_star, g_free, info = lp_free(
+                pattern, inputs, targets, W, shape.input_vocab_size, box_e,
+                logits_hint=h @ W.T,
+            )
+            lp_line = None if u_star is None else f"lp_gamma={g_free:.4f}"
         if u_star is None:
             print(f"  [{name}-drift] LP failed at round {r}: "
                   f"{info.get('message')}", flush=True)
@@ -473,7 +535,7 @@ def drift(name, facts, shape, rounds, flip_cap=0.02):
         W_new, g_w, _ = readout_lp(h, targets, shape.output_vocab_size, box_w)
         if W_new is not None:
             W = W_new
-        print(f"  [{name}-drift] round {r}: lp_gamma={g_free:.4f} "
+        print(f"  [{name}-drift] round {r}: {lp_line} "
               f"step={t:.3f} flips={flips}", flush=True)
         row, acc, s90 = snapshot(r)
         if acc == 1.0 and s90 is not None and s90 > best["sigma90"]:
@@ -485,11 +547,103 @@ def drift(name, facts, shape, rounds, flip_cap=0.02):
             break
 
     entry = {"history": history, "best_round": best["round"],
-             "best_sigma90": best["sigma90"]}
+             "best_sigma90": best["sigma90"], "pressure": pressure}
+    if pressure == "spread":
+        entry["tau"] = tau
     entry["best_metrics"] = evaluate_full(best["u"], best["v"], best["W"],
                                           facts, f"{name}-drift best")
-    np.savez(os.path.join(GATES_DIR, f"{name}_drift_best.npz"),
+    suffix = "_drift_best" if pressure == "minmax" else f"_drift_{pressure}_best"
+    np.savez(os.path.join(GATES_DIR, f"{name}{suffix}.npz"),
              u=best["u"], v=best["v"], W=best["W"])
+    return entry
+
+
+# --------------------------------------------------------------------------
+# curve: gate quality along the training trajectory
+# --------------------------------------------------------------------------
+#
+# Section 15's relocation result (trained_early ~ trained, init infeasible)
+# says the gate's quality is built during fitting. This phase measures when:
+# checkpoint the post-recipe training run, freeze each checkpoint's pattern,
+# give it the same two-LP ascent the zoo got, and read the sigma90 ceiling
+# against epoch. The ceiling is a function of the pattern alone, so the curve
+# moves only at flip events; per-epoch flip rate, accuracy, and drift from
+# init/final are recorded alongside. Checkpoints are independent, so the
+# ascents run in parallel worker processes.
+
+CURVE_EPOCHS = (0, 1, 2, 3, 5, 8, 12, 20, 30, 50, 75, 100, 150, 200, 300,
+                500, 750, 1000, 1500, 2000, 3000, 5000)
+CURVE_CKPT_PATH = os.path.join(GATES_DIR, "curve_checkpoints.npz")
+
+
+def train_curve_checkpoints(shape, facts, seed=1000, n_epochs=5000, lr=1e-2):
+    """The post's recipe with the zoo's seed, snapshotting (up, down) at
+    CURVE_EPOCHS plus the first acc=1 epoch. Accuracy is read from the
+    pre-step logits, matching build_trained's early-stop check."""
+    import torch.nn.functional as F
+
+    up0, down0 = random_init(shape, seed)
+    up = up0.clone().requires_grad_(True)
+    down = down0.clone().requires_grad_(True)
+    opt = torch.optim.Adam([up, down], lr=lr)
+    with torch.no_grad():
+        pat_prev = hidden_activations(up, facts["inputs"]) > 0
+        logits0 = hidden_activations(up, facts["inputs"]) @ down.T
+        acc0 = float((logits0.argmax(-1) == facts["targets"]).float().mean())
+
+    snaps = {0: (up.detach().clone(), down.detach().clone())}
+    accs = {0: acc0}
+    flip_frac = np.zeros(n_epochs)
+    first_acc1 = None
+    for epoch in range(1, n_epochs + 1):
+        opt.zero_grad()
+        logits = hidden_activations(up, facts["inputs"]) @ down.T
+        F.cross_entropy(logits, facts["targets"]).backward()
+        opt.step()
+        with torch.no_grad():
+            acc = float((logits.argmax(-1) == facts["targets"]).float().mean())
+            pat = hidden_activations(up, facts["inputs"]) > 0
+            flip_frac[epoch - 1] = float((pat != pat_prev).float().mean())
+            pat_prev = pat
+        if first_acc1 is None and acc == 1.0:
+            first_acc1 = epoch
+            snaps[epoch] = (up.detach().clone(), down.detach().clone())
+            accs[epoch] = acc
+        if epoch in CURVE_EPOCHS:
+            snaps[epoch] = (up.detach().clone(), down.detach().clone())
+            accs[epoch] = acc
+        if epoch % 500 == 0:
+            print(f"  [curve-train] epoch {epoch}: acc={acc:.4f} "
+                  f"flip={flip_frac[epoch - 1]:.4f}", flush=True)
+
+    os.makedirs(GATES_DIR, exist_ok=True)
+    arrays = {"epochs": np.array(sorted(snaps)),
+              "acc": np.array([accs[e] for e in sorted(snaps)]),
+              "flip_frac": flip_frac,
+              "first_acc1": np.array(first_acc1 if first_acc1 else -1)}
+    for e, (u_t, d_t) in snaps.items():
+        arrays[f"up_{e}"] = u_t.numpy()
+        arrays[f"down_{e}"] = d_t.numpy()
+    np.savez(CURVE_CKPT_PATH, **arrays)
+    print(f"  [curve-train] first acc=1 at epoch {first_acc1}; "
+          f"{len(snaps)} checkpoints -> {CURVE_CKPT_PATH}", flush=True)
+
+
+def curve_ascend_worker(epoch: int) -> dict:
+    """Ascend one checkpoint's gate (runs in a worker process)."""
+    shape = ModelShape.from_d(D)
+    facts = generate_facts(N_FACTS, shape.input_vocab_size,
+                           shape.output_vocab_size, 42)
+    z = np.load(CURVE_CKPT_PATH)
+    up = torch.from_numpy(z[f"up_{epoch}"]).float()
+    down = torch.from_numpy(z[f"down_{epoch}"]).float()
+    with torch.no_grad():
+        pattern = (hidden_activations(up, facts["inputs"]) > 0).numpy()
+    best, history = ascend_best(pattern, facts, shape, up, down,
+                                label=f"ep{epoch}")
+    entry = {"epoch": epoch, "best_gamma": best["gamma"], "history": history}
+    entry["metrics"] = evaluate_full(best["u"], best["v"], best["W"], facts,
+                                     f"ep{epoch} ceiling")
     return entry
 
 
@@ -514,10 +668,15 @@ def merge_out(update: dict) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--phase", choices=("metrics", "predict", "drift"),
+    parser.add_argument("--phase",
+                        choices=("metrics", "predict", "drift", "curve"),
                         default="metrics")
     parser.add_argument("--gates", nargs="*", default=None)
     parser.add_argument("--rounds", type=int, default=30)
+    parser.add_argument("--pressure", choices=("minmax", "spread"),
+                        default="minmax")
+    parser.add_argument("--tau", type=float, default=0.5)
+    parser.add_argument("--workers", type=int, default=11)
     args = parser.parse_args()
 
     shape = ModelShape.from_d(D)
@@ -559,10 +718,55 @@ def main() -> None:
         print(f"\nwrote {OUT_PATH}")
 
     elif args.phase == "drift":
+        key = "drift" if args.pressure == "minmax" else f"drift_{args.pressure}"
         for name in names:
-            print(f"== drift from {name}", flush=True)
-            entry = drift(name, facts, shape, rounds=args.rounds)
-            merge_out({"drift": {name: entry}})
+            print(f"== drift from {name} ({args.pressure})", flush=True)
+            entry = drift(name, facts, shape, rounds=args.rounds,
+                          pressure=args.pressure, tau=args.tau)
+            merge_out({key: {name: entry}})
+        print(f"\nwrote {OUT_PATH}")
+
+    elif args.phase == "curve":
+        from concurrent.futures import ProcessPoolExecutor, as_completed
+
+        if not os.path.exists(CURVE_CKPT_PATH):
+            train_curve_checkpoints(shape, facts)
+        z = np.load(CURVE_CKPT_PATH)
+        snap_epochs = [int(e) for e in z["epochs"]]
+        accs = {int(e): float(a) for e, a in zip(z["epochs"], z["acc"])}
+
+        def pattern_of(e):
+            up = torch.from_numpy(z[f"up_{e}"]).float()
+            with torch.no_grad():
+                return (hidden_activations(up, facts["inputs"]) > 0).numpy()
+
+        pat_init = pattern_of(0)
+        pat_final = pattern_of(snap_epochs[-1])
+        drift_stats = {
+            e: {"from_init": float((pattern_of(e) != pat_init).mean()),
+                "from_final": float((pattern_of(e) != pat_final).mean())}
+            for e in snap_epochs
+        }
+        merge_out({"curve": {
+            "first_acc1": int(z["first_acc1"]),
+            "flip_frac_per_epoch": [round(float(f), 5) for f in z["flip_frac"]],
+        }})
+
+        rows = {}
+        with ProcessPoolExecutor(max_workers=args.workers) as ex:
+            futures = {ex.submit(curve_ascend_worker, e): e
+                       for e in snap_epochs}
+            for fut in as_completed(futures):
+                e = futures[fut]
+                entry = fut.result()
+                entry["train_acc"] = accs[e]
+                entry.update(drift_stats[e])
+                rows[str(e)] = entry
+                merge_out({"curve": {"ascent": dict(rows)}})
+                print(f"== ep{e}: ceiling "
+                      f"sigma90={entry['metrics']['sigma90_weight']} "
+                      f"acc={entry['metrics']['accuracy']:.3f} "
+                      f"({len(rows)}/{len(snap_epochs)} done)", flush=True)
         print(f"\nwrote {OUT_PATH}")
 
 
