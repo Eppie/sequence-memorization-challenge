@@ -181,10 +181,18 @@ point, respectively.
    through train accuracy 0.77, crosses to 4.5× the best construction's ceiling in
    a ~50-epoch window (train accuracy 0.77 → 0.90, only 4.6% of pattern bits), and
    reaches 92% of its final ceiling at first-acc=1 — the gate becomes good before
-   the model does, and the long §12 consolidation is polish worth ~8%. What would
-   finish this item: the implicit flip-selection policy inside that window, then a
-   construction that starts from infeasibility with fit pressure rather than from
-   feasibility with margin pressure.
+   the model does, and the long §12 consolidation is polish worth ~8%. The flip
+   policy inside that window has now been measured (`FINDINGS.md` §17), and it is
+   trivial: gradient descent flips only extreme near-ties (bits 50–500× closer to
+   zero than typical), error-agnostically, with no bit-level signature at the
+   feasibility edge — while an embedding interpolation along the training
+   direction crosses from infeasible to 3× the constructed record within 0.35% of
+   bits. Same capped-step mechanics as the failed drifts, opposite outcome: all of
+   gate quality lives in the *direction field* of the embedding dynamics. What
+   would finish this item: characterize that direction (it is the aggregated
+   fitting gradient, not any margin-LP vertex) and build an exact solve that
+   points along it from an infeasible ~90%-fit start; the ~180 decisive bits at
+   the edge are an enumerable object for that study.
 2. **Codebook targets instead of digit targets.** §1's readout measurement says trained
    labels live on ~12–18 random-ish directions, not on `m` ladders. The digit solver
    generalizes: replace the per-group digit targets with margin *inequality* targets

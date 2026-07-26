@@ -580,6 +580,64 @@ and whether a fit-pressure construction started from infeasibility (rather than
 margin pressure from feasibility, which §§14–15 refuted) can reproduce it. Caveats as
 §§14–15: one seed, one d, one load.
 
+## 17. The flip policy is trivial; the direction is everything
+
+`probe_flippolicy.py`. Three phases inside §16's window: a dense ceiling curve
+(checkpoints every 20 epochs, 140–360, each LP-ascended in parallel), per-flip
+statistics for every consecutive pair against a churn-regime null pair (500→700),
+and an embedding-space interpolation across the feasibility edge. One methods note
+with scientific content: torch CPU training is not bit-deterministic (parallel
+reduction order) and the trajectory is chaotic, so the dense run is an independent
+micro-realization — its patterns diverge from §16's run at the ~1% bit level by
+epoch 200, yet its ceiling curve lands on §16's almost exactly (ep200 1.39e-2 vs
+1.44e-2; ep300 3.83e-2 vs 3.84e-2). The window phenomenon is a property of the
+dynamics, not of one lucky trajectory.
+
+**Dense curve.** Infeasible through epoch 180 (train acc ~0.85); feasible at 1.39e-2
+by epoch 200; then a smooth fast climb (2.0e-2, 2.8e-2, 3.4e-2, 3.7e-2 at 220–280)
+into the polish regime. The infeasible → feasible edge sits inside a single
+20-epoch interval.
+
+**Flip statistics.** Three facts, none of which §16's "error-driven flips" framing
+predicted:
+
+* *Flips are extreme near-ties.* The median |pre-activation| of a bit that flips in
+  the next 20 epochs is 0.002–0.03, against 0.85–1.6 for the population — gradient
+  descent flips only bits already 50–500× closer to zero than typical, paying ~zero
+  margin cost per flip. (The failed LP drifts of §§14–15 do the opposite: the
+  order-statistic step forces whichever flips the distant vertex wants most.)
+* *Flips are error-agnostic in location.* Wrong-fact enrichment is 0.93–1.71 across
+  the window — even at the feasibility edge, flips land on correctly-classified
+  facts' bits nearly in proportion to their share. The errors drive the *embedding
+  motion* globally through the loss; they do not select the flips locally.
+* *The edge has no bit-level signature.* Net flip counts decline smoothly through it
+  (1458 → 627 per 20 epochs; ~15× the churn regime's net rate), and near-tie-ness,
+  direction (~50/50 on↔off), survival to epoch 5000 (~⅔), and neuron concentration
+  (~uniform) are all flat across the transition. §14's lesson — quality is
+  relational, invisible to statistics — holds at flip granularity too.
+
+**Interpolation across the edge.** Per-bit pattern hybrids are not additively
+realizable, so interpolate where every point is a real model: u_t = (1−t)·u_180 +
+t·u_200. Every interpolate is feasible, and the first one is the result: at
+t = 0.125 the pattern differs from the *infeasible* epoch-180 pattern by **0.35% of
+bits (~180 bits)** and already ascends to σ90 9.7e-3 — 3× the best gate any
+construction has produced. The ceiling then rises smoothly in t (1.04e-2 … 1.35e-2
+at t=0.875, endpoint 1.39e-2). The feasibility edge is razor-thin, and crossing it
+buys more than every exact-solve construction combined.
+
+The synthesis, and the sharpest statement of the reduction to date: the interpolation
+*is* a flip-capped step — near-ties cross first, exactly like the drift experiments'
+`capped_step` — but pointed along gradient descent's own realized direction instead
+of at an LP vertex. Same step mechanics, opposite outcome: the LP-vertex direction
+destroys the gate (§§14–15), the training direction crosses from infeasible to 3× the
+constructed record within 0.35% of bits. **The flip policy is trivial — cross
+whatever is nearest zero along the motion. All of gate quality lives in the direction
+field of the embedding dynamics.** The constructive question is now: what
+characterizes that direction, and can an exact solve point along it from an
+infeasible ~90%-fit start? The ~180 decisive bits at the edge are a small, explicitly
+enumerable object for that study. Caveats: one seed family, one d, one load;
+interpolation granularity t = 0.125.
+
 ## Why this matters for the challenge
 
 The post frames its construction and the trained model as differing in *which* neurons

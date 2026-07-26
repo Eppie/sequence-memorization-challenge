@@ -576,10 +576,13 @@ CURVE_EPOCHS = (0, 1, 2, 3, 5, 8, 12, 20, 30, 50, 75, 100, 150, 200, 300,
 CURVE_CKPT_PATH = os.path.join(GATES_DIR, "curve_checkpoints.npz")
 
 
-def train_curve_checkpoints(shape, facts, seed=1000, n_epochs=5000, lr=1e-2):
+def train_curve_checkpoints(shape, facts, seed=1000, n_epochs=5000, lr=1e-2,
+                            epochs=CURVE_EPOCHS, path=CURVE_CKPT_PATH):
     """The post's recipe with the zoo's seed, snapshotting (up, down) at
-    CURVE_EPOCHS plus the first acc=1 epoch. Accuracy is read from the
-    pre-step logits, matching build_trained's early-stop check."""
+    `epochs` plus the first acc=1 epoch. Accuracy is read from the
+    pre-step logits, matching build_trained's early-stop check. The
+    trajectory is deterministic, so runs with different snapshot lists
+    agree at shared epochs (probe_flippolicy checks this)."""
     import torch.nn.functional as F
 
     up0, down0 = random_init(shape, seed)
@@ -609,7 +612,7 @@ def train_curve_checkpoints(shape, facts, seed=1000, n_epochs=5000, lr=1e-2):
             first_acc1 = epoch
             snaps[epoch] = (up.detach().clone(), down.detach().clone())
             accs[epoch] = acc
-        if epoch in CURVE_EPOCHS:
+        if epoch in epochs:
             snaps[epoch] = (up.detach().clone(), down.detach().clone())
             accs[epoch] = acc
         if epoch % 500 == 0:
@@ -624,9 +627,9 @@ def train_curve_checkpoints(shape, facts, seed=1000, n_epochs=5000, lr=1e-2):
     for e, (u_t, d_t) in snaps.items():
         arrays[f"up_{e}"] = u_t.numpy()
         arrays[f"down_{e}"] = d_t.numpy()
-    np.savez(CURVE_CKPT_PATH, **arrays)
+    np.savez(path, **arrays)
     print(f"  [curve-train] first acc=1 at epoch {first_acc1}; "
-          f"{len(snaps)} checkpoints -> {CURVE_CKPT_PATH}", flush=True)
+          f"{len(snaps)} checkpoints -> {path}", flush=True)
 
 
 def curve_ascend_worker(epoch: int) -> dict:
