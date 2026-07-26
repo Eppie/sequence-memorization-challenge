@@ -343,6 +343,38 @@ equality-constrained codes from trained models. (Protocol caveat: their appendix
 an lr ladder and 11 attempts per point; this is single-lr, best-of-2 — the comparison
 across rows is internal and like-for-like, the absolute numbers are not theirs.)
 
+## 12. The trained gate settles early, and its stability is co-sized with its margins
+
+`probe_patterns.py`. The account's last unmeasured clause was that trained models need
+no stabilizer pedestal because gradient descent stabilizes the ReLU sign pattern
+*dynamically*. Two direct measurements, d=32:
+
+**Churn.** Training at n=2080 under the post's recipe, the fraction of (fact, neuron)
+pre-activation signs flipping per epoch collapses from 100% (init) through 1.3% by
+epoch 10 to ~0.5% by epoch 30 — while accuracy is still at 21%. The gate is found
+first; the remaining ~1600 epochs grow margins on an almost-settled pattern.
+
+**Co-sizing.** Under weight noise, compare where accuracy fails (σ90) with where the
+pattern starts moving (1% of sign bits flipped):
+
+| model | σ(acc < 0.9) | σ(1% pattern flips) | ratio |
+|---|---|---|---|
+| trained @ 2080 | 3.2e-2 | 1.0e-2 | **0.3×** |
+| digit m=2, pedestal-optimized @ 1584 | 3.2e-3 | 3.2e-2 | 10× |
+| twosided @ 3168 | 3.2e-5 | 1.0e-2 | **316×** |
+
+The trained model's gate stability and decision margins sit at the same noise scale —
+it even keeps decoding with ~1% of its gate bits flipped, so the pattern is itself a
+robust code rather than brittle bits. The exact solve's accuracy dies 316× before its
+gate moves at all: its pattern stability (bought with the pedestal) is irrelevant to
+its failure mode, which is decode precision. That mismatch — slack spent where the
+metric looks instead of where failure comes from — is the equality-code design in one
+number.
+
+One picture of the whole session: `results/frontier.png` (`plot_frontier.py`), the
+(capacity, σ90) plane with every construction, the trained frontier, and the
+max-margin LP landing on the trained point.
+
 ## Why this matters for the challenge
 
 The post frames its construction and the trained model as differing in *which* neurons

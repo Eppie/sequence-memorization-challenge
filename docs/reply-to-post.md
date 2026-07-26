@@ -64,7 +64,12 @@ geometry — while every mixed condition is *infeasible*: a random codebook cann
 decode the trained pattern, the trained readout cannot separate a random pattern, and
 a random pattern with a random codebook cannot hold even half of trained capacity at
 any positive margin. The capacity lives in the joint adaptation of gate and codebook;
-the margins come free once the geometry is right.
+the margins come free once the geometry is right. (5) That adaptation is visible in
+training: the sign pattern's per-epoch churn collapses 200× within 30 epochs while
+accuracy is still at 21% — the gate settles first, margins grow on it — and in the
+finished model, gate stability and decision margin sit at the same noise scale
+(within 3×), where my construction's accuracy dies 316× before its gate moves. One
+figure with everything on it: `results/frontier.png`, the capacity-robustness plane.
 
 **Your appendix-B outlier.** MLP+Norms+NoRes+NoBias+ReLU: rerunning your model with
 each setting flipped one at a time, the deficit is real (0.68 vs 0.86–1.00 for every

@@ -107,7 +107,14 @@ cutting planes, scipy added to the project for it). Freeze a trained model's own
 pattern and readout; the margin and pattern-consistency conditions are linear in the
 embeddings, so the max-min-margin point is a linear program. The LP solution
 reproduces the trained model's robustness — σ90 4.6e-2 vs 4.8e-2 at d=16, 1.6e-2 vs
-1.6e-2 at d=32 — and its radii distribution. To first order, **the trained model is
+1.6e-2 at d=32 — and its radii distribution. The dynamic-stabilization clause also has
+direct evidence now (`probe_patterns.py`, `FINDINGS.md` §12): the sign pattern's
+per-epoch churn collapses 200× within 30 epochs while accuracy is still at 21% — the
+gate is found first and margins are grown on it — and at the end, gate stability and
+decision margin sit at the same noise scale (accuracy fails at 3.2e-2, 1% of gate bits
+flip at 1.0e-2), where the exact solve's accuracy dies 316× before its gate moves.
+Gradient descent co-sizes every slack; the equality codes spend all of theirs in one
+place. To first order, **the trained model is
 the max-margin point of its own active-set geometry**: the implicit-bias story stated
 as a checkable identity rather than an asymptotic theorem. One refinement the LP adds:
 the trained model holds only ~60% of its geometry's optimal *minimum* margin (5.8 vs
