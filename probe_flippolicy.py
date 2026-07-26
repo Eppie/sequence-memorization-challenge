@@ -30,9 +30,20 @@ flips in that window from the churn that surrounds them, in three phases:
             each interpolate's pattern. Does the ceiling arrive gradually in
             t, or at a threshold where the decisive flips switch in?
 
+  direction the constructive test. From one infeasible edge state (epoch
+            180 of a fresh short run), take the SAME flip-budget-matched
+            capped step along seven directions -- the realized 20-epoch
+            training delta, the realized one-epoch Adam step, the raw loss
+            gradient, fit-pressure spread LPs (tau = 0.1, 0.5), the max-min
+            margin LP vertex, and a random control -- and LP-ascend each
+            stepped gate. Same step mechanics everywhere; only the direction
+            differs. Also characterizes the realized direction's decisive
+            flipped bits.
+
     uv run python probe_flippolicy.py --phase dense --workers 12
     uv run python probe_flippolicy.py --phase stats
-    uv run python probe_flippolicy.py --phase interp --pair 160 240
+    uv run python probe_flippolicy.py --phase interp --pair 180 200
+    uv run python probe_flippolicy.py --phase direction
 """
 
 import argparse
@@ -58,7 +69,10 @@ from probe_gatequality import (
 WINDOW_EPOCHS = tuple(range(140, 361, 20))
 NULL_EPOCHS = (500, 700)
 CKPT_PATH = os.path.join(GATES_DIR, "window_checkpoints.npz")
+EDGE_PATH = os.path.join(GATES_DIR, "edge_state.npz")
 OUT_PATH = os.path.join(RESULTS_DIR, "flippolicy.json")
+EDGE_EPOCH = 180
+EDGE_T = 0.125  # the interp step that crossed the edge (FINDINGS.md 17)
 
 
 def merge_out(update: dict) -> None:
@@ -158,13 +172,117 @@ def pair_stats(z, a, b, facts, pat_final):
     }
 
 
+def split_uv(up_np: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """(d, 2V) up matrix -> (V, d) u and v, float64."""
+    d = up_np.shape[0]
+    n_vocab = up_np.shape[1] // 2
+    u = up_np[:, :n_vocab].T.astype(np.float64)
+    v = up_np[:, n_vocab:].T.astype(np.float64)
+    return u, v
+
+
+def join_uv(u: np.ndarray, v: np.ndarray) -> np.ndarray:
+    return np.concatenate([u.T, v.T], axis=1)
+
+
+def step_to_flip_budget(u, v, du, dv, inputs, k):
+    """Scale s along (du, dv) so exactly k pre-activation signs flip --
+    the order-statistic step of the drift experiments, with the budget
+    fixed instead of the fraction. Returns (u', v', s) or None if the
+    direction cannot flip k bits at any scale."""
+    pre = u[inputs[:, 0]] + v[inputs[:, 1]]
+    dpre = du[inputs[:, 0]] + dv[inputs[:, 1]]
+    with np.errstate(divide="ignore", invalid="ignore"):
+        t = -pre / dpre
+    ts = np.sort(t[np.isfinite(t) & (t > 0)])
+    if len(ts) < k:
+        return None
+    s = float(ts[k - 1]) * (1 + 1e-9)
+    return u + s * du, v + s * dv, s
+
+
+def build_directions(z, facts, shape):
+    """All seven direction fields at the epoch-180 edge state, as
+    (du, dv) in (V, d) coordinates."""
+    import torch.nn.functional as F
+
+    from probe_maxmargin import solve_max_margin
+
+    u0, v0 = split_uv(z[f"up_{EDGE_EPOCH}"])
+    down0 = z[f"down_{EDGE_EPOCH}"].astype(np.float64)
+    inputs = facts["inputs"].numpy()
+    targets = facts["targets"].numpy()
+    pattern = (u0[inputs[:, 0]] + v0[inputs[:, 1]]) > 0
+    box = max(6.0, 1.05 * float(np.abs(np.concatenate([u0, v0])).max()))
+
+    dirs = {}
+    for name, e in (("realized20", 200), ("adam1", EDGE_EPOCH + 1)):
+        ue, ve = split_uv(z[f"up_{e}"])
+        dirs[name] = (ue - u0, ve - v0)
+
+    up_t = torch.from_numpy(z[f"up_{EDGE_EPOCH}"]).float().requires_grad_(True)
+    down_t = torch.from_numpy(z[f"down_{EDGE_EPOCH}"]).float()
+    logits = hidden_activations(up_t, facts["inputs"]) @ down_t.T
+    F.cross_entropy(logits, facts["targets"]).backward()
+    gu, gv = split_uv(up_t.grad.numpy())
+    dirs["gradient"] = (-gu, -gv)
+
+    h = pattern * (u0[inputs[:, 0]] + v0[inputs[:, 1]])
+    hint = h @ down0.T
+    hint[np.arange(len(targets)), targets] = -np.inf
+    wrong_sets = [list(row) for row in np.argsort(-hint, axis=1)[:, :12]]
+    for name, tau in (("fitlp_tau0.1", 0.1), ("fitlp_tau0.5", 0.5),
+                      ("minmax", None)):
+        u_s, v_s, val, info = solve_max_margin(
+            pattern, inputs, targets, down0, shape.input_vocab_size, box,
+            wrong_sets=wrong_sets, pattern_rows=False, spread_tau=tau,
+        )
+        if u_s is None:
+            print(f"  [direction] {name} LP failed: {info.get('message')}",
+                  flush=True)
+            continue
+        dirs[name] = (u_s - u0, v_s - v0)
+        print(f"  [direction] {name}: objective {val:.3f} "
+              f"[{info['seconds']}s]", flush=True)
+
+    rng = np.random.default_rng(0)
+    dirs["random"] = (rng.standard_normal(u0.shape),
+                      rng.standard_normal(v0.shape))
+    return u0, v0, down0, pattern, dirs
+
+
+def decisive_bits_report(flipped, pre, inputs, wrong):
+    """Relational profile of a flipped-bit set."""
+    f_idx, j_idx = np.nonzero(flipped)
+    n_bits = len(f_idx)
+    return {
+        "n_bits": n_bits,
+        "n_facts_touched": int(len(np.unique(f_idx))),
+        "wrong_fact_share": float(wrong[f_idx].mean()),
+        "wrong_fact_base": float(wrong.mean()),
+        "median_abspre": float(np.median(np.abs(pre[flipped]))),
+        "off_to_on_frac": float((pre[flipped] < 0).mean()),
+        "distinct_first_token_cells": int(
+            len(set(zip(inputs[f_idx, 0].tolist(), j_idx.tolist())))),
+        "distinct_second_token_cells": int(
+            len(set(zip(inputs[f_idx, 1].tolist(), j_idx.tolist())))),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--phase", choices=("dense", "stats", "interp"),
+    parser.add_argument("--phase",
+                        choices=("dense", "stats", "interp", "direction"),
                         default="dense")
     parser.add_argument("--pair", type=int, nargs=2, default=(160, 240))
     parser.add_argument("--ts", type=float, nargs="*",
                         default=(0.25, 0.5, 0.75))
+    parser.add_argument("--edge-t", type=float, default=EDGE_T,
+                        help="calibration point on the realized 180->200 "
+                             "path: the flip budget k is what the realized "
+                             "direction spends by this t. The edge's "
+                             "location varies by realization; pick the "
+                             "smallest t whose interpolate is feasible.")
     parser.add_argument("--workers", type=int, default=12)
     args = parser.parse_args()
 
@@ -231,6 +349,62 @@ def main() -> None:
                          "dist_to_b": float((P_t != P_b).mean())}
             jobs.append((tag, up_t, down_t))
         merge_out({"interp_meta": meta})
+        run_ascents(jobs, args.workers)
+        print(f"\nwrote {OUT_PATH}")
+
+    elif args.phase == "direction":
+        if not os.path.exists(EDGE_PATH):
+            train_curve_checkpoints(
+                shape, facts, epochs=(EDGE_EPOCH, EDGE_EPOCH + 1, 200),
+                n_epochs=200, path=EDGE_PATH,
+            )
+        ze = np.load(EDGE_PATH)
+        u0, v0, down0, pattern0, dirs = build_directions(ze, facts, shape)
+        inputs = facts["inputs"].numpy()
+        pre0 = u0[inputs[:, 0]] + v0[inputs[:, 1]]
+        _, _, _, _, wrong0 = load_ckpt(ze, EDGE_EPOCH, facts)
+
+        # The flip budget: what the realized direction spends at --edge-t.
+        et = args.edge_t
+        du, dv = dirs["realized20"]
+        dpre = du[inputs[:, 0]] + dv[inputs[:, 1]]
+        with np.errstate(divide="ignore", invalid="ignore"):
+            t_cross = -pre0 / dpre
+        k = int((np.isfinite(t_cross) & (t_cross > 0)
+                 & (t_cross <= et)).sum())
+        print(f"  [direction] flip budget k={k} "
+              f"(realized20 at t={et})", flush=True)
+
+        sfx = f"@t{et}"
+        jobs = [(f"base180{sfx}", join_uv(u0, v0), down0)]
+        meta, flips = {}, {}
+        for name, (du, dv) in dirs.items():
+            stepped = step_to_flip_budget(u0, v0, du, dv, inputs, k)
+            if stepped is None:
+                print(f"  [direction] {name}: cannot flip {k} bits", flush=True)
+                continue
+            u_s, v_s, s = stepped
+            pat_s = (u_s[inputs[:, 0]] + v_s[inputs[:, 1]]) > 0
+            flips[name] = pat_s != pattern0
+            h_s = np.maximum(u_s[inputs[:, 0]] + v_s[inputs[:, 1]], 0.0)
+            acc_s = float(((h_s @ down0.T).argmax(1)
+                           == facts["targets"].numpy()).mean())
+            meta[name] = {"scale": s, "n_flips": int(flips[name].sum()),
+                          "stepped_acc": acc_s}
+            jobs.append((name + sfx, join_uv(u_s, v_s), down0))
+            if name == "realized20":
+                # readout-start sensitivity: same embeddings, the ascent
+                # seeded with the t-interpolated readout instead
+                down_i = (1 - et) * down0 + et * ze["down_200"].astype(
+                    np.float64)
+                jobs.append((f"realized20_ro{sfx}", join_uv(u_s, v_s), down_i))
+        if "realized20" in flips:
+            merge_out({"decisive_bits": decisive_bits_report(
+                flips["realized20"], pre0, inputs, wrong0)})
+            for name in meta:
+                meta[name]["overlap_with_realized"] = float(
+                    (flips[name] & flips["realized20"]).sum() / max(k, 1))
+        merge_out({"direction_meta": {f"t{et}": {"k": k, **meta}}})
         run_ascents(jobs, args.workers)
         print(f"\nwrote {OUT_PATH}")
 

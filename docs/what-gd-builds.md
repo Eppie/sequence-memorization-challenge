@@ -188,11 +188,17 @@ point, respectively.
    feasibility edge — while an embedding interpolation along the training
    direction crosses from infeasible to 3× the constructed record within 0.35% of
    bits. Same capped-step mechanics as the failed drifts, opposite outcome: all of
-   gate quality lives in the *direction field* of the embedding dynamics. What
-   would finish this item: characterize that direction (it is the aggregated
-   fitting gradient, not any margin-LP vertex) and build an exact solve that
-   points along it from an infeasible ~90%-fit start; the ~180 decisive bits at
-   the edge are an enumerable object for that study.
+   gate quality lives in the *direction field* of the embedding dynamics. The
+   direction question has now been closed the hard way (`FINDINGS.md` §18): at a
+   matched flip budget with identical step mechanics, *no* single direction
+   crosses the edge — not the raw loss gradient, not Adam's own next step
+   linearly extended, not fit-pressure or margin LP solves, not random — only the
+   integrated 20-epoch training delta does. The crossing direction is not an
+   evaluable field at the start point; it exists only as the integral of ~20
+   re-evaluations of the coupled dynamics. The one constructive corner left is a
+   multi-step exact-solve process at gradient descent's own stride (~0.03% of
+   bits per step, re-solved every step from an infeasible fitting start) — i.e.,
+   simulating the process, which is the thesis stated constructively.
 2. **Codebook targets instead of digit targets.** §1's readout measurement says trained
    labels live on ~12–18 random-ish directions, not on `m` ladders. The digit solver
    generalizes: replace the per-group digit targets with margin *inequality* targets

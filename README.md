@@ -384,7 +384,7 @@ uv run python probe_patterns.py                        # gate churn + pattern/de
 uv run python probe_gatequality.py --phase metrics     # what makes a gate good? (then: predict, drift [--pressure spread], curve)
 uv run python plot_frontier.py                         # results/frontier.png, the whole plane
 uv run python plot_gatecurve.py                        # results/gatecurve.png, when the gate is built
-uv run python probe_flippolicy.py --phase dense        # which flips build it? (then: stats, interp)
+uv run python probe_flippolicy.py --phase dense        # which flips build it? (then: stats, interp, direction)
 ```
 
 ## Layout
@@ -414,7 +414,7 @@ probe_optimizers.py     Adam vs SGD vs L-BFGS capacity ladder (§10)
 probe_badcombo.py       the post's unexplained bad architecture combo (§11)
 probe_patterns.py       gate churn during training, pattern/decision co-sizing (§12)
 probe_gatequality.py    gate-quality metrics, LP ceilings, drift, quality curve (§14-16)
-probe_flippolicy.py     flip statistics + feasibility-edge interpolation (§17)
+probe_flippolicy.py     flip statistics, edge interpolation, direction test (§17-18)
 plot_robustness.py      results/robustness.png from the probe output
 plot_frontier.py        results/frontier.png, the capacity-robustness plane
 plot_gatecurve.py       results/gatecurve.png, gate quality along the training run

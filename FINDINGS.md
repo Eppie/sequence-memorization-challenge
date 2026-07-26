@@ -638,6 +638,62 @@ infeasible ~90%-fit start? The ~180 decisive bits at the edge are a small, expli
 enumerable object for that study. Caveats: one seed family, one d, one load;
 interpolation granularity t = 0.125.
 
+## 18. No single direction crosses the edge — only the integrated path
+
+`probe_flippolicy.py --phase direction`. §17 asked what characterizes the crossing
+direction. The test: from one infeasible edge state (epoch 180 of a fresh
+realization, train acc 0.867), take the *same* order-statistic step — near-ties
+cross first, budget fixed at k flips — along seven directions, and LP-ascend every
+stepped gate. Only the direction differs; the step mechanics, the budget, and the
+ascent are identical.
+
+Calibration first, and it is itself a finding: on this realization the edge along
+the realized 180→200 path lies in t ∈ (0.125, 0.25] — §17's realization crossed by
+t = 0.125. The edge's *location* varies between micro-realizations (its ep200
+ceiling, 1.43e-2, matches the others); the *scale* — a fraction of a percent of
+bits — is the robust object. The budget was therefore set to this realization's
+measured crossing: k = 294 flips (0.58% of bits) at t = 0.25.
+
+| direction (same k = 294, same step rule) | stepped acc | overlap w/ realized flips | ceiling |
+|---|---|---|---|
+| realized 20-epoch training delta | 0.873 | 1.00 | **9.1e-3** (1.13e-2 with t-interpolated readout start) |
+| Adam's own next step (up_181 − up_180, extrapolated 4.6×) | 0.869 | 0.35 | infeasible |
+| raw loss gradient −∇L | 0.869 | 0.31 | infeasible |
+| fit-pressure spread LP, τ = 0.1 | 0.869 | 0.29 | infeasible |
+| fit-pressure spread LP, τ = 0.5 | 0.869 | 0.27 | infeasible |
+| max-min-margin LP vertex | 0.869 | 0.26 | infeasible |
+| random | 0.869 | 0.21 | infeasible |
+| (unstepped epoch-180 base) | 0.867 | — | infeasible |
+
+The headline row is the second: **gradient descent's own next move, linearly
+extended to the same flip budget, does not cross the edge.** Neither does the raw
+gradient, nor exact-solve pressure of either §15 flavor, nor random stirring. Every
+direction leaves training accuracy untouched (near-ties are free, §17) and flips a
+~30%-overlapping set of near-tie bits — but only the *integrated* 20-epoch delta,
+the accumulated result of ~20 re-evaluations of the direction after each step's
+flips, lands feasible. The trajectory curves, and the curvature is load-bearing.
+(The readout start shifts the crossed ceiling ~25% — 9.1e-3 vs 1.13e-2 — but not
+feasibility.)
+
+The decisive flip set itself (k = 169 at t = 0.125, `decisive_bits` in
+`results/flippolicy.json`) is maximally distributed: 169 bits touch 158 distinct
+facts — one near-tie bit per fact, essentially — across ~154 distinct embedding
+cells per side, mildly error-enriched (18% vs a 13% base), median |pre-activation|
+0.002. There is no localized structure to copy; the edge is crossed everywhere at
+once, a little.
+
+This closes the direction question the hard way and states the process thesis at
+its finest granularity yet: **the crossing direction is not an evaluable field at
+the start point — not the gradient, not the optimizer's preconditioned step, not
+any one-shot exact solve. It exists only as the integral of the coupled dynamics.**
+The one constructive corner left untested is the honest one: a multi-step
+exact-solve process at gradient descent's own stride (~0.03% of bits per epoch,
+re-solved every stride from an infeasible fitting start) — that is, simulating the
+process — which is the thesis, stated constructively. Caveats: one realization per
+row (edge-location variance itself measured across two), one d, one load; the
+instantaneous directions are linear extrapolations by construction — which is
+precisely what makes their failure informative.
+
 ## Why this matters for the challenge
 
 The post frames its construction and the trained model as differing in *which* neurons
