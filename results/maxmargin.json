@@ -1,0 +1,107 @@
+{
+  "d": 32,
+  "n_facts": 2080,
+  "trained": {
+    "accuracy": 1.0,
+    "margins": {
+      "median": 7.789402008056641,
+      "min": 5.842174530029297,
+      "logit_rms": 74.74746704101562
+    },
+    "sigma90_weight": 0.016243734976806413,
+    "radii": {
+      "radius_median": 0.15824328362941742,
+      "radius_p10": 0.12129060924053192,
+      "radius_min": 0.10032524913549423,
+      "radius_cv": 0.6510188579559326,
+      "margin_cv": 0.7028253674507141,
+      "n_sample": 256
+    },
+    "rms_up": 3.744488000869751,
+    "rms_down": 5.893904685974121
+  },
+  "reconstruct_lp": {
+    "gamma": 9.40322562098757,
+    "box": 11.287249565124512,
+    "status": 0,
+    "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+    "seconds": 36.1,
+    "n_rows": 91520,
+    "nnz": 984688,
+    "hint": "trained-logits k0=12"
+  },
+  "reconstruct": {
+    "accuracy": 1.0,
+    "margins": {
+      "median": 9.403228759765625,
+      "min": 9.403121948242188,
+      "logit_rms": 100.57493591308594
+    },
+    "sigma90_weight": 0.015689971089267344,
+    "radii": {
+      "radius_median": 0.1908363699913025,
+      "radius_p10": 0.136997252702713,
+      "radius_min": 0.10271091014146805,
+      "radius_cv": 0.8587325811386108,
+      "margin_cv": 0.9029082655906677,
+      "n_sample": 256
+    },
+    "rms_up": 5.209465503692627,
+    "rms_down": 5.859373092651367
+  },
+  "trained-pattern+random-codebook": {
+    "gamma": -7.86194240565146e-11,
+    "seconds": 11.3,
+    "rounds": 1,
+    "status": 0,
+    "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+    "n_rows": 83200,
+    "nnz": 708000,
+    "added_cuts": 0
+  },
+  "random-pattern+trained-readout": {
+    "gamma": -2.78129880971916e-09,
+    "seconds": 20.5,
+    "rounds": 1,
+    "status": 0,
+    "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+    "n_rows": 83200,
+    "nnz": 729200,
+    "added_cuts": 0
+  },
+  "scratch": [
+    {
+      "n_facts": 992,
+      "gamma": -8.695339686775794e-09,
+      "seconds": 6.5,
+      "rounds": 1,
+      "status": 0,
+      "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+      "n_rows": 39680,
+      "nnz": 348496,
+      "added_cuts": 0
+    },
+    {
+      "n_facts": 1584,
+      "gamma": -2.450721280659037e-10,
+      "seconds": 8.9,
+      "rounds": 1,
+      "status": 0,
+      "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+      "n_rows": 63360,
+      "nnz": 554560,
+      "added_cuts": 0
+    },
+    {
+      "n_facts": 2080,
+      "gamma": -2.607272371943654e-10,
+      "seconds": 12.8,
+      "rounds": 1,
+      "status": 0,
+      "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+      "n_rows": 83200,
+      "nnz": 729200,
+      "added_cuts": 0
+    }
+  ]
+}
