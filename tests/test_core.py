@@ -41,8 +41,8 @@ def test_gather_forward_matches_one_hot_matmul():
     assert torch.allclose(hidden_activations(up, facts["inputs"]), torch.relu(x_enc @ up.T))
 
 
-def test_vectorised_up_matrix_matches_loop():
-    """The vectorised construction is the per-neuron reference, batched."""
+def test_vectorized_up_matrix_matches_loop():
+    """The vectorized construction is the per-neuron reference, batched."""
     shape = ModelShape.from_d(16)
     facts = generate_facts(150, shape.input_vocab_size, shape.output_vocab_size)
     conn = make_connection_matrix(D=shape.d_mlp, T=shape.output_vocab_size, S=4, seed=0)
@@ -77,7 +77,7 @@ def test_guarded_neurons_are_silent():
     assert hidden.min() >= 0.0
 
 
-def test_hand_coded_model_memorises_small_fact_sets():
+def test_hand_coded_model_memorizes_small_fact_sets():
     shape = ModelShape.from_d(16)
     facts = generate_facts(60, shape.input_vocab_size, shape.output_vocab_size)
     up, down = hand_coded_weights(shape, facts, HandCodedParams(S=4, top_fraction=0.1), seed=0)

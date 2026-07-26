@@ -99,7 +99,7 @@ noise-tolerant — rather than approaching this one slowly.
 
 ### The prediction worth testing first
 
-**The benchmark has no robustness requirement, so it is maximised by maximally fragile
+**The benchmark has no robustness requirement, so it is maximized by maximally fragile
 codes.** This construction is correct by 0.42 out of a ±500 logit range; a trained model by
 7.77. Predicted: adding Gaussian weight noise should shatter the construction while barely
 moving a trained model at the same load.
@@ -116,14 +116,14 @@ most valuable next experiment, both for the repo and as something to say to the 
    construction's `W_U` is essentially rank-2 (labels ⊗ ones, plus the bias column) and GD
    has no reason to find a low-rank readout. This is the post's `hybrid` with the roles
    reversed, and the best-conditioned version of the problem.
-2. **Remove the scaling escape, then cap the margin** — constrain `‖W_U‖` or normalise the
+2. **Remove the scaling escape, then cap the margin** — constrain `‖W_U‖` or normalize the
    logits, so confidence cannot be bought by scaling and a margin cap becomes meaningful.
    This is the experiment this session could not run, and it directly tests the cross-talk
    story.
 3. **Second-order / Gauss–Newton training** (K-FAC, or full-batch CG at these sizes). If the
    bottleneck really is "solve a linear system by first-order descent", curvature should
    close much of the gap.
-4. **Initialise at the construction and fine-tune with something that will not destroy it** —
+4. **Initialize at the construction and fine-tune with something that will not destroy it** —
    very low `lr`, or a loss with zero gradient on already-correct facts. Separates stability
    from reachability.
 
@@ -153,7 +153,7 @@ returning precisely what it was asked to keep. Four sizes, four decimals. Log in
 
 * `torch.linalg.lu_factor` raises on an exactly singular block, and in float32 a `mu` of
   `1e-8` does not perturb a Gram with entries of order `width` — the ridge silently
-  vanishes. Factorisations are done in float64 for this reason; keep the split.
+  vanishes. Factorizations are done in float64 for this reason; keep the split.
 * The capacity search's ramp assumes monotonicity in `n_facts`, but this construction
   converges *more slowly at low load*. A spurious first-probe failure aborts the search and
   reports nonsense. The `rho` sweep covers it; re-check the low-load end if the sweep is

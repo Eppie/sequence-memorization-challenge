@@ -180,7 +180,7 @@ def test_first_embedding_carries_facts():
     solve collapses, at every load -- so the first embedding is carrying facts,
     not decorating. This is *not* a fair stand-in for `linsolve` at the same
     budget: there the first embedding is a deliberately designed mask, here it
-    is left at its random initialisation. The budget comparison against
+    is left at its random initialization. The budget comparison against
     `linsolve` proper is `test_stores_more_than_linsolve_at_the_same_fact_count`.
     """
     d, n_facts = 32, 3072  # 3 d^2: above linsolve's ceiling, below 4 d^2

@@ -77,13 +77,13 @@ def main() -> None:
         ax.set_title("acc = 1" if threshold == 1.0 else r"acc $\geq$ 0.9")
         ax.grid(True, which="both", alpha=0.2)
 
-    axes[0].set_ylabel("max facts memorised")
+    axes[0].set_ylabel("max facts memorized")
     handles, labels = axes[0].get_legend_handles_labels()
     handles.append(plt.Line2D([], [], color="k", ls="--", alpha=0.65))
     labels.append("published fit (dashed)")
     axes[0].legend(handles, labels, fontsize=9, loc="upper left")
     fig.suptitle(
-        "Sequence memorisation capacity: reproduction (markers + solid) vs "
+        "Sequence memorization capacity: reproduction (markers + solid) vs "
         "Linsefors & Bushnaq (dashed)"
     )
     fig.tight_layout()

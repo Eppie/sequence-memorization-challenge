@@ -48,7 +48,7 @@ from .handcoded import build_down_matrix
 def label_means(hidden: torch.Tensor, targets: torch.Tensor, n_labels: int) -> torch.Tensor:
     """Unit-norm mean hidden vector per label -- (n_labels, d_mlp).
 
-    mu_c points along "what facts labelled c look like". Labels with no facts
+    mu_c points along "what facts labeled c look like". Labels with no facts
     get a zero row.
     """
     totals = torch.zeros(n_labels, hidden.shape[1])
@@ -100,7 +100,7 @@ def ridge_down(
     W = argmin ||H W^T - Y||^2 + lambda ||W||^2, i.e. W^T = (H^T H + lambda I)^-1 H^T Y.
     `alpha` sets lambda relative to the mean eigenvalue of H^T H so one grid of
     alphas works across model sizes. H^T Y is accumulated directly rather than
-    materialising the one-hot Y.
+    materializing the one-hot Y.
     """
     h = hidden.double()
     d_mlp = h.shape[1]

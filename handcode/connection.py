@@ -8,7 +8,7 @@ neuron i is assigned to label l. We want
   * pairwise column overlap <=1 -- no two labels share more than one neuron.
 
 The last is a combinatorial-design constraint, only achievable when
-T <= D(D-1) / (S(S-1)); beyond that we just minimise the number of violations.
+T <= D(D-1) / (S(S-1)); beyond that we just minimize the number of violations.
 
 This is a port of `make_connection_matrix` from the authors' hc2.py: greedy
 column-by-column init, simulated-annealing refinement, then a greedy balance
@@ -94,7 +94,7 @@ def evaluate_connection_matrix(M: np.ndarray) -> dict:
 
 
 def _greedy_init(D: int, T: int, S: int, rng: np.random.Generator) -> np.ndarray:
-    """Pick S rows per column, minimising row sum (balance) and co-occurrence
+    """Pick S rows per column, minimizing row sum (balance) and co-occurrence
     with rows already chosen for this column (overlap)."""
     matrix = np.zeros((D, T), dtype=np.int8)
     row_sums = np.zeros(D, dtype=np.int32)

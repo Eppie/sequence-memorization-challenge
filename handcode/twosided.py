@@ -44,7 +44,7 @@ The solve is a block Gauss-Seidel sweep: with `v` fixed, each first token's
 symmetrically for `v`. Each block is a ridge regression, which the challenge
 rules name explicitly as allowed, and the outer loop is a fixed, small number of
 rounds -- freezing a piecewise-linear system's active set and re-solving is the
-same move `linsolve`'s greedy drop already makes, not a numerical optimiser.
+same move `linsolve`'s greedy drop already makes, not a numerical optimizer.
 
 Two things follow from the ReLU-as-gate choice, both of which matter for the
 post's actual goal of resembling trained models:
@@ -58,7 +58,7 @@ post's actual goal of resembling trained models:
   rounds, which `t0 = 16 d` achieves. Weights come out `O(d)` rather than
   `O(d^2)`, and the decode stays inside float32 at every size tested.
 * **Density is free.** The fraction of active neurons is set by the
-  initialisation and then by the solve, not by a positivity constraint, so it
+  initialization and then by the solve, not by a positivity constraint, so it
   can be put at the ~0.53 that trained models show.
 
 The readout is the same quadratic decode as `linsolve`, assembled at the bottom
@@ -99,7 +99,7 @@ class TwoSidedParams:
     rounds: int = 150  # freeze-the-pattern-and-solve rounds
     sweeps: int = 4  # Gauss-Seidel sweeps per round
     flip_cap: float = 0.02  # largest fraction of the pattern a step may flip
-    # Ablation: hold the first embedding at its random initialisation, so only
+    # Ablation: hold the first embedding at its random initialization, so only
     # `v` carries facts. That is `linsolve`'s parameter budget (`2 d^2`) under
     # this construction's gate, and it isolates how much of the capacity comes
     # from having freed the first embedding rather than from anything else here.
@@ -112,7 +112,7 @@ class TwoSidedParams:
     # with `d`: the decode must place a sum of size `t0 + d ~ 17d` within half
     # a unit, a relative accuracy of `1/34d` (2e-4 at d=128), while a d-term
     # float32 sum costs about `sqrt(d) * 1e-7`. Two orders of margin -- which
-    # the `t0 ~ d^2` parameterisation did not have, and is the second reason to
+    # the `t0 ~ d^2` parameterization did not have, and is the second reason to
     # have dropped it.
     dtype: torch.dtype = torch.float32
 
@@ -174,7 +174,7 @@ def pad_group(keys: torch.Tensor, n_keys: int) -> PadGroup:
 
 
 class TokenBlocks:
-    """Every token's normal equations for one frozen pattern, factorised once.
+    """Every token's normal equations for one frozen pattern, factorized once.
 
     For each key (a first or second token) the rows of the design are the
     frozen activation patterns of that token's live facts, and asking for the
@@ -189,7 +189,7 @@ class TokenBlocks:
 
     The design depends only on the frozen pattern and the live set, both of
     which are constant across a round's sweeps, so the Gram matrices and their
-    factorisations are built once here and reused. That is the whole cost of
+    factorizations are built once here and reused. That is the whole cost of
     the algorithm: forming a Gram is `width * n_value^2` per token against
     `width * n_value` for applying it, so rebuilding it every sweep -- which is
     what a straightforward implementation does -- spends `n_value` times more
@@ -235,11 +235,11 @@ class TokenBlocks:
                 gram = sub @ sub.transpose(1, 2) if use_dual else sub.transpose(1, 2) @ sub
                 # The Gram is formed in the working precision -- its entries are
                 # counts of co-active neurons, so float32 holds them exactly --
-                # but factorised in float64. A token with no live facts, or a
+                # but factorized in float64. A token with no live facts, or a
                 # neuron it never activates, leaves an exactly zero row, and
                 # `mu` is all that keeps the block invertible; at `mu = 1e-8`
                 # against Gram entries of order `width`, adding it in float32 is
-                # a no-op and the factorisation fails outright.
+                # a no-op and the factorization fails outright.
                 gram = gram.double()
                 gram.diagonal(dim1=1, dim2=2).add_(mu)
                 # The design is kept rather than re-gathered per sweep: it is
@@ -269,7 +269,7 @@ class TokenBlocks:
         return out
 
 
-# ── initialisation ────────────────────────────────────────────────────────────
+# ── initialization ────────────────────────────────────────────────────────────
 
 
 def init_embeddings(
@@ -291,7 +291,7 @@ def init_embeddings(
     pins this down.
 
     The overall scale is left to `_rescale`, which is a separate step because
-    the pattern -- the only thing the initialisation is really choosing -- is
+    the pattern -- the only thing the initialization is really choosing -- is
     invariant to it.
     """
     quantile = torch.special.ndtri(torch.tensor(rho, dtype=torch.float64))
@@ -312,7 +312,7 @@ def _rescale(
 
     Scaling both embeddings by the same factor leaves every activation pattern
     untouched and multiplies every decoded sum by it, so this costs nothing and
-    fixes the one thing the initialisation would otherwise get badly wrong: if
+    fixes the one thing the initialization would otherwise get badly wrong: if
     the sums start orders of magnitude away from the targets, the first solve
     has to move every weight by more than its own size, and the sign pattern it
     was solved against is destroyed.
@@ -334,7 +334,7 @@ def _decode_accuracy(
 ) -> torch.Tensor:
     """Fraction of facts the quadratic readout gets right, per candidate shift.
 
-    The readout below is maximised at `c + 1 = round((s - shift) / delta)`
+    The readout below is maximized at `c + 1 = round((s - shift) / delta)`
     clipped to the label range, so the argmax can be evaluated without ever
     forming the logits. `tests/test_twosided.py` checks the two agree.
     """
@@ -523,7 +523,7 @@ def assemble(
         logit_c = (c + 1) (s - shift) / delta  -  (c + 1)^2 / 2
                 = -((c + 1) - (s - shift)/delta)^2 / 2  +  const
 
-    which is maximised at the label whose target `s` is nearest. Both terms are
+    which is maximized at the label whose target `s` is nearest. Both terms are
     linear in the activations, so this is an ordinary unembedding.
 
     `beta` is a pure gauge. It appears as `beta / 2` in the embedding and

@@ -18,7 +18,7 @@ Building the up matrix, per neuron:
 
 Down matrix: -2 from each neuron to the labels it is assigned to, 0 elsewhere.
 
-`build_up_matrix` is the vectorised implementation used everywhere; the
+`build_up_matrix` is the vectorized implementation used everywhere; the
 per-neuron loop it replaces is kept as `build_up_matrix_loop`, which reads like
 the description above and is checked against the fast path in the tests.
 """
@@ -53,7 +53,7 @@ def build_up_matrix(
     """Embedding weights: neuron i is silenced on every fact whose label is
     assigned to i, while firing on as many other inputs as possible.
 
-    Vectorised over neurons. `generator` breaks ties between equally frequent
+    Vectorized over neurons. `generator` breaks ties between equally frequent
     tokens at random (as the authors' code does by shuffling before ranking);
     pass None for deterministic lowest-token-id-first tie-breaking.
     """
@@ -157,7 +157,7 @@ def build_down_matrix(conn: np.ndarray) -> torch.Tensor:
 
     logit[l] = -2 * (# firing neurons assigned to l), so logit[l] = 0 exactly
     when none of them fire -- which the up matrix arranges precisely for the
-    facts labelled l. Every other label scores <= -2, so the argmax is l.
+    facts labeled l. Every other label scores <= -2, so the argmax is l.
     """
     return -2.0 * torch.tensor(conn, dtype=torch.float32).T
 

@@ -72,7 +72,7 @@ def test_hebbian_correction_would_carry_no_signal():
 
     On a tied fact, h is already zero on every tied label's neurons, so
     <h, mu_c> loses the term that could distinguish them and the prototype score
-    is the same for all tied labels up to normalisation noise. The residual
+    is the same for all tied labels up to normalization noise. The residual
     spread is not zero, but it is uninformative: the correct label wins such
     ties at chance rate. That is the property worth pinning, since it is the
     reason the correction has to be whitened.

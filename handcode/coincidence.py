@@ -27,7 +27,7 @@ and 0 or -2 otherwise, so
 
 Choosing the rectangles. Neuron i serves a set of labels L_i (the same
 connection-matrix design the authors use). Setting A_i to the first tokens and
-B_i to the second tokens of every fact labelled in L_i makes neuron i fire on
+B_i to the second tokens of every fact labeled in L_i makes neuron i fire on
 *all* of those facts by construction -- no false negatives, a Bloom-filter-style
 code where "all of label l's neurons fired" is evidence for l.
 

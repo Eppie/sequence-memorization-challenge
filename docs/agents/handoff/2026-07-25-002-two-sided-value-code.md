@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-25
 **Repo:** `/Users/eppie/claude_projects/handcode` (now a git repo — `main`)
-**Previous handoff:** `2026-07-25-001-sequence-memorisation-challenge.md`
+**Previous handoff:** `2026-07-25-001-sequence-memorization-challenge.md`
 **Subject:** Implementing that handoff's "concrete proposal", and what the result says about
 the authors' actual question
 
@@ -70,7 +70,7 @@ loop exits.
 | + 2000 Adam epochs from there | 0.834 | 0.737 |
 
 Adam lowered its loss 18% while giving up 17% of the facts. **The construction is not a
-stationary point of the training objective**, so no initialisation or schedule would settle
+stationary point of the training objective**, so no initialization or schedule would settle
 on it. Margins at 100% accuracy: construction median 0.42 (min 0.02), trained model median
 7.77 (min 5.93).
 
@@ -84,7 +84,7 @@ on it. Margins at 100% accuracy: construction median 0.42 (min 0.02), trained mo
 | max abs unembedding weight | 6.3 | 2 | 4.2e4 | **6.4e1** |
 | params carrying facts | `5d²` | — | `2d²` | `4d²` |
 
-**6. Performance.** A `twosided` solve at d=128, 49k facts takes ~8s. Factorising the
+**6. Performance.** A `twosided` solve at d=128, 49k facts takes ~8s. Factorizing the
 per-token normal equations once per round instead of once per sweep, replacing the
 12-point step search with one order statistic, carrying the masked decode forward
 incrementally, and running the bulk arithmetic in float32.
@@ -123,7 +123,7 @@ incrementally, and running the bulk arithmetic in float32.
   n=4096 the `keep=0.92` schedule reaches 0.905 at 400 rounds versus 0.840 at 150), so the
   reported acc≥0.9 numbers at large `d` are budget-limited. Reported at a fixed budget on
   purpose; raising it per point would be tuning the metric.
-* Working precision float32, with the per-token *factorisations* in float64. A ridge of
+* Working precision float32, with the per-token *factorizations* in float64. A ridge of
   `1e-8` is below float32 epsilon against Gram entries of order `width`, so adding it was a
   silent no-op and singular blocks crashed `lu_factor`. This bit once; keep the split.
 
@@ -204,7 +204,7 @@ uv run python probe_reachability.py --d 32
 
 * `torch.linalg.lu_factor` raises on an exactly singular block. In float32 a `mu` of `1e-8`
   does not perturb a Gram whose entries are `O(width)`, so the ridge silently vanishes. The
-  factorisations are done in float64 for this reason.
+  factorizations are done in float64 for this reason.
 * The capacity search's ramp assumes monotonicity in `n_facts`. This construction converges
   *more slowly at low load* (the per-token systems are heavily under-determined and the flip
   cap pins the step), so a spurious failure at the first probe aborts the whole search and

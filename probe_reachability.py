@@ -7,7 +7,7 @@ them. This asks which of the two possible reasons it is:
   * the solution is not a place gradient descent would *stay* -- it is a saddle,
     or a sharp minimum that cross-entropy pushes off; or
   * the solution is perfectly stable, and gradient descent simply never gets
-    near it from a small random initialisation.
+    near it from a small random initialization.
 
 Three measurements, at a fact count above the trained model's own capacity:
 

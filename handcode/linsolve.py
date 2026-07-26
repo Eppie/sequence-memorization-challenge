@@ -54,7 +54,7 @@ Two details make it work:
 
       logit_c = (c+1) * (s - T0) - (c+1)^2 / 2 = -(c - l)^2 / 2 + const
 
-  which is maximised at `c = l`. Both terms are linear in `h`, so this is an
+  which is maximized at `c = l`. Both terms are linear in `h`, so this is an
   ordinary unembedding: `(c+1)` on every value neuron and
   `-(c+1) T0 / 2 - (c+1)^2 / 4` on the bias neuron.
 

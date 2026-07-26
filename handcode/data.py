@@ -1,4 +1,4 @@
-"""Fact generation for the sequence-memorisation toy task.
+"""Fact generation for the sequence-memorization toy task.
 
 Quoted verbatim (modulo formatting) from the "Training data" section of
 Linsefors & Bushnaq, "Challenge: Hand coding weights for efficient sequence
@@ -7,7 +7,7 @@ memorisation" (LessWrong, 2026-07-23).
 A "fact" is a pair of input tokens mapped to one output label. Input pairs are
 drawn uniformly at random from all `input_vocab_size ** 2` possibilities and
 labels are dealt round-robin, so there is no structure to exploit: the model
-can only memorise.
+can only memorize.
 """
 
 import torch

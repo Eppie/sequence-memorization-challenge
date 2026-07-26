@@ -3,11 +3,11 @@
 Reproduces the probes behind `FINDINGS.md` and extends them to the two-sided
 construction. For each model we take the hidden activations on its own fact
 set, coarsen the *magnitudes* while keeping the *pattern*, and retrain a linear
-readout on each variant. A model whose accuracy survives binarisation is using
+readout on each variant. A model whose accuracy survives binarization is using
 a pattern code; one that needs many magnitude levels is using a value code.
 
 Retraining the readout matters: ridge under-reads badly here, because ridge
-optimises L2 while the metric is argmax. Gradient descent is used for these
+optimizes L2 while the metric is argmax. Gradient descent is used for these
 *probes* only -- that is analysis, not a challenge entry, so the no-gradient
 rule does not apply to it.
 
@@ -19,7 +19,7 @@ have: it is a narrow, large-weight solution and the probe's objective does not
 lead to it. That is a failure to re-derive the readout, not an absence of
 information, and any ratio built on it is meaningless. Those two rows are marked
 `n/a` below; their coding scheme is known analytically instead -- the decoded sum
-*is* the label, so they are magnitude codes by construction, and binarising
+*is* the label, so they are magnitude codes by construction, and binarizing
 their activations destroys the label outright.
 
 The columns that *are* valid for every construction are the ones that need no
@@ -57,7 +57,7 @@ def train_keeping_weights(
     """The post's training recipe, but returning the weights.
 
     `model.train` clones its inputs and returns only the accuracy, so the
-    trained weights are discarded -- analysing a trained model needs its own
+    trained weights are discarded -- analyzing a trained model needs its own
     loop. Getting this wrong silently produces a table of random-init results.
     """
     up, down = random_init(shape, seed)
@@ -87,10 +87,10 @@ def retrain_readout(
 
     Adam is started from the closed-form ridge fit rather than from a small
     random init, and the learning rate is scaled to the features. Without this
-    the probe silently measures the *optimiser* instead of the features: a value
+    the probe silently measures the *optimizer* instead of the features: a value
     code needs readout weights of order `1e4`, Adam will not travel that far
     from a `1/sqrt(d)` init, and the probe reports 0.07 for a construction whose
-    own readout scores 1.000. That is an optimisation failure, not an
+    own readout scores 1.000. That is an optimization failure, not an
     information one, and it makes every ratio computed from it meaningless.
     """
     from handcode.readouts import ridge_down
@@ -121,10 +121,10 @@ def retrain_readout(
     return best
 
 
-def quantise(hidden: torch.Tensor, levels: int | None) -> torch.Tensor:
+def quantize(hidden: torch.Tensor, levels: int | None) -> torch.Tensor:
     """Keep the pattern, coarsen the magnitudes to `levels` steps.
 
-    `levels=1` is pure binarisation: every active neuron reports the same
+    `levels=1` is pure binarization: every active neuron reports the same
     number, so all that survives is *which* neurons fired.
     """
     if levels is None:
@@ -230,7 +230,7 @@ def main() -> None:
         }
         for levels in args.levels:
             row[f"probe_{levels}"] = retrain_readout(
-                quantise(hidden, levels), facts["targets"], shape.output_vocab_size
+                quantize(hidden, levels), facts["targets"], shape.output_vocab_size
             )
         # A construction whose readout scores far above what the probe can
         # re-derive has defeated the probe, not revealed anything about its
@@ -260,7 +260,7 @@ def main() -> None:
             "\nn/a: the retrained readout scored far below the construction's own,"
             "\n     so it failed to re-derive a decode that demonstrably exists."
             "\n     These are magnitude codes analytically -- the decoded sum is the"
-            "\n     label -- so binarising destroys it. See the module docstring."
+            "\n     label -- so binarizing destroys it. See the module docstring."
         )
 
     os.makedirs(RESULTS_DIR, exist_ok=True)
