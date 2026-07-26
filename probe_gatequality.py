@@ -473,8 +473,11 @@ def capped_step(u, v, u_star, v_star, inputs, flip_cap):
 
 
 def drift(name, facts, shape, rounds, flip_cap=0.02, pressure="minmax",
-          tau=0.5):
-    """Margin-driven gate drift from a feasible construction's gate."""
+          tau=0.5, checkpoint=None):
+    """Margin-driven gate drift from a feasible construction's gate.
+    checkpoint, if given, is called with the partial entry after every
+    round, so a killed run loses nothing (history and the best-state npz
+    are written as they happen, not at completion)."""
     pattern0, up0, down0 = get_gate(name, shape, facts)
     inputs, targets = facts["inputs"].numpy(), facts["targets"].numpy()
     u = up0[:, : shape.input_vocab_size].T.numpy().astype(np.float64)
@@ -538,9 +541,17 @@ def drift(name, facts, shape, rounds, flip_cap=0.02, pressure="minmax",
         print(f"  [{name}-drift] round {r}: {lp_line} "
               f"step={t:.3f} flips={flips}", flush=True)
         row, acc, s90 = snapshot(r)
+        suffix = ("_drift_best" if pressure == "minmax"
+                  else f"_drift_{pressure}_best")
         if acc == 1.0 and s90 is not None and s90 > best["sigma90"]:
             best = {"sigma90": s90, "u": u.copy(), "v": v.copy(),
                     "W": W.copy(), "round": r}
+            np.savez(os.path.join(GATES_DIR, f"{name}{suffix}.npz"),
+                     u=best["u"], v=best["v"], W=best["W"])
+        if checkpoint is not None:
+            checkpoint({"history": history, "best_round": best["round"],
+                        "best_sigma90": best["sigma90"],
+                        "pressure": pressure, "in_progress": True})
         bad_rounds = bad_rounds + 1 if acc < 0.99 else 0
         if bad_rounds >= 3:
             print(f"  [{name}-drift] accuracy collapsed; stopping", flush=True)
@@ -725,7 +736,8 @@ def main() -> None:
         for name in names:
             print(f"== drift from {name} ({args.pressure})", flush=True)
             entry = drift(name, facts, shape, rounds=args.rounds,
-                          pressure=args.pressure, tau=args.tau)
+                          pressure=args.pressure, tau=args.tau,
+                          checkpoint=lambda e, n=name: merge_out({key: {n: e}}))
             merge_out({key: {name: entry}})
         print(f"\nwrote {OUT_PATH}")
 

@@ -55,6 +55,8 @@ flips in that window from the churn that surrounds them, in three phases:
     uv run python probe_flippolicy.py --phase interp --pair 180 200
     uv run python probe_flippolicy.py --phase direction
     uv run python probe_flippolicy.py --phase stride --rounds 40
+    uv run python probe_flippolicy.py --phase stride --stride-seed scratch \
+        --rounds 100 --snap-every 10       # theory.md problem 6': no GD at all
 """
 
 import argparse
@@ -347,6 +349,7 @@ def decisive_bits_report(flipped, pre, inputs, wrong):
 
 
 def main() -> None:
+    global OUT_PATH
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--phase",
                         choices=("dense", "stats", "interp", "direction",
@@ -358,6 +361,19 @@ def main() -> None:
                              "descent's own per-step gross flip rate")
     parser.add_argument("--tau", type=float, default=0.5)
     parser.add_argument("--snap-every", type=int, default=4)
+    parser.add_argument("--stride-seed", default="edge",
+                        help="edge: the infeasible epoch-180 GD fitting "
+                             "state (FINDINGS 19). scratch: gradient "
+                             "descent's own random init, seed 1000 -- no "
+                             "GD anywhere (theory.md problem 6'). epN "
+                             "(e.g. ep100): the coarse curve run's epoch-N "
+                             "checkpoint -- the GD-prefix sweep.")
+    parser.add_argument("--resume", action="store_true",
+                        help="continue a previous stride run of the same "
+                             "seed from its saved final state")
+    parser.add_argument("--out", default=None,
+                        help="override the results JSON (lets concurrent "
+                             "stride runs avoid write races; merge after)")
     parser.add_argument("--pair", type=int, nargs=2, default=(160, 240))
     parser.add_argument("--ts", type=float, nargs="*",
                         default=(0.25, 0.5, 0.75))
@@ -369,6 +385,8 @@ def main() -> None:
                              "smallest t whose interpolate is feasible.")
     parser.add_argument("--workers", type=int, default=12)
     args = parser.parse_args()
+    if args.out:
+        OUT_PATH = args.out
 
     shape, facts = setup()
     if not os.path.exists(CKPT_PATH):
@@ -495,24 +513,70 @@ def main() -> None:
     elif args.phase == "stride":
         from probe_gatequality import capped_step, lp_spread
 
-        if not os.path.exists(EDGE_PATH):
-            train_curve_checkpoints(
-                shape, facts, epochs=(EDGE_EPOCH, EDGE_EPOCH + 1, 200),
-                n_epochs=200, path=EDGE_PATH,
-            )
-        ze = np.load(EDGE_PATH)
-        u, v = split_uv(ze[f"up_{EDGE_EPOCH}"])
-        W = ze[f"down_{EDGE_EPOCH}"].astype(np.float64)
+        seed_name = args.stride_seed
+        state_path = os.path.join(GATES_DIR, f"stride_{seed_name}_state.npz")
+        r0 = 0
+        u0_seed = None
+        if args.resume and os.path.exists(state_path):
+            zs = np.load(state_path)
+            u, v = split_uv(zs["up"])
+            W = zs["down"].astype(np.float64)
+            u0_seed = split_uv(zs["up0"])
+            r0 = int(zs["round"])
+            print(f"  [stride] resuming {seed_name} from round {r0}",
+                  flush=True)
+        elif seed_name == "scratch":
+            from handcode.model import random_init
+
+            up0, down0 = random_init(shape, 1000)
+            u, v = split_uv(up0.numpy())
+            W = down0.numpy().astype(np.float64)
+        elif seed_name == "digit":
+            # The fully constructive seed: the pedestal-optimized digit
+            # construction -- ridge solves only, no gradient descent
+            # anywhere in its ancestry. With the stride process also
+            # GD-free, this pipeline is GD-free end to end.
+            from probe_gatequality import get_gate
+
+            pattern_d, up_d, down_d = get_gate("digit_m2", shape, facts)
+            u, v = split_uv(up_d.numpy())
+            W = down_d.numpy().astype(np.float64)
+        elif seed_name.startswith("ep") and seed_name != "edge":
+            e = int(seed_name[2:])
+            zc = np.load(CURVE_CKPT_PATH)
+            u, v = split_uv(zc[f"up_{e}"])
+            W = zc[f"down_{e}"].astype(np.float64)
+        else:
+            if not os.path.exists(EDGE_PATH):
+                train_curve_checkpoints(
+                    shape, facts, epochs=(EDGE_EPOCH, EDGE_EPOCH + 1, 200),
+                    n_epochs=200, path=EDGE_PATH,
+                )
+            ze = np.load(EDGE_PATH)
+            u, v = split_uv(ze[f"up_{EDGE_EPOCH}"])
+            W = ze[f"down_{EDGE_EPOCH}"].astype(np.float64)
         inputs = facts["inputs"].numpy()
         targets = facts["targets"].numpy()
-        pattern0 = (u[inputs[:, 0]] + v[inputs[:, 1]]) > 0
+        if u0_seed is None:
+            up0_np = join_uv(u, v)
+            pattern0 = (u[inputs[:, 0]] + v[inputs[:, 1]]) > 0
+        else:
+            up0_np = np.asarray(np.load(state_path)["up0"])
+            uu0, vv0 = u0_seed
+            pattern0 = (uu0[inputs[:, 0]] + vv0[inputs[:, 1]]) > 0
         box_e = max(6.0, 1.05 * float(np.abs(np.concatenate([u, v])).max()))
         box_w = max(6.0, 1.05 * float(np.abs(W).max()))
 
+        key = "stride" if seed_name == "edge" else f"stride_{seed_name}"
+        tagbase = ("stride" if seed_name == "edge"
+                   else f"stride_{seed_name}")
         history = []
-        snaps = {0: (join_uv(u, v), W.copy())}
-        pattern = pattern0.copy()
-        for r in range(1, args.rounds + 1):
+        if r0 and os.path.exists(OUT_PATH):
+            with open(OUT_PATH) as f:
+                history = json.load(f).get(key, {}).get("history", [])
+        snaps = {} if r0 else {0: (join_uv(u, v), W.copy())}
+        pattern = (u[inputs[:, 0]] + v[inputs[:, 1]]) > 0
+        for r in range(r0 + 1, r0 + args.rounds + 1):
             h = pattern * (u[inputs[:, 0]] + v[inputs[:, 1]])
             u_star, v_star, obj, m, info = lp_spread(
                 pattern, inputs, targets, W, shape.input_vocab_size, box_e,
@@ -539,11 +603,16 @@ def main() -> None:
             print(f"  [stride] {r}: mean_m={row['mean_m']:.4f} step={t:.4f} "
                   f"flips={flips} acc={acc:.4f} "
                   f"net_drift={row['net_drift']:.4f}", flush=True)
-            if r % args.snap_every == 0 or r == args.rounds:
+            # Write-as-you-go: history to the JSON every round, resumable
+            # state every snapshot -- a killed run loses at most snap_every
+            # rounds and no data (the write-at-completion trap, retired).
+            merge_out({key: {"cap": args.cap, "tau": args.tau,
+                             "seed": seed_name, "history": history}})
+            if r % args.snap_every == 0 or r == r0 + args.rounds:
                 snaps[r] = (join_uv(u, v), W.copy())
-        merge_out({"stride": {"cap": args.cap, "tau": args.tau,
-                              "history": history}})
-        jobs = [(f"stride_r{r}", up_np, W_np)
+                np.savez(state_path, up=join_uv(u, v), down=W, up0=up0_np,
+                         round=np.array(r))
+        jobs = [(f"{tagbase}_r{r}", up_np, W_np)
                 for r, (up_np, W_np) in sorted(snaps.items())]
         run_ascents(jobs, args.workers)
         print(f"\nwrote {OUT_PATH}")
