@@ -420,6 +420,7 @@ plot_frontier.py        results/frontier.png, the capacity-robustness plane
 plot_gatecurve.py       results/gatecurve.png, gate quality along the training run
 docs/twosided-construction.md   why the two-sided construction works
 docs/what-gd-builds.md          toward the constructive account of trained storage
+docs/theory.md                  formal notes: realizability, free flips, edge geometry
 reference/              the authors' own source, fetched for cross-checking
 reference_post.md       the full post text
 ```

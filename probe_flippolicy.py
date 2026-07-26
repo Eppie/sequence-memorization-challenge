@@ -40,10 +40,21 @@ flips in that window from the churn that surrounds them, in three phases:
             differs. Also characterizes the realized direction's decisive
             flipped bits.
 
+  stride    the process thesis, tested constructively. Iterate the section
+            15 drift machinery unchanged (spread LP -> order-statistic
+            capped step -> re-read pattern -> readout-LP refit, no memory)
+            but seeded from the INFEASIBLE epoch-180 fitting state with the
+            flip cap at gradient descent's own stride (~0.5% of bits per
+            full-batch step) -- i.e., simulate the process with an exact-
+            solve direction oracle at matched granularity. Snapshots are
+            LP-ascended afterwards in parallel: does any round's pattern
+            become storage-feasible, as GD's does within ~20 steps?
+
     uv run python probe_flippolicy.py --phase dense --workers 12
     uv run python probe_flippolicy.py --phase stats
     uv run python probe_flippolicy.py --phase interp --pair 180 200
     uv run python probe_flippolicy.py --phase direction
+    uv run python probe_flippolicy.py --phase stride --rounds 40
 """
 
 import argparse
@@ -272,8 +283,15 @@ def decisive_bits_report(flipped, pre, inputs, wrong):
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--phase",
-                        choices=("dense", "stats", "interp", "direction"),
+                        choices=("dense", "stats", "interp", "direction",
+                                 "stride"),
                         default="dense")
+    parser.add_argument("--rounds", type=int, default=40)
+    parser.add_argument("--cap", type=float, default=0.005,
+                        help="flip cap per stride round; 0.005 is gradient "
+                             "descent's own per-step gross flip rate")
+    parser.add_argument("--tau", type=float, default=0.5)
+    parser.add_argument("--snap-every", type=int, default=4)
     parser.add_argument("--pair", type=int, nargs=2, default=(160, 240))
     parser.add_argument("--ts", type=float, nargs="*",
                         default=(0.25, 0.5, 0.75))
@@ -405,6 +423,62 @@ def main() -> None:
                 meta[name]["overlap_with_realized"] = float(
                     (flips[name] & flips["realized20"]).sum() / max(k, 1))
         merge_out({"direction_meta": {f"t{et}": {"k": k, **meta}}})
+        run_ascents(jobs, args.workers)
+        print(f"\nwrote {OUT_PATH}")
+
+    elif args.phase == "stride":
+        from probe_gatequality import capped_step, lp_spread
+        from probe_geometry_ascent import readout_lp
+
+        if not os.path.exists(EDGE_PATH):
+            train_curve_checkpoints(
+                shape, facts, epochs=(EDGE_EPOCH, EDGE_EPOCH + 1, 200),
+                n_epochs=200, path=EDGE_PATH,
+            )
+        ze = np.load(EDGE_PATH)
+        u, v = split_uv(ze[f"up_{EDGE_EPOCH}"])
+        W = ze[f"down_{EDGE_EPOCH}"].astype(np.float64)
+        inputs = facts["inputs"].numpy()
+        targets = facts["targets"].numpy()
+        pattern0 = (u[inputs[:, 0]] + v[inputs[:, 1]]) > 0
+        box_e = max(6.0, 1.05 * float(np.abs(np.concatenate([u, v])).max()))
+        box_w = max(6.0, 1.05 * float(np.abs(W).max()))
+
+        history = []
+        snaps = {0: (join_uv(u, v), W.copy())}
+        pattern = pattern0.copy()
+        for r in range(1, args.rounds + 1):
+            h = pattern * (u[inputs[:, 0]] + v[inputs[:, 1]])
+            u_star, v_star, obj, m, info = lp_spread(
+                pattern, inputs, targets, W, shape.input_vocab_size, box_e,
+                logits_hint=h @ W.T, tau=args.tau,
+            )
+            if u_star is None:
+                print(f"  [stride] LP failed at round {r}: "
+                      f"{info.get('message')}", flush=True)
+                break
+            u, v, t, flips = capped_step(u, v, u_star, v_star, inputs,
+                                         args.cap)
+            pattern = (u[inputs[:, 0]] + v[inputs[:, 1]]) > 0
+            h = np.maximum(u[inputs[:, 0]] + v[inputs[:, 1]], 0.0)
+            W_new, g_w, _ = readout_lp(h, targets, shape.output_vocab_size,
+                                       box_w)
+            if W_new is not None:
+                W = W_new
+            acc = float(((h @ W.T).argmax(1) == targets).mean())
+            row = {"round": r, "mean_m": obj / len(targets), "step": t,
+                   "flips": flips, "acc": acc,
+                   "net_drift": float((pattern != pattern0).mean())}
+            history.append(row)
+            print(f"  [stride] {r}: mean_m={row['mean_m']:.4f} step={t:.4f} "
+                  f"flips={flips} acc={acc:.4f} "
+                  f"net_drift={row['net_drift']:.4f}", flush=True)
+            if r % args.snap_every == 0 or r == args.rounds:
+                snaps[r] = (join_uv(u, v), W.copy())
+        merge_out({"stride": {"cap": args.cap, "tau": args.tau,
+                              "history": history}})
+        jobs = [(f"stride_r{r}", up_np, W_np)
+                for r, (up_np, W_np) in sorted(snaps.items())]
         run_ascents(jobs, args.workers)
         print(f"\nwrote {OUT_PATH}")
 

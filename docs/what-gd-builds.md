@@ -6,7 +6,10 @@ Status: the negative half of the account is established; the constructive half h
 a measured wall — gate quality is real, decisive, and (per `FINDINGS.md` §§14–15)
 neither statistically characterizable nor reachable by exact-solve co-adaptation under
 either pressure structure. §§15–16 relocate where gradient descent builds it: in a
-narrow window at the end of the fitting phase, not the late consolidation.*
+narrow window at the end of the fitting phase, not the late consolidation.
+`docs/theory.md` gives the formal layer: realizability characterized and counted,
+flips proved free along continuous paths, and the edge's flip geometry identified
+with Hamming distance to the feasible realizable set.*
 
 The challenge asks for an algorithm that stores facts the way a trained model does. The
 capacity benchmark turned out to be answerable without answering that question — the

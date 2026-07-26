@@ -694,6 +694,17 @@ row (edge-location variance itself measured across two), one d, one load; the
 instantaneous directions are linear extrapolations by construction — which is
 precisely what makes their failure informative.
 
+These statements are made exact in `docs/theory.md`: flips are free along *any*
+continuous path (Lemma 3), a straight segment to any feasible realizer crosses in
+exactly Hamming-many flips (Lemma 4) — so crossing directions exist in abundance,
+and this section's content is precisely that no locally computable oracle among the
+natural candidates produces one. By Lemma 4, naming a crossing direction is
+equivalent to naming a feasible realizable pattern near P₀ — the construction
+problem itself. Theorem 2 there also characterizes realizability outright (per
+column: no alternating strict cycle; total case: staircase/Ferrers) with a counting
+corollary — fewer than 2^(−28000) of patterns are realizable at this scale — which
+is why all interventions here move in embedding space, never on bits.
+
 ## Why this matters for the challenge
 
 The post frames its construction and the trained model as differing in *which* neurons
