@@ -1,4 +1,4 @@
-# Hand-coded weights for efficient sequence memorisation
+# Hand-coded weights for efficient sequence memorization
 
 A reproduction of [Linsefors & Bushnaq, *Challenge: Hand coding weights for efficient
 sequence memorisation*](https://www.lesswrong.com/posts/KWtchKwwnJkd4bwCi/challenge-hand-coding-weights-for-efficient-sequence-1)
@@ -20,9 +20,24 @@ Measured directly, the constructions store `~C·d²` facts while the trained mod
 `~C·d^1.73`–`d^1.88` — so this is an exponent difference, not a constant, and the gap
 widens with `d`.
 
+**The honest counterweight: the capacity is bought with fragility the benchmark does not
+score.** At matched load the construction tolerates ~1000× less weight noise than a
+trained model — less than a single Adam step — while the authors' own construction sits in
+the trained model's robustness class (`probe_robustness.py`, FINDINGS.md §5). Fixing the
+readout and retraining shows the remaining capacity gap is the optimizer, not the
+objective: Adam reaches the trained model's full capacity through a readout carrying zero
+fact information, then stalls where converged training stalls, short of the construction
+(FINDINGS.md §7). So the construction settles what the architecture *can hold*; why
+gradient descent holds robustly less is the question the measurements in `FINDINGS.md`
+now put numbers on — and a robustness-qualified metric would be the version of this
+challenge that tracks trained storage. The emerging answer to what gradient descent
+actually builds — and how much of it can be reproduced without gradient descent (about
+two of the three-and-a-half orders of magnitude, so far) — is assembled in
+[docs/what-gd-builds.md](docs/what-gd-builds.md).
+
 ## The task
 
-Memorise `n_facts` structureless facts — a random pair of input tokens maps to a random
+Memorize `n_facts` structureless facts — a random pair of input tokens maps to a random
 label — in the bias-free one-layer ReLU MLP of the post's Figure 4:
 
 ```
@@ -129,7 +144,7 @@ Fitted over d ∈ {16 … 256}, `linsolve` is `3.11·d^2.24/ln d` against traine
 **The exponent exceeds the trained model's** while the prefactor is lower, so the curves
 cross — at d≈60, down from d≈112 before tuning. At d=128 the construction reaches 0.43
 facts per parameter, i.e. **3.0 bits per parameter**, at or slightly above the usual
-empirical ceiling for memorisation in transformer weights.
+empirical ceiling for memorization in transformer weights.
 
 Note that 34816 exceeds the `2d² = 32768` exact-solve bound: the greedy drop buys that by
 spending part of the 10% error budget, which is precisely what it is for.
@@ -210,7 +225,7 @@ with `b ≈ 2.28`, so `twosided`'s `b = 2.3` is not super-quadratic.
 | | trained | their hand-coded | linsolve | **twosided** |
 |---|---|---|---|---|
 | density | 0.53 | 0.82 | 0.08 | **0.44** |
-| binarise activations → | 0.11× accuracy | 1.00× | n/a | n/a |
+| binarize activations → | 0.11× accuracy | 1.00× | n/a | n/a |
 | max abs embedding weight | 6.4 | 1 | 4.7e2 | **5.4e2** |
 | max abs unembedding weight | 6.3 | 2 | 4.2e4 | **6.4e1** |
 | parameters carrying facts | all `5d²` | — | `2d²` | `4d²` |
@@ -220,7 +235,7 @@ Density and unembedding scale both move a long way toward the trained model rela
 readout, and on a value code it scores 0.07–0.10 where the construction's own readout scores
 1.000 on the same activations, so it has failed to re-derive a decode that demonstrably
 exists. For those two the coding scheme is known analytically — the decoded sum *is* the
-label — so they are magnitude codes and binarising destroys the label outright.
+label — so they are magnitude codes and binarizing destroys the label outright.
 
 ## Caveats
 
@@ -250,7 +265,7 @@ label — so they are magnitude codes and binarising destroys the label outright
   stores facts in the low-order bits of large numbers, and eventually runs out of them.
 * **Capacity is a best-of-sweep order statistic**, as it is in the post: the maximum over
   the hyperparameter grid and 3 seeds. That is their protocol, so the comparison is
-  like-for-like, but the absolute numbers are optimistic for every condition alike.
+  like-for-like, but the absolute numbers are optimiztic for every condition alike.
 * **`trained` uses 3 seeds, not their 11.** This costs the baseline ~20% at d=16 (496 vs
   600); from d=32 up the two agree exactly, and the fitted curve matches their published
   one to 0.95–1.02 per point.
@@ -267,7 +282,7 @@ label — so they are magnitude codes and binarising destroys the label outright
 * **`twosided`'s iteration count is the part a referee should push on.** Every weight comes
   from a ridge regression and no gradient of any loss is computed, but it runs 150
   freeze-and-solve rounds with a step-length rule. The argument that this is a construction
-  rather than an optimiser — the search direction is determined, not explored, and what it
+  rather than an optimizer — the search direction is determined, not explored, and what it
   searches for is a self-consistent *active set* — is set out in
   [docs/twosided-construction.md](docs/twosided-construction.md) §9, along with the reasons
   it might not persuade.
@@ -320,7 +335,7 @@ scheme. Worth 1.10–1.75×.
   the *constructed* gate, not two-sidedness.
 * **Projection methods lose to the greedy drop.** Kaczmarz projecting to exact targets
   restores an equality system, which past the DOF limit is inconsistent and cycles. POCS to
-  interval edges fixes that and is still worse, because least squares optimises L2 while the
+  interval edges fixes that and is still worse, because least squares optimizes L2 while the
   metric is L0 — projection perturbs already-correct facts to help violated ones. This is
   *why* the greedy drop is the right tool.
 * **Per-neuron readout gains don't help**; conditioning was not the binding constraint.
@@ -355,6 +370,16 @@ uv run python run_scaling.py --ds 16 32 64 128 --report-only
 uv run python plot.py                                  # results/scaling.png
 uv run python probe_coding.py --d 64                   # density, weight scale, pattern-vs-value
 uv run python probe_reachability.py --d 32             # why gradient descent does not find it
+uv run python probe_robustness.py --d 32               # accuracy under weight/activation noise
+uv run python probe_walkaway.py --d 32                 # which facts Adam gives up, by margin
+uv run python probe_fixed_readout.py --d 32            # train embeddings under the fixed decode
+uv run python plot_robustness.py                       # results/robustness.png
+uv run python probe_structure.py                       # weight-level shape of the trained solution
+uv run python probe_digitcode.py --d 32                # capacity-robustness frontier of digit codes
+uv run python probe_pedestal.py                        # where the digit code's fragility lives
+uv run python probe_maxmargin.py --d 32                # is trained = max-margin of its own geometry?
+uv run python probe_optimizers.py --d 32               # does any optimizer beat converged Adam?
+uv run python probe_badcombo.py                        # the post's unexplained bad architecture
 ```
 
 ## Layout
@@ -369,10 +394,22 @@ handcode/coincidence.py the active-pattern rectangle-detector embedding
 handcode/linsolve.py    the value code (reference implementation)
 handcode/fastsolve.py   batched solver for the value code
 handcode/twosided.py    the two-sided value code -- the ReLU is the gate
+handcode/digitcode.py   the redundant value code -- label digits on neuron groups
 handcode/capacity.py    binary search over n_facts, sweeps, scaling fit
 probe_coding.py         density, weight scale, pattern-vs-magnitude probes
 probe_reachability.py   does gradient descent stay at the construction?
+probe_robustness.py     noise tolerance, load-matched vs trained (FINDINGS.md §5)
+probe_walkaway.py       which facts Adam sacrifices when it walks off (§6)
+probe_fixed_readout.py  Adam under the fixed quadratic decode (§7)
+probe_structure.py      radii, readout rank: the trained solution's shape (§8)
+probe_digitcode.py      the digit-code capacity-robustness frontier (§9)
+probe_pedestal.py       fragility attribution and the t0 sweep (§9)
+probe_maxmargin.py      max-min-margin LP on frozen geometries (what-gd-builds)
+probe_optimizers.py     Adam vs SGD vs L-BFGS capacity ladder (§10)
+probe_badcombo.py       the post's unexplained bad architecture combo (§11)
+plot_robustness.py      results/robustness.png from the probe output
 docs/twosided-construction.md   why the two-sided construction works
+docs/what-gd-builds.md          toward the constructive account of trained storage
 reference/              the authors' own source, fetched for cross-checking
 reference_post.md       the full post text
 ```

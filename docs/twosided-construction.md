@@ -1,6 +1,6 @@
 # Letting the ReLU be the gate
 
-*A construction for [Linsefors & Bushnaq's sequence-memorisation
+*A construction for [Linsefors & Bushnaq's sequence-memorization
 challenge](https://www.lesswrong.com/posts/KWtchKwwnJkd4bwCi/challenge-hand-coding-weights-for-efficient-sequence-1)
 that stores more than the trained model at every size tested, and an account of why.*
 
@@ -215,7 +215,7 @@ do not have a better constant, they have a better *exponent*, so they start behi
 `d` and pull away. It also predicts the gap keeps widening, which is worth stating as a
 falsifiable claim rather than an extrapolation to be trusted.
 
-**The first embedding really is carrying facts.** Freezing it at its random initialisation
+**The first embedding really is carrying facts.** Freezing it at its random initialization
 — halving the free parameters back to `2d²` — collapses accuracy from 1.000 to 0.06 at
 d=32, n=3072, at every load tested. This is checked in the test suite
 (`test_first_embedding_carries_facts`). It is not a fair stand-in for `linsolve` at the same
@@ -231,16 +231,16 @@ This is the post's actual goal, and the more interesting axis. Measured by
 |---|---|---|---|---|
 | facts stored | 6566 | 194 | 5414 | **11520** |
 | density | 0.53 | 0.82 | 0.08 | **0.44** |
-| binarise activations → | 0.11× accuracy | 1.00× | *(n/a)* | *(n/a)* |
+| binarize activations → | 0.11× accuracy | 1.00× | *(n/a)* | *(n/a)* |
 | coding scheme | magnitude, ~5 bits/neuron | pattern | magnitude (analytic) | **magnitude (analytic)** |
 | max abs embedding weight | 6.4 | 1 | 4.7e2 | **5.4e2** |
 | max abs unembedding weight | 6.3 | 2 | 4.2e4 | **6.4e1** |
 | parameters carrying facts | all `5d²` | — | `2d²` | `4d²` |
 
 `FINDINGS.md` establishes the first column: near capacity the trained model is **not** using
-a pattern code — binarising its activations retains 11% of its accuracy, and ~32 magnitude
+a pattern code — binarizing its activations retains 11% of its accuracy, and ~32 magnitude
 levels are needed to keep all of it. The authors' construction is a pure pattern code
-(binarising is free), which is the regime the trained model occupies below ~10% load and
+(binarizing is free), which is the regime the trained model occupies below ~10% load and
 abandons thereafter. That measurement is what motivated a value code in the first place.
 
 The *n/a* entries are a caveat about the instrument, not a result. The probe retrains a
@@ -249,15 +249,38 @@ the construction's own readout scores 1.000 on the identical activations — it 
 re-derive a decode that demonstrably exists, because that decode is a narrow large-weight
 solution the probe's objective does not lead to. No ratio computed from it means anything.
 For these two the answer is analytic anyway: the decoded sum *is* the label, so they are
-magnitude codes by construction and binarising destroys the label outright.
+magnitude codes by construction and binarizing destroys the label outright.
 
 On the axes that *are* directly measurable, this construction lands much closer to a trained
 model than `linsolve` did: density 0.44 against the trained 0.53 (where `linsolve` sits at
 0.08), and an unembedding whose largest weight is 64 rather than 42000. It is still not a
 trained model — the embedding's weights grow like `d` where trained weights stay `O(1)`, and
 the unembedding's `d²` parameters carry no fact information at all, where gradient descent
-uses all `5d²`. That last point is also the obvious place to look for the next factor of
-`1.25×`.
+uses all `5d²`.
+
+There is, however, one measurable axis on which this construction is *nothing* like a
+trained model, and it is the one that settles the resemblance question. Perturb each weight
+matrix with Gaussian noise scaled to its own RMS and ask when accuracy falls below 0.9
+(`probe_robustness.py`; 20 trials per level, every solution at 100% clean accuracy,
+comparisons load-matched):
+
+| d=32 | n | tolerated relative noise (σ90) |
+|---|---|---|
+| their hand-coded, at its capacity | 130 | 2.4e-1 |
+| trained, same n | 130 | 4.6e-1 |
+| trained, at its capacity | 2080 | **2.0e-2** |
+| **twosided, same n** | 2080 | **1.5e-5** |
+| twosided, at its capacity | 3168 | 1.6e-5 |
+
+At matched load the trained model tolerates **~1300× more weight noise**; at d=64 the
+factor is ≥1200× (the construction sits at the floor of the swept range). Perturbing the
+hidden activations instead gives the same ordering. Meanwhile the authors' own silence
+code is *within a factor of ~2* of the trained model's tolerance — their construction is
+in the robustness class gradient descent occupies, and this one is three orders of
+magnitude outside it. The capacity advantage of §6 is bought on exactly this axis: the
+benchmark scores facts stored and does not charge for fragility, and driving interference
+to exactly zero maximizes the first by spending all of the second. §8 makes that
+quantitative.
 
 ## 8. Why doesn't gradient descent find it?
 
@@ -275,9 +298,9 @@ epochs and settles around 0.83:
 | + 2000 Adam epochs from there | 0.834 | **0.737** |
 
 Adam lowered its loss by 18% while giving up 17% of the facts. Nothing is going wrong: it is
-minimising its objective correctly, and **the objective disagrees with the metric**. The
+minimizing its objective correctly, and **the objective disagrees with the metric**. The
 construction is not a stationary point of cross-entropy at all, so no amount of better
-initialisation or longer training would settle on it.
+initialization or longer training would settle on it.
 
 The visible difference is decision margin. At 100% accuracy on their respective fact sets:
 
@@ -288,32 +311,79 @@ The visible difference is decision margin. At 100% accuracy on their respective 
 
 The quadratic decode's gap between adjacent labels is exactly `0.5`, and the construction
 spends all of it — every fact is correct by a hair, against logits spanning ±500.
-Cross-entropy regards that as a poor solution and buys margin with facts.
+Cross-entropy regards that as a poor solution and buys margin with facts. (The trained
+figure depends on when training stops: 7.77 after the full 5000-epoch budget, ~3.3 at the
+first epoch that reaches 100% — the moment the benchmark scores it. The construction's
+0.42 is what it is forever.)
 
-**I could not confirm that this is the *cause* of the capacity gap, and the reason is worth
-recording.** The obvious test is to retrain under an objective that stops caring once a small
-margin is met. That test does not work in this architecture, because the loss is
-scale-invariant: the unembedding is unconstrained, so the network meets any fixed margin
-target by simply scaling itself up, and a margin cap is not actually a cap. Both attempts
-behaved accordingly — a multi-class hinge at margin 0.5 and 1.0 failed to train at all (0.15
-where cross-entropy reaches 1.000), and cross-entropy on `β·logits` for `β` up to 100 left
-capacity unchanged or slightly worse. So the margin gap is a solid *description* of where
-the two solutions sit, and an unproven hypothesis about why.
+Three further measurements turn that description into an account
+(`probe_robustness.py`, `probe_walkaway.py`, `probe_fixed_readout.py`; details in
+`FINDINGS.md` §5–7).
 
-What is established is narrower but still useful to the post: **the hand-coded/trained gap is
-not purely an optimisation-difficulty story.** Part of it is that the training objective does
-not want this solution. That is a different kind of claim from "gradient descent is bad at
-finding it", and it predicts that no improvement in initialisation or schedule will close it.
+**The walk-away is arithmetic, not preference.** In absolute units, the construction
+tolerates weight perturbations of about `1.1e-3` per weight before losing 10% of its facts
+(§7's σ90 times the weight RMS), while one Adam step at the post's learning rate moves
+every weight by ~`1e-2` — **a single optimizer step is ~9× the construction's entire noise
+budget**. The trained solutions sit on the other side of the same line, with 5–20 steps of
+cushion. No solution can be held, let alone found, by an optimizer whose own churn exceeds
+what it can absorb; the construction's extra capacity is purchased in exactly the currency
+an optimizer cannot spend. Consistent with interference arriving globally rather than
+selectively, *which* facts Adam gives up is nearly independent of their starting margin
+(survival is flat across starting-margin deciles, rank correlation 0.05), and the
+survivors are then re-margined as a group, median 0.42 → 1.02.
 
-A second, independent piece of evidence points the same way. The retrained-readout probe in
-§7 hands gradient descent the construction's *own activations* — the hard part solved — and
-asks only for the readout. Starting from a closed-form ridge fit, it reaches 0.07–0.10 where
-the construction's readout scores 1.000 on those identical features. Even the easy half of
-the problem is not something gradient descent recovers.
+**The capacity gap is the optimizer, not the objective.** The margin story could not be
+tested before because the loss is scale-invariant: the unembedding is unconstrained, so
+any margin target is met by scaling up, and a margin cap is not a cap (a hinge at margin
+0.5/1.0 failed to train at all; cross-entropy on `β·logits` for `β` up to 100 changed
+nothing). Fixing the unembedding to the construction's own quadratic decode closes that
+loophole — the readout is pinned, so cross-entropy can no longer buy relative margin at
+all — and hands Adam the construction's exact equations. Trained that way (d=32, 50k
+epochs), Adam reaches **100% at n=2080, the trained model's full capacity, through a
+readout that carries zero fact information** — and then stalls near the free-readout
+ceiling: 0.86 at 2560 after 200k epochs (converged free-readout training reaches ~0.997
+there), and a flat 0.39 at the construction's 3168 that more budget does not move.
+So: the unembedding's `d²` parameters were never storage (all trained capacity fits in
+the embeddings alone), and the objective's taste for margin was never what kept gradient
+descent below `4d²`. What separates 2560 from 3168 is that the construction solves the
+frozen-pattern linear system *exactly* — a Newton step — and first-order descent on the
+same equations does not. Two footnotes worth keeping: under the post's own recipe
+(patience 100) the fixed-decode model reaches 4% — the free readout buys gradient descent
+*trainability*, not capacity — and the solution Adam does find under the fixed decode is
+itself 60× more fragile than its free-readout counterpart (σ90 = 3.3e-4), with the exact
+solve contributing the last factor of ~20 down to the construction's 1.5e-5. Fragility is
+mostly a property of the value code; the zero-slack solve finishes the job.
+
+Put together: gradient descent does not find this solution because it *cannot hold it*
+(one step exceeds the noise budget), does not *need* it (its own capacity fits in the
+embeddings under a fixed decode), and cannot *reach* the last 25% (that requires solving
+an ill-conditioned `4d²`-unknown linear system to a precision first-order methods do not
+attain). None of these is "gradient descent is bad at finding good solutions" — the
+trained model is solving a different, harder problem: storing facts subject to remaining
+stable under its own optimizer's noise. The benchmark does not score that constraint,
+which is the subject of §9.
 
 ## 9. Where this is vulnerable
 
 Stated plainly, because a referee will ask.
+
+**The benchmark does not charge for fragility, and this construction spends all of it.**
+This is the deepest objection, and after §7's measurements I consider it correct rather
+than merely arguable. The challenge scores facts stored at a clean argmax; nothing in it
+requires the solution to survive any perturbation, and this construction is broken by
+weight noise three orders of magnitude below what any gradient-descent product tolerates
+— below, in fact, a single step of the optimizer that trained the baseline it is compared
+against. The authors deprioritized Dugan-style exact-solve constructions on the intuition
+that they are "very unlike something models trained with gradient descent would or could
+learn"; the robustness axis makes that intuition quantitative, and this construction is on
+the wrong side of it, while their own silence code is on the right side. If the challenge
+is meant to track understanding of *trained* storage, the metric should either report a
+noise-tolerance number alongside capacity (σ90 under relative weight noise is cheap to
+measure), or score capacity under weight noise of about one optimizer step. Under either
+amendment, this construction's headline advantage disappears — which is the honest way to
+say what kind of progress it is: it settles the representational question (what the
+architecture can hold: `~4d²`) while sharpening, not closing, the question the post
+actually asks (what gradient descent builds, and why that is so much smaller).
 
 **The iteration count.** The rules forbid "gradient descent, or any other generic black-box
 optimizer", and permit "closed-form computations, greedy algorithms, and combinatorial
@@ -335,7 +405,7 @@ I would rather flag this than have it found.
 
 **Capacity is a best-of-sweep order statistic**, over 4 initial densities × 3 ridge
 strengths × 3 drop schedules × 3 seeds. That is the post's own protocol, so comparisons are
-like-for-like, but the absolute numbers are optimistic for every condition alike.
+like-for-like, but the absolute numbers are optimiztic for every condition alike.
 
 **Convergence, not counting, binds at the top.** By parameter counting the `keep = 0.92`
 schedule ought to reach 0.92 at `n = 4d²`, clearing the 0.9 threshold and saturating the
