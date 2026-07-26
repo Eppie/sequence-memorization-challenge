@@ -109,12 +109,13 @@ embeddings, so the max-min-margin point is a linear program. The LP solution
 reproduces the trained model's robustness — σ90 4.6e-2 vs 4.8e-2 at d=16, 1.6e-2 vs
 1.6e-2 at d=32 — and its radii distribution. The dynamic-stabilization clause also has
 direct evidence now (`probe_patterns.py`, `FINDINGS.md` §12): the sign pattern's
-per-epoch churn collapses 200× within 30 epochs while accuracy is still at 21% — the
-gate is found first and margins are grown on it — and at the end, gate stability and
-decision margin sit at the same noise scale (accuracy fails at 3.2e-2, 1% of gate bits
-flip at 1.0e-2), where the exact solve's accuracy dies 316× before its gate moves.
-Gradient descent co-sizes every slack; the equality codes spend all of theirs in one
-place. To first order, **the trained model is
+per-epoch churn collapses 200× within 30 epochs while accuracy is still at 21%, yet
+the finished gate differs from its init in 41% of bits — gradient descent rebuilds the
+gate gradually and substantially while never churning fast. At the end, gate stability
+and decision margin sit at the same noise scale (accuracy fails at 3.2e-2, 1% of gate
+bits flip at 1.0e-2), where the exact solve's accuracy dies 316× before its gate
+moves. Gradient descent co-sizes every slack; the equality codes spend all of theirs
+in one place. To first order, **the trained model is
 the max-margin point of its own active-set geometry**: the implicit-bias story stated
 as a checkable identity rather than an asymptotic theorem. One refinement the LP adds:
 the trained model holds only ~60% of its geometry's optimal *minimum* margin (5.8 vs
@@ -137,14 +138,20 @@ point, respectively.
 
 ## 4. What would finish the constructive half
 
-1. **Geometry discovery.** The max-margin reconstruction (§3) settled the margin half:
-   given the trained (pattern, readout), an LP reproduces trained robustness. What it
-   also showed is that no *generic* geometry works — the remaining constructive
-   problem is discovering an adapted gate + codebook pair without gradient descent.
-   Candidates: alternating LP-and-pattern-update (each step exact, but the alternation
-   drifts toward the rules' gray zone, argued in `twosided-construction.md` §9), or a
-   combinatorial co-design of active sets and codewords. This is now the whole
-   ballgame: the margins are free once the geometry is right.
+1. **Gate discovery.** The max-margin reconstruction (§3) settled the margin half, and
+   two construction attempts (`FINDINGS.md` §13) then narrowed the rest by one more
+   level. A ridge-bootstrap pipeline dies immediately (a ridge readout supports zero
+   margin even on the trained gate — co-adaptation cannot be started from an
+   infeasible point), and a two-LP max-margin coordinate ascent that stays feasible
+   raises the digit gate's minimum margin 1000× while improving σ90 only 1.3× — still
+   ~25× short of trained at the same load, on the same machinery that reproduces
+   trained σ90 exactly when given the trained gate. Values, readout, and margins are
+   all an LP away; **the one unconstructed object is the gate** — the sign pattern
+   with whatever property gradient descent builds during its slow 41%-of-bits
+   consolidation and the frozen-pattern ridge solves do not. Characterizing that
+   property (per-token design conditioning? active-set decorrelation across facts
+   sharing a token?) and constructing gates that have it is the entire remaining
+   problem.
 2. **Codebook targets instead of digit targets.** §1's readout measurement says trained
    labels live on ~12–18 random-ish directions, not on `m` ladders. The digit solver
    generalizes: replace the per-group digit targets with margin *inequality* targets

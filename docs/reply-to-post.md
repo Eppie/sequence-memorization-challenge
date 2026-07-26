@@ -66,9 +66,10 @@ a random pattern with a random codebook cannot hold even half of trained capacit
 any positive margin. The capacity lives in the joint adaptation of gate and codebook;
 the margins come free once the geometry is right. (5) That adaptation is visible in
 training: the sign pattern's per-epoch churn collapses 200× within 30 epochs while
-accuracy is still at 21% — the gate settles first, margins grow on it — and in the
-finished model, gate stability and decision margin sit at the same noise scale
-(within 3×), where my construction's accuracy dies 316× before its gate moves. One
+accuracy is still at 21%, yet the finished gate differs from its init in 41% of bits —
+gradient descent rebuilds the gate gradually and substantially while never churning
+fast. In the finished model, gate stability and decision margin sit at the same noise
+scale (within 3×), where my construction's accuracy dies 316× before its gate moves. One
 figure with everything on it: `results/frontier.png`, the capacity-robustness plane.
 
 **Your appendix-B outlier.** MLP+Norms+NoRes+NoBias+ReLU: rerunning your model with

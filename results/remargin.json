@@ -1,0 +1,44 @@
+{
+  "d": 32,
+  "n_facts": 2080,
+  "gate_drift_from_init": 0.41284555196762085,
+  "twosided+ridge": {
+    "history": [
+      {
+        "round": 0,
+        "gamma": null,
+        "note": "LP failed"
+      }
+    ]
+  },
+  "twosided+random": {
+    "history": [
+      {
+        "round": 0,
+        "gamma": -2.006781826840819e-10,
+        "accuracy": 0.032692309468984604,
+        "lp_seconds": 12.1
+      },
+      {
+        "round": 1,
+        "gamma": null,
+        "note": "LP failed"
+      }
+    ]
+  },
+  "trained+ridge": {
+    "history": [
+      {
+        "round": 0,
+        "gamma": -9.182116591256211e-12,
+        "accuracy": 0.02163461595773697,
+        "lp_seconds": 104.1
+      },
+      {
+        "round": 1,
+        "gamma": null,
+        "note": "LP failed"
+      }
+    ]
+  }
+}

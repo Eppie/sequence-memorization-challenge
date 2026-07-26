@@ -351,8 +351,12 @@ no stabilizer pedestal because gradient descent stabilizes the ReLU sign pattern
 
 **Churn.** Training at n=2080 under the post's recipe, the fraction of (fact, neuron)
 pre-activation signs flipping per epoch collapses from 100% (init) through 1.3% by
-epoch 10 to ~0.5% by epoch 30 — while accuracy is still at 21%. The gate is found
-first; the remaining ~1600 epochs grow margins on an almost-settled pattern.
+epoch 10 to ~0.5% by epoch 30 — while accuracy is still at 21%. The per-epoch rate is
+calm early, but it does not mean the gate is final: the finished gate differs from its
+random init in **41% of bits** (`probe_remargin.py`), so ~0.5%/epoch compounds into a
+long, slow consolidation. The right statement is that gradient descent rebuilds the
+gate gradually and substantially while never churning fast — the opposite of the
+frozen-pattern solves, which hold the gate rigid and move everything else.
 
 **Co-sizing.** Under weight noise, compare where accuracy fails (σ90) with where the
 pattern starts moving (1% of sign bits flipped):
@@ -374,6 +378,40 @@ number.
 One picture of the whole session: `results/frontier.png` (`plot_frontier.py`), the
 (capacity, σ90) plane with every construction, the trained frontier, and the
 max-margin LP landing on the trained point.
+
+## 13. Two construction attempts at geometry discovery, and where they narrow to
+
+`probe_remargin.py`, `probe_geometry_ascent.py`. With margins reduced to LPs, the open
+constructive problem is discovering the adapted geometry. Two attempts:
+
+**Ridge bootstrap — fails at the first joint.** Take a ridge-only gate (the twosided
+solve's own sign pattern), fit a ridge readout, alternate with the embeddings-LP. It
+never gets started: a ridge-fit readout supports *no positive margin even on the
+trained gate* (γ* ≈ 0, against 9.4 for the trained gate with its own co-adapted
+readout; ridge on the trained activations decodes only 47%). Coordinate ascent cannot
+bootstrap from an infeasible point — the (gate, readout) pair is co-adapted or it is
+nothing.
+
+**Two-LP max-margin ascent — stays feasible, and hits the real wall.** Start from a
+construction that already decodes at thin margins (its gate + its own readout) and
+alternate two exact solves: max-min-margin over embeddings (readout frozen) and over
+the readout (activations frozen). On the pedestal-optimized digit gate at n=1584 the
+mechanics work — accuracy stays 1.0 and the minimum margin climbs **1000×** (3e-4 →
+0.32) — but σ90 moves only 1.3e-3 → **1.7e-3**, still ~25× short of trained at the
+same load. Margins per unit weight box grow enormously; robustness barely follows.
+Since the same LP machinery on the *trained* gate reproduces trained σ90 exactly (§ in
+`docs/what-gd-builds.md`), the deficit is now located to one object: **the gate**. The
+sign patterns that frozen-pattern ridge solves discover lack some property the trained
+gate has — the property gradient descent builds during its slow 41%-of-bits
+consolidation — and no exact margin ascent on top of a deficient gate can buy it back.
+
+So the constructive program reduces to a single question: *what makes a gate good, and
+can that be constructed?* Everything else — values, readout, margins — is an LP away.
+(Engineering notes for whoever picks this up: the twosided ladder readout is rank-2
+and makes the cutting-plane hints degenerate — thrashing, negative interim margins;
+carry cut sets across rounds instead of rebuilding, and prefer starting readouts with
+spread spectra. The d=64 reconstruct LP is compute-bound at ~550k rows; cutting planes
+on the pattern-consistency rows, not just the margin rows, is the likely fix.)
 
 ## Why this matters for the challenge
 

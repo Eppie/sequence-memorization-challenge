@@ -110,9 +110,19 @@ memory).
   logits (k0=12) converges in one round, 36s. `results/maxmargin.json` holds the
   refined numbers; `probe_maxmargin.py`'s built-in hint is still readout-similarity —
   worth upgrading to accept a logits hint if rerun.
-* Ideas ranked next: exact Gauss-Newton/K-FAC to complete the optimizer story; the
-  quantization-vs-d law (bits/neuron ≈ log d?); their best-S ≈ √d question; LP-based
-  constructions with *adapted* patterns (alternate LP + pattern flips — but see the
-  no-GD rules gray zone, argued in `docs/twosided-construction.md` §9).
-* Nothing committed. Suggested first action next session: review diff, commit in
-  logical chunks (rename first), push only with user approval.
+* **The construction problem is now "gate discovery" and nothing else** (FINDINGS
+  §13, run after this handoff was first written). Ridge-bootstrap coordinate ascent
+  dies (ridge readouts support zero margin even on the trained gate); two-LP
+  max-margin ascent from a feasible start raises the digit gate's min margin 1000×
+  while σ90 moves 1.3e-3 → 1.7e-3 only. Same LP machinery on the trained gate hits
+  trained σ90. So: characterize what makes the trained gate good (it drifts 41% of
+  bits from init, slowly; candidate metrics: per-token design conditioning,
+  active-set decorrelation among facts sharing a token) and construct gates with that
+  property. Engineering notes: carry LP cut sets across ascent rounds (rebuilding
+  them thrashes, especially under rank-2 readouts); the d=64 reconstruct LP is
+  compute-bound at ~550k rows — add cutting planes on pattern-consistency rows too.
+* Ideas ranked next: gate-quality metric + gate construction (above); exact
+  Gauss-Newton/K-FAC to complete the optimizer story; the quantization-vs-d law
+  (bits/neuron ≈ log d?); their best-S ≈ √d question.
+* All committed and pushed through the geometry-ascent results;
+  `docs/reply-to-post.md` awaits user review before posting.
