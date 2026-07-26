@@ -705,6 +705,64 @@ column: no alternating strict cycle; total case: staircase/Ferrers) with a count
 corollary — fewer than 2^(−28000) of patterns are realizable at this scale — which
 is why all interventions here move in embedding space, never on bits.
 
+## 19. The stride process crosses: iteration, not the gradient, is the ingredient
+
+`probe_flippolicy.py --phase stride`. The one door §18 left open: simulate the
+process itself — an exact-solve direction oracle re-solved *every step* at gradient
+descent's own stride (~0.5% of bits per full-batch step), from the infeasible
+epoch-180 fitting state. Two runs, and the first is part of the result:
+
+**Max-min refits are degenerate off the feasible set — observed.** With the §15
+machinery unchanged (spread emb-LP, but max-min readout refit), the process
+destroys itself in eight rounds (train accuracy 0.867 → 0.01): at an infeasible
+state the max-min readout LP's optimum is the do-nothing W (`docs/theory.md` Prop
+1a), the logits zero out, and the next emb-LP is contentless. Fit pressure is
+needed in *both* blocks: the readout refit was replaced by the capped-sum
+(spread) objective — `readout_lp_spread` — and nothing else changed.
+
+**With fit pressure in both blocks, the process crosses and keeps building:**
+
+| round | train acc | net drift | pattern ceiling σ90 |
+|---|---|---|---|
+| 0 (= epoch-180 state) | 0.867 | 0 | infeasible |
+| **4** | 0.949 | 0.87% | **1.45e-2 — crossed** |
+| 20 | 0.971 | 1.78% | 1.69e-2 |
+| 40 | 0.983 | 2.57% | **1.80e-2** |
+
+Four rounds — 0.87% of bits, the §17 edge scale — take the pattern from
+storage-infeasible to a ceiling at gradient descent's own epoch-200 level
+(1.39–1.44e-2), and forty rounds reach **1.80e-2 with monotone improvement
+throughout**: the first exact-solve iteration in this program that consolidates
+instead of churning. The gate it builds is 5.7× the previous constructed record
+(3.18e-3, §15) and within **~2.4×** of the trained full-budget ceiling (4.40e-2).
+Train accuracy climbs the whole way (0.867 → 0.983) — also a first: every previous
+exact-solve iteration degraded the model it touched.
+
+What this overturns, and what it doesn't. §18's strongest reading — the crossing
+information lives in the loss gradient field and nothing coarser — is refuted: a
+fit-pressure LP oracle, re-solved each stride, integrates to a crossing path with
+no gradients anywhere. What stands, sharpened: *one-shot fails, iteration
+succeeds* — the same spread LP whose single budget-matched step failed in §18
+crosses in four re-solved strides. The ingredient is the re-solve loop — direction
+recomputed after each step's flips — not the specific field being integrated. GD
+at matched train accuracy is still ~2× ahead in ceiling (its acc-0.98 gate sits at
+~3.5e-2), so the gradient field remains the better integrand; but the *class* of
+processes that build gate quality just widened from "gradient descent" to
+"any sufficiently fine re-solved fit-pressure dynamics."
+
+Attribution caveats, explicitly: relative to §15's collapsing drift, this run
+changed three things at once — the seed (infeasible fitting state, not a feasible
+constructed gate), the stride (0.5%, not 2%), and the readout refit (spread, not
+max-min). Which are necessary is unmeasured (the natural ablations: stride at 2%;
+stride seeded from the digit gate). And the seed is a *gradient-descent* state:
+epochs 0–180 of training produced it. §16 says those epochs build no gate quality
+— the epoch-180 pattern is still infeasible — but they do build the 87%-fit
+embedding structure the process starts from. **The live constructive question is
+therefore no longer "can exact solves build the gate" — they can, from the right
+start — but "can anything cheaper than gradient descent produce the start":
+whether the stride process runs from a ridge-style 87%-fit state, or from scratch.**
+Caveats as ever: one seed family, one d, one load.
+
 ## Why this matters for the challenge
 
 The post frames its construction and the trained model as differing in *which* neurons

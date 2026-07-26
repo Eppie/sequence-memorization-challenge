@@ -2,14 +2,15 @@
 
 *Toward the constructive account the challenge is really asking for. Everything here is
 measured on the Figure-4 toy model; sections cite the probe that produced each number.
-Status: the negative half of the account is established; the constructive half has hit
-a measured wall — gate quality is real, decisive, and (per `FINDINGS.md` §§14–15)
-neither statistically characterizable nor reachable by exact-solve co-adaptation under
-either pressure structure. §§15–16 relocate where gradient descent builds it: in a
-narrow window at the end of the fitting phase, not the late consolidation.
-`docs/theory.md` gives the formal layer: realizability characterized and counted,
-flips proved free along continuous paths, and the edge's flip geometry identified
-with Hamming distance to the feasible realizable set.*
+Status: the negative half is established — gate quality is real, decisive, not a
+statistic (§14), not one-shot-reachable under any pressure structure or direction
+(§§15, 18) — and the constructive half has turned: gradient descent builds the gate
+in a narrow window at the end of fitting (§16), by trivial free flips (§17), and that
+transition is reproducible by an iterated exact-solve process at matched stride with
+no gradients (§19) — one-shot fails, iteration succeeds. The open question is the
+seed. `docs/theory.md` gives the formal layer: realizability characterized and
+counted, flips proved free, edge geometry = Hamming distance, the stride conjecture
+confirmed.*
 
 The challenge asks for an algorithm that stores facts the way a trained model does. The
 capacity benchmark turned out to be answerable without answering that question — the
@@ -137,13 +138,15 @@ Quantitatively: of the ~1300× robustness gap between the best capacity construc
 and the trained model at matched load, ~100× is now constructively recovered by a
 ridge-only algorithm (the pedestal-optimized digit code: 76% of trained capacity at
 30× less robustness), a further ~2.5× by exact margin ascent plus one flip-capped
-drift step on its gate (σ90 3.18e-3, under spread pressure; `FINDINGS.md` §§14–15),
-and the remaining ~14× is the gate-quality deficit that no exact solve in this family
-crosses — the part of gradient descent's implicit bias that lives in its coupled
-dynamics rather than in its optimum. §15 adds where those dynamics do the work: the
-gate at the *first* 100%-accuracy epoch already ascends to σ90 4.07e-2 against the
-full-budget gate's 4.40e-2, so the quality is built during error-driven fitting, and
-the long margin phase that follows adds only ~8%. Its two known inefficiencies — first-order convergence (`FINDINGS.md` §7)
+drift step on its gate (σ90 3.18e-3, under spread pressure; `FINDINGS.md` §§14–15) —
+and the iterated stride process (§19) then takes a gradient-descent fitting seed
+from infeasible to σ90 1.80e-2 with exact solves alone, leaving **~2.4×** to the
+trained ceiling from that seed and ~14× as the best *seed-free* construction. The
+gate quality itself is built during error-driven fitting, in a narrow window (§16;
+the first-acc=1 gate already ascends to 4.07e-2 of the full-budget 4.40e-2), and
+what the failures and the success jointly isolate as the irreducible ingredient is
+the re-solve loop — direction recomputed after every small step — not the gradient
+field (§§18–19). Its two known inefficiencies — first-order convergence (`FINDINGS.md` §7)
 and spending parameters on margin the metric never scores (§5) — are the price and the
 point, respectively.
 
@@ -188,20 +191,22 @@ point, respectively.
    policy inside that window has now been measured (`FINDINGS.md` §17), and it is
    trivial: gradient descent flips only extreme near-ties (bits 50–500× closer to
    zero than typical), error-agnostically, with no bit-level signature at the
-   feasibility edge — while an embedding interpolation along the training
-   direction crosses from infeasible to 3× the constructed record within 0.35% of
-   bits. Same capped-step mechanics as the failed drifts, opposite outcome: all of
-   gate quality lives in the *direction field* of the embedding dynamics. The
-   direction question has now been closed the hard way (`FINDINGS.md` §18): at a
-   matched flip budget with identical step mechanics, *no* single direction
-   crosses the edge — not the raw loss gradient, not Adam's own next step
-   linearly extended, not fit-pressure or margin LP solves, not random — only the
-   integrated 20-epoch training delta does. The crossing direction is not an
-   evaluable field at the start point; it exists only as the integral of ~20
-   re-evaluations of the coupled dynamics. The one constructive corner left is a
-   multi-step exact-solve process at gradient descent's own stride (~0.03% of
-   bits per step, re-solved every step from an infeasible fitting start) — i.e.,
-   simulating the process, which is the thesis stated constructively.
+   feasibility edge. The direction question closed the hard way (`FINDINGS.md`
+   §18): at a matched flip budget with identical step mechanics, *no* single
+   direction crosses the edge — not the raw loss gradient, not Adam's own next
+   step linearly extended, not fit-pressure or margin LP solves — only the
+   integrated 20-epoch training delta does. And then the process question closed
+   the other way (`FINDINGS.md` §19): the same fit-pressure LP that fails in one
+   shot **crosses in four re-solved strides** at gradient descent's own step
+   size, from the infeasible fitting state, and climbs monotonically to 1.80e-2
+   — 5.7× the one-shot-era constructed record, ~2.4× from the trained ceiling,
+   with no gradients anywhere. One-shot fails, iteration succeeds: the
+   irreducible ingredient is the re-solve loop, not the gradient field. What
+   remains open is the *seed* (`docs/theory.md` problem 6′): the process starts
+   from a gradient-descent 87%-fit state whose gate is worthless but whose
+   embedding geometry may not be — running the stride process from a
+   ridge-style fit seed, or from scratch, decides whether the constructive
+   account closes end to end.
 2. **Codebook targets instead of digit targets.** §1's readout measurement says trained
    labels live on ~12–18 random-ish directions, not on `m` ladders. The digit solver
    generalizes: replace the per-group digit targets with margin *inequality* targets

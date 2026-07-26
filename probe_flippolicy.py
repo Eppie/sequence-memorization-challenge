@@ -183,6 +183,72 @@ def pair_stats(z, a, b, facts, pat_final):
     }
 
 
+def readout_lp_spread(h, targets, n_labels, box, tau, k0=12, max_rounds=4):
+    """Capped-sum margins over the readout, activations frozen -- the
+    fit-pressure analog of probe_geometry_ascent.readout_lp. The max-min
+    readout refit is degenerate off the feasible set (its optimum is the
+    do-nothing W = 0 whenever some fact cannot be fixed; theory.md Prop 1a,
+    observed as a death spiral in the first stride run), so the stride
+    process needs spread pressure in this block too."""
+    from scipy import sparse
+    from scipy.optimize import linprog
+
+    n, d = h.shape
+    emb_cols = n_labels * d
+    nvar = emb_cols + n
+
+    means = np.stack([h[targets == c].mean(0) if (targets == c).any()
+                      else np.zeros(d) for c in range(n_labels)])
+    hint = h @ means.T
+    hint[np.arange(n), targets] = -np.inf
+    wrong_sets = [list(row) for row in np.argsort(-hint, axis=1)[:, :k0]]
+
+    W = m = None
+    for _ in range(max_rounds):
+        rows, cols, data = [], [], []
+        row_count = 0
+        for f in range(n):
+            lab = targets[f]
+            hf = h[f]
+            nz = np.flatnonzero(hf)
+            for c in wrong_sets[f]:
+                r = row_count
+                rows.extend([r] * (2 * len(nz) + 1))
+                cols.extend((lab * d + nz).tolist())
+                data.extend((-hf[nz]).tolist())
+                cols.extend((c * d + nz).tolist())
+                data.extend(hf[nz].tolist())
+                cols.append(emb_cols + f)
+                data.append(1.0)
+                row_count += 1
+        A = sparse.csr_matrix(
+            (np.array(data), (np.array(rows), np.array(cols))),
+            shape=(row_count, nvar),
+        )
+        c_obj = np.zeros(nvar)
+        c_obj[emb_cols:] = -1.0
+        bounds = [(-box, box)] * emb_cols + [(None, tau)] * n
+        res = linprog(c_obj, A_ub=A, b_ub=np.zeros(row_count), bounds=bounds,
+                      method="highs-ipm", options={"time_limit": 300})
+        if res.status != 0:
+            return W, m, {"status": res.status, "message": res.message}
+        W = res.x[:emb_cols].reshape(n_labels, d)
+        m = res.x[emb_cols:]
+        logits = h @ W.T
+        correct = logits[np.arange(n), targets]
+        logits[np.arange(n), targets] = -np.inf
+        gaps = correct[:, None] - logits
+        new = 0
+        for f in np.flatnonzero((gaps < m[:, None] - 1e-7).any(1)):
+            for c in np.flatnonzero(gaps[f] < m[f] - 1e-7):
+                if c != targets[f] and c not in wrong_sets[f]:
+                    wrong_sets[f].append(int(c))
+                    new += 1
+        if new == 0:
+            break
+    return W, m, {"status": 0}
+
+
 def split_uv(up_np: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """(d, 2V) up matrix -> (V, d) u and v, float64."""
     d = up_np.shape[0]
@@ -428,7 +494,6 @@ def main() -> None:
 
     elif args.phase == "stride":
         from probe_gatequality import capped_step, lp_spread
-        from probe_geometry_ascent import readout_lp
 
         if not os.path.exists(EDGE_PATH):
             train_curve_checkpoints(
@@ -461,8 +526,9 @@ def main() -> None:
                                          args.cap)
             pattern = (u[inputs[:, 0]] + v[inputs[:, 1]]) > 0
             h = np.maximum(u[inputs[:, 0]] + v[inputs[:, 1]], 0.0)
-            W_new, g_w, _ = readout_lp(h, targets, shape.output_vocab_size,
-                                       box_w)
+            W_new, _, _ = readout_lp_spread(h, targets,
+                                            shape.output_vocab_size, box_w,
+                                            tau=args.tau)
             if W_new is not None:
                 W = W_new
             acc = float(((h @ W.T).argmax(1) == targets).mean())

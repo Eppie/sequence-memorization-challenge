@@ -169,21 +169,31 @@ proportionally: margins rise, radii — and σ90 — do not. Measured: the two-L
 raises the digit gate's min margin 1000× and σ90 only 1.3× (§13). Margin per unit
 weight, not margin, is the robustness currency.
 
-## 6. The open problem, stated precisely
+## 6. The stride conjecture — now CONFIRMED
 
-**Conjecture 6 (stride conjecture).** Let x₀ be an infeasible fitting-phase state
-(train accuracy ≈ 0.87, ¬STOR(P₀)). Consider the iterated process: at each round,
-solve an exact-solve direction oracle at the *current* state (fit-pressure spread
-LP), step along it with the order-statistic rule capped at gradient descent's own
-per-step gross flip rate (~0.5% of bits), re-read the pattern, refit the readout;
-no memory. The conjecture that would *rescue* a constructive account: within a flip
-budget comparable to gradient descent's crossing budget (~20 steps), some round's
-pattern enters STOR.
+**Conjecture 6 (stride conjecture; confirmed, `FINDINGS.md` §19).** Let x₀ be an
+infeasible fitting-phase state (train accuracy ≈ 0.87, ¬STOR(P₀)). Consider the
+iterated process: at each round, solve an exact-solve direction oracle at the
+*current* state (fit-pressure spread LP in *both* blocks — the max-min readout
+refit is degenerate off STOR by Prop 1(a), and observably fatal), step along it
+with the order-statistic rule capped at gradient descent's own per-step gross flip
+rate (~0.5% of bits), re-read the pattern, refit; no memory. Measured: the
+pattern enters STOR within **four** rounds (0.87% of bits) at a ceiling matching
+gradient descent's own crossing gate, and improves monotonically thereafter
+(1.80e-2 at forty rounds — 5.7× the best one-shot-era construction, ~2.4× from
+the trained ceiling).
 
-Refutation would sharpen the process thesis to its final form: not even simulating
-the strides with exact-solve oracles crosses the edge — the crossing information
-lives in the loss gradient *field along the path*, and in nothing coarser.
-(`probe_flippolicy.py --phase stride` runs exactly this test.)
+The confirmed statement replaces the "gradient field" reading of §18: one-shot
+fails, iteration succeeds, and the ingredient is the re-solve loop, not the
+specific field being integrated. The open problem it leaves is sharper:
+
+**Open problem 6′ (the seed).** The confirmed process starts from a
+gradient-descent fitting state — epochs 0–180 build no gate quality (the seed
+pattern is infeasible) but do build the 87%-fit embedding structure. Does the
+stride process cross from a *constructed* ≈90%-fit seed (ridge/linsolve-style),
+or from scratch? A positive answer closes the constructive account end to end;
+a negative one localizes gradient descent's irreplaceable contribution to the
+fitting-phase embedding geometry rather than to the gate transition.
 
 ## 7. What is proved, what is measured, what is open
 
@@ -193,9 +203,11 @@ continuous paths (Lemma 3), and the identification of flip-budget geometry with
 Hamming distance to the feasible realizable set (Lemma 4) — with Remark 4.1
 reducing "find a crossing direction" to the construction problem itself. Measured
 (FINDINGS): where in training the gate becomes good (§16), the triviality of the
-flip policy (§17), the failure of every one-shot direction (§18). Open: Conjecture
-6, and beneath it the real theorem this program wants — a lower bound showing that
-no oracle of some natural class (functions of the current state and the fact set,
-without path integration) computes a storage-feasible realizer near the fitting
-trajectory. Nothing in the present notes rules such an oracle out; §18 only shows
-the obvious candidates are not it.
+flip policy (§17), the failure of every one-shot direction (§18), and the success
+of the iterated fit-pressure process (§19) — Conjecture 6 confirmed. Open: problem
+6′ (the seed), and beneath it the theorem this program now wants — either an
+efficiency separation between one-shot oracles and re-solved processes (why four
+strides succeed where one budget-matched step cannot), or a construction of the
+87%-fit seed without gradient descent. §18 plus §19 jointly locate the whole
+mystery in the *loop*: direction recomputation after each step's flips is the one
+ingredient every failure lacked and every success has.
