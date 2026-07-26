@@ -413,6 +413,74 @@ carry cut sets across rounds instead of rebuilding, and prefer starting readouts
 spread spectra. The d=64 reconstruct LP is compute-bound at ~550k rows; cutting planes
 on the pattern-consistency rows, not just the margin rows, is the likely fix.)
 
+## 14. Gate quality is not a pattern statistic, and margin pressure cannot build it
+
+`probe_gatequality.py`. Section 13 reduced the constructive program to one question —
+what makes a gate good? This section answers what it is *not*, three ways, on a
+six-gate zoo at one load (d=32, n=1584, where the trained model's own σ90 is 4.5e-2).
+
+**Not an intrinsic statistic (phase `metrics`).** The two candidate metrics from §13 —
+per-token design conditioning and same-token active-set decorrelation — were computed
+for every gate. They fail, decisively: the trained gate is indistinguishable from a
+*density-matched random additive gate* on all of them (same-token correlation 0.323 vs
+0.334, both at the 1/3 a Gaussian calculation predicts for any additive threshold
+gate; median per-token-design smin 0.29 vs 0.26; κ 59 vs 68), and indistinguishable
+from **its own random init** despite having drifted 41% of its bits away from it.
+Worse than unsupported — refuted: the tail statistic `smin_p10` ranks the random and
+init gates *above* the trained gate. The one thing conditioning does detect is
+pedestal degeneracy (twosided: smin 0.06, κ 257; digit m=2 intermediate), which
+orders the two solve gates correctly and nothing else.
+
+**Not readout freedom (phase `predict`).** The two-LP max-margin ascent — embeddings
+and readout both exactly optimized, a test no generic gate had been given (the
+`probe_maxmargin` mixed conditions all froze the readout) — was run on every gate:
+
+| gate | best LP point | σ90 |
+|---|---|---|
+| trained | acc 1.0, min margin 17.3 | **4.40e-2** (its own model: 4.55e-2) |
+| digit m=2 | acc 1.0, min margin 0.99 | 2.85e-3 |
+| twosided | LP fails (ladder-readout degeneracy); construction kept | 1.41e-5 |
+| random additive | **acc 0.03** — no positive margin exists | — |
+| init | **acc 0.03** — no positive margin exists | — |
+
+The random and init gates are not fragile — they are *infeasible*: the fact set
+cannot be stored on them at any positive margin even with both matrices LP-optimal.
+Two patterns with identical family statistics — trained and random — sit at opposite
+extremes of storage capability, so gate quality is relational, not combinatorial:
+what makes a gate good is whether the cone of embeddings realizing its signs also
+contains embeddings whose values decode the facts. Co-adaptation, one level further
+down than §13 put it.
+
+**Not margin-pressure co-adaptation (phase `drift`).** If gates are only ever good by
+co-adaptation with a value scheme, the constructive move is to imitate the mechanism:
+let the pattern drift under *max-margin* pressure (gradient descent's implicit
+objective) instead of the ridge solves' equality pressure. The iteration: solve the
+max-min-margin LP over embeddings with the sign-consistency rows dropped, step toward
+the LP point under twosided's 2% flip cap, re-read the pattern, refit the readout-LP,
+repeat — exact solves everywhere, no gradients. Seeded from the digit gate's feasible
+point, the first step is the best constructed gate to date — σ90 1.27e-3 → **2.96e-3**,
+above the frozen-pattern ceiling (2.85e-3) — and every subsequent round makes it
+worse: σ90 declines monotonically through eight rounds (2.34e-3 → 1.7e-4) while
+accuracy erodes, then collapses outright (0.73, 0.60) at 7.9% cumulative drift, by
+which point even the masked-linear LP margin has decayed to zero — the drifted
+pattern is no longer feasible *as a mask*, let alone as a gate. The flip ledger says
+why: every round spends its full 2% quota but cumulative drift advances ~0.6% —
+the flips churn back and forth rather than consolidate. Max-min margin pressure has
+no memory: it re-targets a distant LP vertex each round, and the order-statistic step
+keeps flipping whichever bits cross first. Gradient descent's consolidation — 0.5%
+churn per epoch compounding to 41% drift with accuracy intact (§12) — moves pattern
+and values together, continuously, under pressure from every fact at once rather
+than the worst one; the exact-solve imitation of it has none of those properties and
+destroys what it touches.
+
+The state of the reduction, then: gate quality cannot be scored by pattern statistics
+(refuted), cannot be substituted by readout freedom (refuted), and cannot be built by
+flip-capped exact-solve margin ascent (refuted — one step helps, iteration collapses).
+What remains is the single mechanism that demonstrably builds it — gradient descent's
+own coupled small-step dynamics — and the residual ~15× robustness gap between the
+best constructed gate (2.96e-3) and the trained gate (4.40e-2) at matched load is now
+the measured price of not having that mechanism in constructive form.
+
 ## Why this matters for the challenge
 
 The post frames its construction and the trained model as differing in *which* neurons

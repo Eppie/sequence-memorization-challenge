@@ -59,6 +59,7 @@ def solve_max_margin(
     n_vocab: int,
     box: float,
     wrong_sets: list | None = None,  # per-fact wrong-class subsets (cutting plane)
+    pattern_rows: bool = True,  # False: masked-linear margins only, signs free
 ) -> tuple[np.ndarray, np.ndarray, float, dict]:
     """Max-min-margin embeddings for a frozen (pattern, readout). Returns
     (u, v, gamma*, info); u and v are (n_vocab, d)."""
@@ -100,15 +101,16 @@ def solve_max_margin(
         row_count += n_rows
 
     # Pattern rows: active -> -(u+v) <= 0, inactive -> +(u+v) <= 0.
-    f_idx, i_idx = np.nonzero(np.ones_like(active))
-    sign = np.where(active[f_idx, i_idx], -1.0, 1.0)
-    r = row_count + np.arange(len(f_idx))
-    cu = inputs[f_idx, 0] * d + i_idx
-    cv = n_vocab * d + inputs[f_idx, 1] * d + i_idx
-    rows.append(np.repeat(r, 2))
-    cols.append(np.stack([cu, cv], axis=1).ravel())
-    data.append(np.repeat(sign, 2))
-    row_count += len(f_idx)
+    if pattern_rows:
+        f_idx, i_idx = np.nonzero(np.ones_like(active))
+        sign = np.where(active[f_idx, i_idx], -1.0, 1.0)
+        r = row_count + np.arange(len(f_idx))
+        cu = inputs[f_idx, 0] * d + i_idx
+        cv = n_vocab * d + inputs[f_idx, 1] * d + i_idx
+        rows.append(np.repeat(r, 2))
+        cols.append(np.stack([cu, cv], axis=1).ravel())
+        data.append(np.repeat(sign, 2))
+        row_count += len(f_idx)
 
     A = sparse.csr_matrix(
         (np.concatenate(data), (np.concatenate(rows), np.concatenate(cols))),

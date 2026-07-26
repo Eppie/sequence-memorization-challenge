@@ -381,6 +381,7 @@ uv run python probe_maxmargin.py --d 32                # is trained = max-margin
 uv run python probe_optimizers.py --d 32               # does any optimizer beat converged Adam?
 uv run python probe_badcombo.py                        # the post's unexplained bad architecture
 uv run python probe_patterns.py                        # gate churn + pattern/decision co-sizing
+uv run python probe_gatequality.py --phase metrics     # what makes a gate good? (then: predict, drift)
 uv run python plot_frontier.py                         # results/frontier.png, the whole plane
 ```
 
@@ -410,6 +411,7 @@ probe_maxmargin.py      max-min-margin LP on frozen geometries (what-gd-builds)
 probe_optimizers.py     Adam vs SGD vs L-BFGS capacity ladder (§10)
 probe_badcombo.py       the post's unexplained bad architecture combo (§11)
 probe_patterns.py       gate churn during training, pattern/decision co-sizing (§12)
+probe_gatequality.py    gate-quality metrics, per-gate LP ceilings, margin drift (§14)
 plot_robustness.py      results/robustness.png from the probe output
 plot_frontier.py        results/frontier.png, the capacity-robustness plane
 docs/twosided-construction.md   why the two-sided construction works

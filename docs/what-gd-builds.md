@@ -2,8 +2,9 @@
 
 *Toward the constructive account the challenge is really asking for. Everything here is
 measured on the Figure-4 toy model; sections cite the probe that produced each number.
-Status: the negative half of the account is established; the constructive half is a
-measured frontier plus a characterization the next construction has to hit.*
+Status: the negative half of the account is established; the constructive half has hit
+a measured wall — gate quality is real, decisive, and (per `FINDINGS.md` §14) neither
+statistically characterizable nor reachable by exact-solve co-adaptation.*
 
 The challenge asks for an algorithm that stores facts the way a trained model does. The
 capacity benchmark turned out to be answerable without answering that question — the
@@ -130,9 +131,11 @@ joint adaptation of gate and codebook that gradient descent performs on the way.
 Quantitatively: of the ~1300× robustness gap between the best capacity construction
 and the trained model at matched load, ~100× is now constructively recovered by a
 ridge-only algorithm (the pedestal-optimized digit code: 76% of trained capacity at
-30× less robustness), and the remaining ~30× is the inequality-packing/margin
-equalization that gradient descent's implicit bias performs and no exact solve in this
-family can. Its two known inefficiencies — first-order convergence (`FINDINGS.md` §7)
+30× less robustness), a further ~2× by exact margin ascent plus one flip-capped drift
+step on its gate (σ90 2.96e-3, `FINDINGS.md` §14), and the remaining ~15× is the
+gate-quality deficit that no exact solve in this family crosses — the part of
+gradient descent's implicit bias that lives in its coupled dynamics rather than in
+its optimum. Its two known inefficiencies — first-order convergence (`FINDINGS.md` §7)
 and spending parameters on margin the metric never scores (§5) — are the price and the
 point, respectively.
 
@@ -143,15 +146,26 @@ point, respectively.
    level. A ridge-bootstrap pipeline dies immediately (a ridge readout supports zero
    margin even on the trained gate — co-adaptation cannot be started from an
    infeasible point), and a two-LP max-margin coordinate ascent that stays feasible
-   raises the digit gate's minimum margin 1000× while improving σ90 only 1.3× — still
-   ~25× short of trained at the same load, on the same machinery that reproduces
+   raises the digit gate's minimum margin 1000× while improving σ90 only ~2× — still
+   ~15× short of trained at the same load, on the same machinery that reproduces
    trained σ90 exactly when given the trained gate. Values, readout, and margins are
-   all an LP away; **the one unconstructed object is the gate** — the sign pattern
-   with whatever property gradient descent builds during its slow 41%-of-bits
-   consolidation and the frozen-pattern ridge solves do not. Characterizing that
-   property (per-token design conditioning? active-set decorrelation across facts
-   sharing a token?) and constructing gates that have it is the entire remaining
-   problem.
+   all an LP away; **the one unconstructed object is the gate**.
+
+   The characterization program has now run (`FINDINGS.md` §14), and its answer is a
+   sharp negative that changes what "construct the gate" can mean. The candidate
+   statistics (per-token design conditioning, same-token active-set decorrelation)
+   do not separate the trained gate from a *random* additive gate — or from the
+   trained run's own init — yet the LP machinery shows those gates cannot store the
+   fact set at all (accuracy 0.03 with embeddings *and* readout exactly optimized),
+   while the trained gate supports full trained robustness. Gate quality is
+   therefore not an intrinsic property of the binary pattern; it is the relational
+   property that the cone of embeddings realizing the pattern's signs contains
+   good value embeddings. And the constructive imitation of gradient descent's
+   mechanism — pattern drift under exact max-margin pressure with twosided's flip
+   cap — buys exactly one step (σ90 1.27e-3 → 2.96e-3, the best constructed gate to
+   date) before iterating destroys the gate entirely. The remaining ~15× is the
+   measured value of gradient descent's coupled small-step dynamics: pattern and
+   values moving together, continuously, under pressure from every fact at once.
 2. **Codebook targets instead of digit targets.** §1's readout measurement says trained
    labels live on ~12–18 random-ish directions, not on `m` ladders. The digit solver
    generalizes: replace the per-group digit targets with margin *inequality* targets
