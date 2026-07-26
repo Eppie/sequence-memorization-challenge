@@ -1,4 +1,4 @@
-# Handoff — hand-coded weights for sequence memorisation
+# Handoff — hand-coded weights for sequence memorization
 
 **Date:** 2026-07-25
 **Repo:** `/Users/eppie/claude_projects/handcode` (not a git repo)
@@ -46,7 +46,7 @@ goal. Near capacity the trained model does **not** use a pattern code:
 | 41% | 0.25 |
 | 82% | 0.11 |
 
-At low load, binarising the activations costs nothing. At capacity, the pattern alone
+At low load, binarizing the activations costs nothing. At capacity, the pattern alone
 retains ~10% and ~32 magnitude levels are needed. The transition is universal in
 load-fraction across d=32/64/128. Density stays at 0.53–0.60 of `d` throughout.
 
@@ -141,7 +141,7 @@ construction, and dropping `T0` removes the precision wall.
   escapes this by removing the positivity constraint, not by beating the bound.
 * **Projection methods lose to the greedy drop.** Kaczmarz to exact targets restores an
   inconsistent equality system and cycles; POCS to interval edges is still worse, because
-  least squares optimises L2 while the metric is L0. This is *why* the greedy drop works.
+  least squares optimizes L2 while the metric is L0. This is *why* the greedy drop works.
 * **A Hebbian/prototype tie-breaker resolves ties at chance** — on a tied fact `h` is
   already zero on every tied label's neurons, so `⟨h, μ_c⟩` collapses to the same value.
   Whitening is the entire difference; Hebbian is ridge's λ→∞ limit.
