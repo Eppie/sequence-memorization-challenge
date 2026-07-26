@@ -1,0 +1,182 @@
+[
+  {
+    "condition": "bad (norms,noB,noRes,ReLU)",
+    "n_facts": 768,
+    "budget": "short",
+    "accuracy": 0.6822916865348816,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.01822916604578495,
+    "mean_density": 0.44140625,
+    "logit_rms": 7.90435791015625
+  },
+  {
+    "condition": "bad (norms,noB,noRes,ReLU)",
+    "n_facts": 768,
+    "budget": "long",
+    "accuracy": 0.7135416865348816,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.12109375,
+    "mean_density": 0.3670247495174408,
+    "logit_rms": 15.5340576171875
+  },
+  {
+    "condition": "bad (norms,noB,noRes,ReLU)",
+    "n_facts": 896,
+    "budget": "short",
+    "accuracy": 0.6651785969734192,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.005580357275903225,
+    "mean_density": 0.4768415093421936,
+    "logit_rms": 9.53681755065918
+  },
+  {
+    "condition": "bad (norms,noB,noRes,ReLU)",
+    "n_facts": 896,
+    "budget": "long",
+    "accuracy": 0.7232142686843872,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.0345982126891613,
+    "mean_density": 0.4314313530921936,
+    "logit_rms": 51.328060150146484
+  },
+  {
+    "condition": "bad (norms,noB,noRes,ReLU)",
+    "n_facts": 1000,
+    "budget": "short",
+    "accuracy": 0.6019999980926514,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.0010000000474974513,
+    "mean_density": 0.4639374911785126,
+    "logit_rms": 8.084310531616211
+  },
+  {
+    "condition": "bad (norms,noB,noRes,ReLU)",
+    "n_facts": 1000,
+    "budget": "long",
+    "accuracy": 0.6570000052452087,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.01899999938905239,
+    "mean_density": 0.43181249499320984,
+    "logit_rms": 19.60478973388672
+  },
+  {
+    "condition": "flip act -> GELU",
+    "n_facts": 768,
+    "budget": "short",
+    "accuracy": 0.89453125,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.00390625,
+    "mean_density": 0.4469400942325592,
+    "logit_rms": 29.55828857421875
+  },
+  {
+    "condition": "flip act -> GELU",
+    "n_facts": 896,
+    "budget": "short",
+    "accuracy": 0.7734375,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.005580357275903225,
+    "mean_density": 0.4811663031578064,
+    "logit_rms": 14.205183982849121
+  },
+  {
+    "condition": "flip act -> GELU",
+    "n_facts": 1000,
+    "budget": "short",
+    "accuracy": 0.6809999942779541,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.0010000000474974513,
+    "mean_density": 0.4620000123977661,
+    "logit_rms": 8.295018196105957
+  },
+  {
+    "condition": "flip bias -> on",
+    "n_facts": 768,
+    "budget": "short",
+    "accuracy": 0.8580729365348816,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.0,
+    "mean_density": 0.461181640625,
+    "logit_rms": 15.187215805053711
+  },
+  {
+    "condition": "flip bias -> on",
+    "n_facts": 896,
+    "budget": "short",
+    "accuracy": 0.7991071343421936,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.0,
+    "mean_density": 0.4444057047367096,
+    "logit_rms": 14.376579284667969
+  },
+  {
+    "condition": "flip bias -> on",
+    "n_facts": 1000,
+    "budget": "short",
+    "accuracy": 0.7120000123977661,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.0,
+    "mean_density": 0.4726875126361847,
+    "logit_rms": 10.794983863830566
+  },
+  {
+    "condition": "flip res -> on",
+    "n_facts": 768,
+    "budget": "short",
+    "accuracy": 1.0,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.0,
+    "mean_density": 0.4838053286075592,
+    "logit_rms": 28.068809509277344
+  },
+  {
+    "condition": "flip res -> on",
+    "n_facts": 896,
+    "budget": "short",
+    "accuracy": 0.9464285969734192,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.0,
+    "mean_density": 0.5016741156578064,
+    "logit_rms": 32.805076599121094
+  },
+  {
+    "condition": "flip res -> on",
+    "n_facts": 1000,
+    "budget": "short",
+    "accuracy": 0.7940000295639038,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.0,
+    "mean_density": 0.4973750114440918,
+    "logit_rms": 18.88395118713379
+  },
+  {
+    "condition": "flip norms -> off",
+    "n_facts": 768,
+    "budget": "short",
+    "accuracy": 0.8997395634651184,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.0,
+    "mean_density": 0.4813639223575592,
+    "logit_rms": 59.640403747558594
+  },
+  {
+    "condition": "flip norms -> off",
+    "n_facts": 896,
+    "budget": "short",
+    "accuracy": 0.6618303656578064,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.0,
+    "mean_density": 0.4940708577632904,
+    "logit_rms": 35.96337127685547
+  },
+  {
+    "condition": "flip norms -> off",
+    "n_facts": 1000,
+    "budget": "short",
+    "accuracy": 0.6069999933242798,
+    "dead_unit_fraction": 0.0,
+    "all_dead_fact_fraction": 0.0,
+    "mean_density": 0.4776875078678131,
+    "logit_rms": 44.956687927246094
+  }
+]
