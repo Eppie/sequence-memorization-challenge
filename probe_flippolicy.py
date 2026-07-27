@@ -254,6 +254,40 @@ def readout_lp_spread(h, targets, n_labels, box, tau, k0=12, max_rounds=4,
     return W, m, {"status": 0}
 
 
+def fw_targets(pattern, inputs, targets, W, u, v, tau, box_e, box_w):
+    """The cheapest possible direction oracle: linearize the capped-sum
+    (spread) objective at the current point and solve the linearization
+    over the weight box exactly -- which is sign-snapping, a matvec. The
+    binding wrong class c* per still-pulling fact gives the subgradient;
+    coordinates it doesn't touch keep their current value. Returns the
+    box-vertex targets for embeddings and readout plus (min gap, mean
+    capped gap) for logging."""
+    n = len(targets)
+    h = pattern * (u[inputs[:, 0]] + v[inputs[:, 1]])
+    logits = h @ W.T
+    correct = logits[np.arange(n), targets]
+    lg = logits.copy()
+    lg[np.arange(n), targets] = -np.inf
+    cstar = lg.argmax(1)
+    gap = correct - lg[np.arange(n), cstar]
+    active = gap < tau
+
+    coef = pattern[active] * (W[targets[active]] - W[cstar[active]])
+    Gu = np.zeros_like(u)
+    Gv = np.zeros_like(v)
+    np.add.at(Gu, inputs[active, 0], coef)
+    np.add.at(Gv, inputs[active, 1], coef)
+    u_star = np.where(Gu != 0, box_e * np.sign(Gu), u)
+    v_star = np.where(Gv != 0, box_e * np.sign(Gv), v)
+
+    Gw = np.zeros_like(W)
+    np.add.at(Gw, targets[active], h[active])
+    np.add.at(Gw, cstar[active], -h[active])
+    W_star = np.where(Gw != 0, box_w * np.sign(Gw), W)
+    return (u_star, v_star, W_star, float(gap.min()),
+            float(np.minimum(gap, tau).mean()))
+
+
 def split_uv(up_np: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """(d, 2V) up matrix -> (V, d) u and v, float64."""
     d = up_np.shape[0]
@@ -383,6 +417,17 @@ def main() -> None:
                              "stride LPs (e.g. 1e-3): the step only uses the "
                              "direction toward the optimum, so a half-"
                              "converged point serves; ~2-4x per solve")
+    parser.add_argument("--oracle", choices=("lp", "fw", "fw-full"),
+                        default="lp",
+                        help="stride direction oracle. lp: the exact spread "
+                             "LPs (FINDINGS 19). fw: emb target = box vertex "
+                             "of the linearized objective (a matvec, no "
+                             "solver), readout refit still exact. fw-full: "
+                             "both blocks first-order -- the cheapest "
+                             "possible oracle, rounds cost milliseconds")
+    parser.add_argument("--fw-tw", type=float, default=0.05,
+                        help="fw-full only: step fraction toward the "
+                             "readout's box-vertex target per round")
     parser.add_argument("--out", default=None,
                         help="override the results JSON (lets concurrent "
                              "stride runs avoid write races; merge after)")
@@ -526,7 +571,9 @@ def main() -> None:
         from probe_gatequality import capped_step, lp_spread
 
         seed_name = args.stride_seed
-        state_path = os.path.join(GATES_DIR, f"stride_{seed_name}_state.npz")
+        run_name = (seed_name if args.oracle == "lp"
+                    else f"{seed_name}_{args.oracle.replace('-', '')}")
+        state_path = os.path.join(GATES_DIR, f"stride_{run_name}_state.npz")
         r0 = 0
         u0_seed = None
         if args.resume and os.path.exists(state_path):
@@ -579,9 +626,9 @@ def main() -> None:
         box_e = max(6.0, 1.05 * float(np.abs(np.concatenate([u, v])).max()))
         box_w = max(6.0, 1.05 * float(np.abs(W).max()))
 
-        key = "stride" if seed_name == "edge" else f"stride_{seed_name}"
-        tagbase = ("stride" if seed_name == "edge"
-                   else f"stride_{seed_name}")
+        key = ("stride" if run_name == "edge" else f"stride_{run_name}")
+        tagbase = ("stride" if run_name == "edge"
+                   else f"stride_{run_name}")
         history = []
         if r0 and os.path.exists(OUT_PATH):
             with open(OUT_PATH) as f:
@@ -591,44 +638,53 @@ def main() -> None:
         ws_emb = ws_ro = None  # cut sets carried across rounds (grow-only)
         for r in range(r0 + 1, r0 + args.rounds + 1):
             h = pattern * (u[inputs[:, 0]] + v[inputs[:, 1]])
-            if ws_emb is None:
-                hint = h @ W.T
-                hint[np.arange(len(targets)), targets] = -np.inf
-                ws_emb = [list(row)
-                          for row in np.argsort(-hint, axis=1)[:, :args.k0]]
             sopts = ({"ipm_optimality_tolerance": args.ipm_tol}
                      if args.ipm_tol else None)
-            u_star, v_star, obj, m, info = lp_spread(
-                pattern, inputs, targets, W, shape.input_vocab_size, box_e,
-                logits_hint=h @ W.T, tau=args.tau, k0=args.k0,
-                wrong_sets=ws_emb, solver_options=sopts,
-            )
-            if u_star is None:
-                print(f"  [stride] LP failed at round {r}: "
-                      f"{info.get('message')}", flush=True)
-                break
+            if args.oracle == "lp":
+                if ws_emb is None:
+                    hint = h @ W.T
+                    hint[np.arange(len(targets)), targets] = -np.inf
+                    ws_emb = [list(row) for row in
+                              np.argsort(-hint, axis=1)[:, :args.k0]]
+                u_star, v_star, obj, m, info = lp_spread(
+                    pattern, inputs, targets, W, shape.input_vocab_size,
+                    box_e, logits_hint=h @ W.T, tau=args.tau, k0=args.k0,
+                    wrong_sets=ws_emb, solver_options=sopts,
+                )
+                if u_star is None:
+                    print(f"  [stride] LP failed at round {r}: "
+                          f"{info.get('message')}", flush=True)
+                    break
+                mean_m = obj / len(targets)
+            else:
+                u_star, v_star, W_star, min_gap, mean_m = fw_targets(
+                    pattern, inputs, targets, W, u, v, args.tau, box_e,
+                    box_w)
             u, v, t, flips = capped_step(u, v, u_star, v_star, inputs,
                                          args.cap)
             pattern = (u[inputs[:, 0]] + v[inputs[:, 1]]) > 0
             h = np.maximum(u[inputs[:, 0]] + v[inputs[:, 1]], 0.0)
-            if ws_ro is None:
-                means = np.stack([h[targets == c].mean(0)
-                                  if (targets == c).any()
-                                  else np.zeros(h.shape[1])
-                                  for c in range(shape.output_vocab_size)])
-                hint = h @ means.T
-                hint[np.arange(len(targets)), targets] = -np.inf
-                ws_ro = [list(row)
-                         for row in np.argsort(-hint, axis=1)[:, :args.k0]]
-            W_new, _, _ = readout_lp_spread(h, targets,
-                                            shape.output_vocab_size, box_w,
-                                            tau=args.tau, k0=args.k0,
-                                            wrong_sets=ws_ro,
-                                            solver_options=sopts)
-            if W_new is not None:
-                W = W_new
+            if args.oracle == "fw-full":
+                W = W + args.fw_tw * (W_star - W)
+            else:
+                if ws_ro is None:
+                    means = np.stack([h[targets == c].mean(0)
+                                      if (targets == c).any()
+                                      else np.zeros(h.shape[1])
+                                      for c in range(shape.output_vocab_size)])
+                    hint = h @ means.T
+                    hint[np.arange(len(targets)), targets] = -np.inf
+                    ws_ro = [list(row) for row in
+                             np.argsort(-hint, axis=1)[:, :args.k0]]
+                W_new, _, _ = readout_lp_spread(
+                    h, targets, shape.output_vocab_size, box_w,
+                    tau=args.tau, k0=args.k0, wrong_sets=ws_ro,
+                    solver_options=sopts,
+                )
+                if W_new is not None:
+                    W = W_new
             acc = float(((h @ W.T).argmax(1) == targets).mean())
-            row = {"round": r, "mean_m": obj / len(targets), "step": t,
+            row = {"round": r, "mean_m": mean_m, "step": t,
                    "flips": flips, "acc": acc,
                    "net_drift": float((pattern != pattern0).mean())}
             history.append(row)
@@ -639,7 +695,8 @@ def main() -> None:
             # state every snapshot -- a killed run loses at most snap_every
             # rounds and no data (the write-at-completion trap, retired).
             merge_out({key: {"cap": args.cap, "tau": args.tau,
-                             "seed": seed_name, "history": history}})
+                             "seed": seed_name, "oracle": args.oracle,
+                             "history": history}})
             if r % args.snap_every == 0 or r == r0 + args.rounds:
                 snaps[r] = (join_uv(u, v), W.copy())
                 np.savez(state_path, up=join_uv(u, v), down=W, up0=up0_np,
