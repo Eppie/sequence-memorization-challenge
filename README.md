@@ -384,7 +384,8 @@ uv run python probe_patterns.py                        # gate churn + pattern/de
 uv run python probe_gatequality.py --phase metrics     # what makes a gate good? (then: predict, drift [--pressure spread], curve)
 uv run python plot_frontier.py                         # results/frontier.png, the whole plane
 uv run python plot_gatecurve.py                        # results/gatecurve.png, when the gate is built
-uv run python probe_flippolicy.py --phase dense        # which flips build it? (then: stats, interp, direction)
+uv run python probe_flippolicy.py --phase dense        # which flips build it? (then: stats, interp, direction, stride, softseed)
+uv run python probe_ordering.py                        # order-structure gate statistics (theory.md 6'')
 ```
 
 ## Layout
@@ -400,6 +401,7 @@ handcode/linsolve.py    the value code (reference implementation)
 handcode/fastsolve.py   batched solver for the value code
 handcode/twosided.py    the two-sided value code -- the ReLU is the gate
 handcode/digitcode.py   the redundant value code -- label digits on neuron groups
+handcode/softseed.py    ridge-built soft seeds for the stride flow (fit + near-ties, no GD)
 handcode/capacity.py    binary search over n_facts, sweeps, scaling fit
 probe_coding.py         density, weight scale, pattern-vs-magnitude probes
 probe_reachability.py   does gradient descent stay at the construction?
@@ -414,7 +416,8 @@ probe_optimizers.py     Adam vs SGD vs L-BFGS capacity ladder (§10)
 probe_badcombo.py       the post's unexplained bad architecture combo (§11)
 probe_patterns.py       gate churn during training, pattern/decision co-sizing (§12)
 probe_gatequality.py    gate-quality metrics, LP ceilings, drift, quality curve (§14-16)
-probe_flippolicy.py     flip stats, edge interp, direction test, stride flows (§17-21)
+probe_flippolicy.py     flip stats, edge interp, direction test, stride flows, soft seeds (§17-22)
+probe_ordering.py       rank-space gate statistics -- the ordering-invariant probe (§23)
 plot_robustness.py      results/robustness.png from the probe output
 plot_frontier.py        results/frontier.png, the capacity-robustness plane
 plot_gatecurve.py       results/gatecurve.png, gate quality along the training run

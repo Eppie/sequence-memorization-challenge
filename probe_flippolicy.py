@@ -50,6 +50,18 @@ flips in that window from the churn that surrounds them, in three phases:
             LP-ascended afterwards in parallel: does any round's pattern
             become storage-feasible, as GD's does within ~20 steps?
 
+  softseed  the missing cell of the seed problem (FINDINGS 20). That section
+            found the flow needs half a fit AND a soft geometry, but its
+            constructed seed (digit) had full fit and stiff geometry -- the
+            confound was never broken. Build ridge-only seeds spanning
+            (fit, softness) -- handcode/softseed.py: heavy step-ridge keeps
+            the geometry near its maximally soft init while fit climbs as
+            far as capped motion carries it -- and report each seed's train
+            accuracy and near-tie profile against the GD-edge and digit
+            references. Seeds are saved as softseed_<tag>.npz; feed one to
+            the flow with --stride-seed soft:<tag>. If any cell bootstraps,
+            the constructive account closes end to end with no GD anywhere.
+
     uv run python probe_flippolicy.py --phase dense --workers 12
     uv run python probe_flippolicy.py --phase stats
     uv run python probe_flippolicy.py --phase interp --pair 180 200
@@ -57,6 +69,9 @@ flips in that window from the churn that surrounds them, in three phases:
     uv run python probe_flippolicy.py --phase stride --rounds 40
     uv run python probe_flippolicy.py --phase stride --stride-seed scratch \
         --rounds 100 --snap-every 10       # theory.md problem 6': no GD at all
+    uv run python probe_flippolicy.py --phase softseed
+    uv run python probe_flippolicy.py --phase stride --stride-seed soft:s0 \
+        --oracle fw-full --rounds 400      # the softness hypothesis, GD-free
 """
 
 import argparse
@@ -390,7 +405,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--phase",
                         choices=("dense", "stats", "interp", "direction",
-                                 "stride"),
+                                 "stride", "softseed"),
                         default="dense")
     parser.add_argument("--rounds", type=int, default=40)
     parser.add_argument("--cap", type=float, default=0.005,
@@ -404,7 +419,9 @@ def main() -> None:
                              "descent's own random init, seed 1000 -- no "
                              "GD anywhere (theory.md problem 6'). epN "
                              "(e.g. ep100): the coarse curve run's epoch-N "
-                             "checkpoint -- the GD-prefix sweep.")
+                             "checkpoint -- the GD-prefix sweep. soft:TAG: "
+                             "a ridge-built soft seed from --phase softseed "
+                             "(softseed_TAG.npz) -- GD-free end to end.")
     parser.add_argument("--resume", action="store_true",
                         help="continue a previous stride run of the same "
                              "seed from its saved final state")
@@ -428,6 +445,36 @@ def main() -> None:
     parser.add_argument("--fw-tw", type=float, default=0.05,
                         help="fw-full only: step fraction toward the "
                              "readout's box-vertex target per round")
+    parser.add_argument("--no-ascend", action="store_true",
+                        help="stride only: skip the LP ascents of the "
+                             "snapshots (cheap smoke runs / tuning; the "
+                             "history and state npz are still written)")
+    parser.add_argument("--soft-mu", type=float, nargs="*",
+                        default=(1e-3, 1e-2, 1e-1, 1.0),
+                        help="softseed sweep: step-ridge values (the "
+                             "fit-vs-softness knob)")
+    parser.add_argument("--soft-lam", type=float, nargs="*",
+                        default=(1e-1,),
+                        help="softseed sweep: readout ridge values")
+    parser.add_argument("--soft-rounds", type=int, default=40)
+    parser.add_argument("--soft-cap", type=float, default=0.02,
+                        help="softseed: per-round flip cap (0.05 reaches the "
+                             "fit plateau ~2x faster than twosided's 0.02)")
+    parser.add_argument("--soft-soften", type=float, default=None,
+                        help="softseed: construct the near-tie reservoir to "
+                             "this q0.5%%/median ratio (GD edge states "
+                             "measure ~1.1e-3; unset leaves the ~6-9e-3 the "
+                             "ridge rounds land at)")
+    parser.add_argument("--soft-wrms", type=float, default=None,
+                        help="softseed: rescale the seed readout to this rms "
+                             "(GD's epoch-180 readout measures 1.28; the raw "
+                             "ridge readout is ~19x smaller, which both lets "
+                             "box-scale vertex steps swamp it and keeps every "
+                             "fact below tau)")
+    parser.add_argument("--soft-acc-stop", type=float, default=None,
+                        help="softseed: stop a build at this train accuracy "
+                             "(targets a fit band instead of a plateau)")
+    parser.add_argument("--soft-init-seed", type=int, default=2000)
     parser.add_argument("--out", default=None,
                         help="override the results JSON (lets concurrent "
                              "stride runs avoid write races; merge after)")
@@ -573,6 +620,7 @@ def main() -> None:
         seed_name = args.stride_seed
         run_name = (seed_name if args.oracle == "lp"
                     else f"{seed_name}_{args.oracle.replace('-', '')}")
+        run_name = run_name.replace(":", "-")
         state_path = os.path.join(GATES_DIR, f"stride_{run_name}_state.npz")
         r0 = 0
         u0_seed = None
@@ -600,6 +648,14 @@ def main() -> None:
             pattern_d, up_d, down_d = get_gate("digit_m2", shape, facts)
             u, v = split_uv(up_d.numpy())
             W = down_d.numpy().astype(np.float64)
+        elif seed_name.startswith("soft"):
+            # A ridge-built soft seed from --phase softseed: with the fw
+            # oracles this pipeline has no gradient descent anywhere.
+            tag = seed_name.split(":", 1)[1] if ":" in seed_name else "s0"
+            zs = np.load(os.path.join(GATES_DIR, f"softseed_{tag}.npz"))
+            u = zs["u"].astype(np.float64)
+            v = zs["v"].astype(np.float64)
+            W = zs["W"].astype(np.float64)
         elif seed_name.startswith("ep") and seed_name != "edge":
             e = int(seed_name[2:])
             zc = np.load(CURVE_CKPT_PATH)
@@ -701,9 +757,82 @@ def main() -> None:
                 snaps[r] = (join_uv(u, v), W.copy())
                 np.savez(state_path, up=join_uv(u, v), down=W, up0=up0_np,
                          round=np.array(r))
-        jobs = [(f"{tagbase}_r{r}", up_np, W_np)
-                for r, (up_np, W_np) in sorted(snaps.items())]
-        run_ascents(jobs, args.workers)
+        if args.no_ascend:
+            print(f"\nwrote {OUT_PATH} (snapshot ascents skipped)")
+        else:
+            jobs = [(f"{tagbase}_r{r}", up_np, W_np)
+                    for r, (up_np, W_np) in sorted(snaps.items())]
+            run_ascents(jobs, args.workers)
+            print(f"\nwrote {OUT_PATH}")
+
+    elif args.phase == "softseed":
+        from handcode.softseed import (
+            SoftSeedParams,
+            softness_report,
+            solve_soft_seed,
+        )
+
+        inputs = facts["inputs"].numpy()
+
+        def soft_line(name, rep, acc=None):
+            acc_s = "" if acc is None else f" acc={acc:.4f}"
+            print(f"  [softseed] {name:14s}{acc_s} q005={rep['q005']:.2e} "
+                  f"median={rep['median']:.3f} ratio={rep['ratio']:.2e} "
+                  f"density={rep['density']:.3f}", flush=True)
+
+        refs = {}
+        if os.path.exists(EDGE_PATH):
+            ze = np.load(EDGE_PATH)
+            u_e, v_e = split_uv(ze[f"up_{EDGE_EPOCH}"])
+            refs[f"ep{EDGE_EPOCH}_gd"] = softness_report(
+                u_e[inputs[:, 0]] + v_e[inputs[:, 1]])
+        digit_path = os.path.join(GATES_DIR, "digit_m2.npz")
+        if os.path.exists(digit_path):
+            zd = np.load(digit_path, allow_pickle=True)
+            if zd["up"].size:
+                u_d, v_d = split_uv(zd["up"].astype(np.float64))
+                refs["digit_m2"] = softness_report(
+                    u_d[inputs[:, 0]] + v_d[inputs[:, 1]])
+        for name, rep in refs.items():
+            soft_line(name, rep)
+
+        merge_out({"softseed_refs": refs})
+        rows = {}
+        for mu in args.soft_mu:
+            for lam in args.soft_lam:
+                # Tags carry the full config, so repeated invocations with
+                # different grids accumulate distinct seeds in the JSON and
+                # the gate cache instead of overwriting s0, s1, ...
+                tag = (f"mu{mu:g}-lam{lam:g}-r{args.soft_rounds}"
+                       f"-c{args.soft_cap:g}")
+                if args.soft_soften is not None:
+                    tag += f"-s{args.soft_soften:g}"
+                if args.soft_wrms is not None:
+                    tag += f"-w{args.soft_wrms:g}"
+                if args.soft_acc_stop is not None:
+                    tag += f"-a{args.soft_acc_stop:g}"
+                params = SoftSeedParams(mu=mu, lam=lam,
+                                        rounds=args.soft_rounds,
+                                        flip_cap=args.soft_cap,
+                                        soften_ratio=args.soft_soften,
+                                        w_rms=args.soft_wrms,
+                                        acc_stop=args.soft_acc_stop)
+                res = solve_soft_seed(shape, facts, params,
+                                      seed=args.soft_init_seed)
+                np.savez(os.path.join(GATES_DIR, f"softseed_{tag}.npz"),
+                         u=res.u, v=res.v, W=res.W)
+                rows[tag] = {"mu": mu, "lam": lam,
+                             "rounds": args.soft_rounds,
+                             "flip_cap": args.soft_cap,
+                             "soften_ratio": args.soft_soften,
+                             "w_rms": args.soft_wrms,
+                             "acc_stop": args.soft_acc_stop,
+                             "init_seed": args.soft_init_seed,
+                             "rounds_run": len(res.history),
+                             "accuracy": res.accuracy,
+                             "softness": res.softness}
+                soft_line(tag, res.softness, acc=res.accuracy)
+                merge_out({"softseed": dict(rows)})
         print(f"\nwrote {OUT_PATH}")
 
 
