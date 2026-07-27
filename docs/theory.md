@@ -195,16 +195,18 @@ GD-built states maintain (0.5% of bits within ~10⁻³ of zero, ~12× denser tha
 the pedestal construction's) is absent.
 
 **Resolution of the seed problem (6′; `FINDINGS.md` §22).** The seed is
-constructible: a ridge-built state at train accuracy 0.63 with its readout
-rescaled to GD's rms bootstraps the fw flow to a ceiling matching the
-GD-seeded runs (2.3–2.4e-2, crossing at §19's own 1.45e-2), with no gradient
-descent anywhere in the ancestry. Two attributions of §20 are thereby revised:
-the property that gated the cheap flows was the readout's τ-saturation regime
-(a 19×-undersized readout leaves every fit fact below the cap, so fit facts
-never stop pulling — §14's churn), not embedding stiffness; and the near-tie
-reservoir is a second-order stabilizer (longer feasible windows under the
-cheapest readout), not the gatekeeper. What gradient descent retains is only
-the ~1.8× ceiling edge of its own full trajectory over the process class.
+constructible: a ridge-built state at train accuracy 0.63 (0.52 also works,
+crossing later) with its readout rescaled to GD's rms bootstraps the fw flow
+past the GD-seeded runs — crossing at §19's own 1.45e-2, reaching 3.0–3.2e-2
+by round 400 with no plateau, ≤1.4× from the trained full-budget ceiling —
+with no gradient descent anywhere in the ancestry. Two attributions of §20 are
+thereby revised: the property that gated the cheap flows was the readout's
+τ-saturation regime (a 19×-undersized readout leaves every fit fact below the
+cap, so fit facts never stop pulling — §14's churn), not embedding stiffness;
+and the near-tie reservoir is a second-order stabilizer (longer feasible
+windows under the cheapest readout), not the gatekeeper. What gradient descent
+retains is a residual ceiling edge of ≤1.4× that shrinks with the flow's round
+count — possibly nothing but iteration budget.
 
 **Open problem 6″ (the ordering invariant — first pass refuted).** By
 Theorem 2 a gate *is* d token-orderings plus thresholds. §14 refuted
@@ -228,8 +230,10 @@ delta's marginals are structureless (§23 — near-boundary, uniform over column
 labels, and tokens, error-agnostic, for GD's window flips and the GD-free
 flow's alike); and naming a crossing direction is equivalent to solving the
 construction problem (Remark 4.1). The missing theorem is a lower bound over a
-natural oracle class. Also open: the ~1.8× ceiling advantage gradient descent's
-full trajectory retains over every hand-specified flow (`FINDINGS.md` §§21–22).
+natural oracle class. The companion quantitative question has nearly dissolved:
+the ceiling advantage of gradient descent's full trajectory over hand-specified
+flows, ~1.8× at §21's horizons, is ≤1.4× at round 400 and still shrinking
+(`FINDINGS.md` §22) — it may be iteration budget, not integrand.
 
 ## 7. What is proved, what is measured, what is open
 

@@ -9,9 +9,9 @@ has closed up to one number: gradient descent builds the gate in a narrow window
 the end of fitting (§16), by trivial free flips (§17), the transition is
 reproducible by iterated fit pressure at matched stride with no gradients (§19),
 with the cheapest oracle there is (§21), from a ridge-built seed (§22) — no stage
-needs gradient descent, and the GD-free pipeline lands within ~1.8× of the trained
-ceiling. What remains is that ~1.8×, and the fact that the account is a process,
-not a description. `docs/theory.md` gives the formal layer: realizability
+needs gradient descent, and the GD-free pipeline is within ~1.4× of the trained
+ceiling at round 400 with no plateau in sight. What remains is that shrinking
+residue, and the fact that the account is a process, not a description. `docs/theory.md` gives the formal layer: realizability
 characterized and counted, flips proved free, edge geometry = Hamming distance,
 the stride conjecture confirmed, the seed problem resolved.*
 
@@ -208,8 +208,9 @@ point, respectively.
    oracle ablation (§21) removed GD's specifics — a subgradient matvec matches
    or beats the exact LPs — and the seed problem then fell outright
    (`FINDINGS.md` §22): a ridge-built 0.63-fit seed with its readout rescaled
-   to GD's rms bootstraps the same flow to 2.3–2.4e-2, matching the GD-seeded
-   runs, so **no stage of the pipeline needs gradient descent**. §20's two
+   to GD's rms bootstraps the same flow past the GD-seeded runs — 3.0–3.2e-2
+   by round 400, no plateau — so **no stage of the pipeline needs gradient
+   descent**. §20's two
    readings were revised in the process: the cheap flows were gated by the
    readout's τ-saturation regime (an undersized readout keeps every fit fact
    pulling — §14's churn), not by embedding stiffness, and the near-tie
@@ -217,7 +218,7 @@ point, respectively.
    ridge-built gate (ceiling 2.85e-3) as the *construction record* and files
    the flows — which iterate solves against the task's own margins, i.e.
    training — as process-class analysis; the best fully GD-free artifact now
-   stands at 2.40e-2, ~1.8× from trained. The declarative escape narrowed too
+   stands at 3.21e-2, ~1.4× from trained and still climbing at round 400. The declarative escape narrowed too
    (`FINDINGS.md` §23): order-structure statistics — the full Theorem-2
    parameterization — are as blind to quality as §14's magnitude statistics,
    on the sharpest pair available (the seed and its own flow product), and the
