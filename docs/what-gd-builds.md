@@ -201,12 +201,26 @@ point, respectively.
    size, from the infeasible fitting state, and climbs monotonically to 1.80e-2
    — 5.7× the one-shot-era constructed record, ~2.4× from the trained ceiling,
    with no gradients anywhere. One-shot fails, iteration succeeds: the
-   irreducible ingredient is the re-solve loop, not the gradient field. What
-   remains open is the *seed* (`docs/theory.md` problem 6′): the process starts
-   from a gradient-descent 87%-fit state whose gate is worthless but whose
-   embedding geometry may not be — running the stride process from a
-   ridge-style fit seed, or from scratch, decides whether the constructive
-   account closes end to end.
+   irreducible ingredient is the re-solve loop, not the gradient field. The
+   seed question then resolved mostly negatively (`FINDINGS.md` §20): the flow
+   bootstraps from any GD state past ~half-fit (threshold in GD-epochs
+   (50, 100]) but not from scratch, and the constructed digit seed defeats
+   every cheap oracle — its pedestal-stiffened geometry lacks the near-tie
+   reservoir GD-built states maintain (0.5% of bits within ~10⁻³ of zero, ~12×
+   denser than the construction's), the first measurable property separating
+   the two. The oracle ablation (§21) closed the other axis: a subgradient
+   matvec matches or beats the exact LPs on soft geometry (plateau ~2.2e-2, vs
+   1.8e-2 for the LPs), so nothing about gradient descent's specifics is
+   load-bearing — and nothing tested closes GD's residual ~1.8× integrand
+   advantage. The honest ledger therefore keeps the ridge-built gate (ceiling
+   2.85e-3) as the *construction record* and files the flows as process-class
+   analysis. What would finish this item is now precisely posed
+   (`docs/theory.md` problems 6″–6‴): an **ordering invariant** — Theorem 2
+   makes a gate d token-orderings plus thresholds, and only magnitude
+   statistics have ever been refuted, never order-structure statistics — which,
+   if it exists, both describes what gradient descent builds and enables a
+   closed-form construction that *chooses* its orderings; or the
+   incompressibility lower bound saying no state-local description exists.
 2. **Codebook targets instead of digit targets.** §1's readout measurement says trained
    labels live on ~12–18 random-ish directions, not on `m` ladders. The digit solver
    generalizes: replace the per-group digit targets with margin *inequality* targets

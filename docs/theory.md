@@ -185,15 +185,31 @@ the trained ceiling).
 
 The confirmed statement replaces the "gradient field" reading of §18: one-shot
 fails, iteration succeeds, and the ingredient is the re-solve loop, not the
-specific field being integrated. The open problem it leaves is sharper:
+specific field being integrated. Two follow-ups sharpened it further
+(`FINDINGS.md` §§20–21): the oracle can be as cheap as a subgradient matvec
+(exactness is not the ingredient; step granularity is), and the flow's seed
+requirements are now measured — it bootstraps from any GD state past ~half-fit
+(threshold in GD-epochs (50, 100]) but not from scratch, and cheap oracles fail
+outright on stiff constructed geometry, where the near-tie reservoir that
+GD-built states maintain (0.5% of bits within ~10⁻³ of zero, ~12× denser than
+the pedestal construction's) is absent.
 
-**Open problem 6′ (the seed).** The confirmed process starts from a
-gradient-descent fitting state — epochs 0–180 build no gate quality (the seed
-pattern is infeasible) but do build the 87%-fit embedding structure. Does the
-stride process cross from a *constructed* ≈90%-fit seed (ridge/linsolve-style),
-or from scratch? A positive answer closes the constructive account end to end;
-a negative one localizes gradient descent's irreplaceable contribution to the
-fitting-phase embedding geometry rather than to the gate transition.
+**Open problem 6″ (the ordering invariant — the declarative target).** By
+Theorem 2 a gate *is* d token-orderings plus thresholds. §14 refuted
+magnitude/correlation statistics as quality predictors; *order-structure*
+statistics of the permutation ensemble relative to the fact hypergraph have
+never been tested. A quality-predicting invariant here would be the first
+declarative description of what gradient descent builds — and would enable a
+closed-form, rules-legal construction that *chooses* its orderings instead of
+drifting into them. The candidate softness invariant (near-tie density) sits
+beside it: measurable, provenance-separating, quality-relevance untested.
+
+**Open problem 6‴ (incompressibility).** The standing alternative: no
+state-local description predicts gate quality, and the process is the shortest
+description of its own fixed point. The missing theorem is a lower bound over a
+natural oracle class — or the invariant of 6″ refuting it. Also open: the ~1.8×
+ceiling advantage gradient descent's own integrand retains over every
+hand-specified flow from the same seed.
 
 ## 7. What is proved, what is measured, what is open
 

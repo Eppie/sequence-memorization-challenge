@@ -763,6 +763,102 @@ start — but "can anything cheaper than gradient descent produce the start":
 whether the stride process runs from a ridge-style 87%-fit state, or from scratch.**
 Caveats as ever: one seed family, one d, one load.
 
+## 20. The seed problem: the flow needs half a fit and a soft geometry
+
+`probe_flippolicy.py --phase stride --stride-seed {scratch,epN,digit}`. §19's process
+starts from a gradient-descent state, so it closes nothing constructively (a recipe
+containing GD is GD with a post-processor). This section asks what the flow actually
+requires of its seed, two ways: how much GD prefix (an analysis question — localizing
+what remains un-understood), and whether a *constructed* seed serves (the
+constructive question proper).
+
+**The prefix sweep.** The same LP stride process seeded along the training
+trajectory:
+
+| seed | train acc | outcome |
+|---|---|---|
+| scratch (GD's own init) | 0.03 | degenerate by round 2, LP dead by round 4 |
+| epoch 50 | 0.34 | dead by round 32; 14% of bits churned for nothing |
+| epoch 100 | 0.58 | **crosses** ~round 75, ceiling 1.51e-2 at round 120 |
+| epoch 150 | 0.77 | **crosses** ~round 25, ceiling 1.52e-2 at round 60 |
+| epoch 180 (§19) | 0.87 | crosses in 4 rounds, 1.80e-2 at round 40 |
+
+The scratch and ep50 deaths are §14 mechanized: a far-from-feasible pattern gives
+fit pressure nothing to push on (the LP optimum through the mask is ≈ the
+do-nothing point), and stepping toward a contentless target is churn. The bootstrap
+threshold sits in **GD-epochs (50, 100]** — train accuracy between 0.34 and 0.58.
+Everything after half-fit, *including the entire gate transition*, belongs to the
+generic process class; gradient descent's irreplaceable contribution is at most the
+first ~100 of 355 fitting epochs. Notably the ep100 and ep150 flows crossed on
+their own, well outside §16's window — they did not replay gradient descent's
+crossing; they built their own.
+
+**The constructed seed refuses the cheap flows.** The pedestal-optimized digit gate
+(ridge solves only, feasible at ceiling 2.85e-3) was given three versions of the
+process. The first-order oracles fail in an instructive order: the fully-cheap
+variant that works from the GD seed *destroys* the digit seed in one round; the
+hybrid (matvec direction + exact readout refit) holds live accuracy at 1.0 for 60
+rounds but its ceiling dips to 1.86e-3 and crawls back only to 2.47e-3 — sixty
+rounds for a net loss. The exact-LP version builds, but at a crawl: the same dip,
+then a slow climb past the seed to **3.15e-3 at round 50** (≈1.1× the seed;
+plateauing by round 60 at 3.10e-3) — a real gain, and the best GD-free artifact in
+the repo, yet ~6× short of what the *same flow* achieves from soft GD seeds. Stiff
+geometry does not refuse the exact flow; it throttles it. The mechanism is
+measurable and is the section's second finding:
+
+**Softness.** The GD fitting state keeps 0.5% of its pre-activations within ~0.001
+of zero (|pre| quantiles at epoch 180: 0.5% = 0.0011, median 0.98); the digit
+construction's same quantile is ~12× farther out (0.0137, median 2.45) — the
+pedestal exists precisely to stiffen signs. The stride step caps *flips*, not
+travel: on soft geometry the flip quota is met with tiny motion and any decent
+direction survives; on stiff geometry the same quota forces excursions an order of
+magnitude longer, which only exact targets (if anything) survive. **Gradient
+descent does not just build a good gate — it maintains a near-tie reservoir that
+makes its own geometry cheaply adaptable.** §17's flip policy seen from the other
+side, and the first measurable property separating GD-built from constructed
+embedding geometry.
+
+The honest constructive ledger, restated per the distinction this program now
+insists on: the *construction record* (closed-form-ish, rules-legal in spirit)
+remains the ridge-built digit gate at ceiling 2.85e-3; the best fully GD-free
+artifact is that seed plus the exact-LP flow at 3.15e-3. Everything from §19 on is
+*process-class analysis*, not entries: hand-specified dynamics closing the gap is
+the finding, not the recipe the challenge asked for — and the 5–7× between the best
+GD-free artifact and the soft-seeded flows' 1.5–2.3e-2 is now the measured value of
+the soft geometry that only gradient descent's early fitting has been shown to
+build.
+
+## 21. The oracle ablation: granularity is the ingredient, exactness is not
+
+`probe_flippolicy.py --phase stride --oracle {lp,fw,fw-full}`. §19 used exact LPs
+as the direction oracle. Replacing them, from the same edge seed, identical step
+mechanics throughout:
+
+| oracle (emb / readout) | cost per round | ceiling |
+|---|---|---|
+| exact LP / exact LP (§19) | ~45 s | 1.80e-2 at round 40 |
+| **matvec vertex / exact LP** | ~15 s | **2.16e-2 at round 40, plateau ~2.2e-2, peak 2.33e-2** |
+| matvec vertex / 0.2% vertex step | **~10 ms** | 1.66–1.76e-2 plateau (400 rounds) |
+| matvec vertex / 5% vertex step | ~10 ms | destroyed in one round |
+
+The matvec oracle is the box-LP solution of the *linearized* capped-sum objective —
+sign-snapping a subgradient, no solver. Three attributions fall out. (1) **Step
+magnitude is the requirement**: the identical process at a 5% readout step is a
+demolition; at 0.2% it matches the exact-LP process from a milliseconds-per-round
+loop. (2) **LP-exactness of the direction is not**: the first-order direction beats
+the LP direction outright (2.2e-2 vs 1.8e-2) — aiming at a distant LP vertex is
+worse than following the local pull, §18's lesson recurring inside the successful
+regime. (3) The exact readout refit is worth ~1.3× over the cheap nudge (2.2e-2 vs
+1.7e-2). The fully-first-order arm is, bluntly, gradient descent with a hinge
+objective and an order-statistic step rule — and that bluntness is the finding:
+nothing about gradient descent's specifics (cross-entropy, softmax, Adam,
+backprop-exact gradients) is load-bearing for gate quality on soft geometry.
+Iterated fine-grained fit pressure is the whole mechanism. What remains
+unexplained: from the same seed, gradient descent's own continuation reaches
+4.06e-2 — a ~1.8× integrand advantage over the best hand-specified flow, the
+process class's one remaining mystery. Caveats as ever: one seed family, one d,
+one load; the replication guard (d=64 / second seed) still gates publication.
+
 ## Why this matters for the challenge
 
 The post frames its construction and the trained model as differing in *which* neurons
