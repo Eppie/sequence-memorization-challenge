@@ -61,6 +61,8 @@ def solve_max_margin(
     wrong_sets: list | None = None,  # per-fact wrong-class subsets (cutting plane)
     pattern_rows: bool = True,  # False: masked-linear margins only, signs free
     spread_tau: float | None = None,  # per-fact capped-sum objective (see below)
+    solver_options: dict | None = None,  # extra HiGHS options (e.g. looser
+    # ipm_optimality_tolerance when only the direction to the optimum is used)
 ) -> tuple[np.ndarray, np.ndarray, float, dict]:
     """Max-min-margin embeddings for a frozen (pattern, readout). Returns
     (u, v, gamma*, info); u and v are (n_vocab, d).
@@ -137,7 +139,7 @@ def solve_max_margin(
 
     t = time.time()
     res = linprog(c, A_ub=A, b_ub=b_ub, bounds=bounds, method="highs-ipm",
-                  options={"time_limit": 900})
+                  options={"time_limit": 900, **(solver_options or {})})
     info = {
         "status": res.status, "message": res.message,
         "seconds": round(time.time() - t, 1),

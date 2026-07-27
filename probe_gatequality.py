@@ -422,7 +422,7 @@ def lp_free(pattern, inputs, targets, readout, n_vocab, box, logits_hint,
 
 
 def lp_spread(pattern, inputs, targets, readout, n_vocab, box, logits_hint,
-              tau, k0=12, max_rounds=2, wrong_sets=None):
+              tau, k0=12, max_rounds=2, wrong_sets=None, solver_options=None):
     """Cutting-plane capped-sum margins over embeddings, signs free. Same
     hints and rounds as lp_free; only the objective differs. The cut rule is
     per fact: a left-out class must beat that fact's own solved m_f.
@@ -441,6 +441,7 @@ def lp_spread(pattern, inputs, targets, readout, n_vocab, box, logits_hint,
         u, v, obj, info = solve_max_margin(
             pattern, inputs, targets, readout, n_vocab, box,
             wrong_sets=wrong_sets, pattern_rows=False, spread_tau=tau,
+            solver_options=solver_options,
         )
         if u is None:
             return None, None, obj, None, info

@@ -186,7 +186,7 @@ def pair_stats(z, a, b, facts, pat_final):
 
 
 def readout_lp_spread(h, targets, n_labels, box, tau, k0=12, max_rounds=4,
-                      wrong_sets=None):
+                      wrong_sets=None, solver_options=None):
     """Capped-sum margins over the readout, activations frozen -- the
     fit-pressure analog of probe_geometry_ascent.readout_lp. The max-min
     readout refit is degenerate off the feasible set (its optimum is the
@@ -233,7 +233,8 @@ def readout_lp_spread(h, targets, n_labels, box, tau, k0=12, max_rounds=4,
         c_obj[emb_cols:] = -1.0
         bounds = [(-box, box)] * emb_cols + [(None, tau)] * n
         res = linprog(c_obj, A_ub=A, b_ub=np.zeros(row_count), bounds=bounds,
-                      method="highs-ipm", options={"time_limit": 300})
+                      method="highs-ipm",
+                      options={"time_limit": 300, **(solver_options or {})})
         if res.status != 0:
             return W, m, {"status": res.status, "message": res.message}
         W = res.x[:emb_cols].reshape(n_labels, d)
@@ -377,6 +378,11 @@ def main() -> None:
                         help="initial wrong classes per fact in the stride "
                              "LPs; the cut loop repairs anything missed, so "
                              "smaller is faster and stays exact")
+    parser.add_argument("--ipm-tol", type=float, default=None,
+                        help="loosen HiGHS ipm_optimality_tolerance for the "
+                             "stride LPs (e.g. 1e-3): the step only uses the "
+                             "direction toward the optimum, so a half-"
+                             "converged point serves; ~2-4x per solve")
     parser.add_argument("--out", default=None,
                         help="override the results JSON (lets concurrent "
                              "stride runs avoid write races; merge after)")
@@ -590,10 +596,12 @@ def main() -> None:
                 hint[np.arange(len(targets)), targets] = -np.inf
                 ws_emb = [list(row)
                           for row in np.argsort(-hint, axis=1)[:, :args.k0]]
+            sopts = ({"ipm_optimality_tolerance": args.ipm_tol}
+                     if args.ipm_tol else None)
             u_star, v_star, obj, m, info = lp_spread(
                 pattern, inputs, targets, W, shape.input_vocab_size, box_e,
                 logits_hint=h @ W.T, tau=args.tau, k0=args.k0,
-                wrong_sets=ws_emb,
+                wrong_sets=ws_emb, solver_options=sopts,
             )
             if u_star is None:
                 print(f"  [stride] LP failed at round {r}: "
@@ -615,7 +623,8 @@ def main() -> None:
             W_new, _, _ = readout_lp_spread(h, targets,
                                             shape.output_vocab_size, box_w,
                                             tau=args.tau, k0=args.k0,
-                                            wrong_sets=ws_ro)
+                                            wrong_sets=ws_ro,
+                                            solver_options=sopts)
             if W_new is not None:
                 W = W_new
             acc = float(((h @ W.T).argmax(1) == targets).mean())
