@@ -422,16 +422,19 @@ def lp_free(pattern, inputs, targets, readout, n_vocab, box, logits_hint,
 
 
 def lp_spread(pattern, inputs, targets, readout, n_vocab, box, logits_hint,
-              tau, k0=12, max_rounds=2):
+              tau, k0=12, max_rounds=2, wrong_sets=None):
     """Cutting-plane capped-sum margins over embeddings, signs free. Same
     hints and rounds as lp_free; only the objective differs. The cut rule is
-    per fact: a left-out class must beat that fact's own solved m_f."""
+    per fact: a left-out class must beat that fact's own solved m_f.
+    wrong_sets, if given, seeds the cut sets (they are grown in place, so an
+    iterating caller can carry them across rounds and skip re-discovery)."""
     from probe_maxmargin import solve_max_margin
 
     n = len(targets)
-    hint = logits_hint.copy()
-    hint[np.arange(n), targets] = -np.inf
-    wrong_sets = [list(row) for row in np.argsort(-hint, axis=1)[:, :k0]]
+    if wrong_sets is None:
+        hint = logits_hint.copy()
+        hint[np.arange(n), targets] = -np.inf
+        wrong_sets = [list(row) for row in np.argsort(-hint, axis=1)[:, :k0]]
     u = v = m = None
     obj = float("-inf")
     for _ in range(max_rounds):

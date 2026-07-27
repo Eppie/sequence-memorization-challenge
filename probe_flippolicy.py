@@ -185,7 +185,8 @@ def pair_stats(z, a, b, facts, pat_final):
     }
 
 
-def readout_lp_spread(h, targets, n_labels, box, tau, k0=12, max_rounds=4):
+def readout_lp_spread(h, targets, n_labels, box, tau, k0=12, max_rounds=4,
+                      wrong_sets=None):
     """Capped-sum margins over the readout, activations frozen -- the
     fit-pressure analog of probe_geometry_ascent.readout_lp. The max-min
     readout refit is degenerate off the feasible set (its optimum is the
@@ -199,11 +200,12 @@ def readout_lp_spread(h, targets, n_labels, box, tau, k0=12, max_rounds=4):
     emb_cols = n_labels * d
     nvar = emb_cols + n
 
-    means = np.stack([h[targets == c].mean(0) if (targets == c).any()
-                      else np.zeros(d) for c in range(n_labels)])
-    hint = h @ means.T
-    hint[np.arange(n), targets] = -np.inf
-    wrong_sets = [list(row) for row in np.argsort(-hint, axis=1)[:, :k0]]
+    if wrong_sets is None:
+        means = np.stack([h[targets == c].mean(0) if (targets == c).any()
+                          else np.zeros(d) for c in range(n_labels)])
+        hint = h @ means.T
+        hint[np.arange(n), targets] = -np.inf
+        wrong_sets = [list(row) for row in np.argsort(-hint, axis=1)[:, :k0]]
 
     W = m = None
     for _ in range(max_rounds):
@@ -371,6 +373,10 @@ def main() -> None:
     parser.add_argument("--resume", action="store_true",
                         help="continue a previous stride run of the same "
                              "seed from its saved final state")
+    parser.add_argument("--k0", type=int, default=12,
+                        help="initial wrong classes per fact in the stride "
+                             "LPs; the cut loop repairs anything missed, so "
+                             "smaller is faster and stays exact")
     parser.add_argument("--out", default=None,
                         help="override the results JSON (lets concurrent "
                              "stride runs avoid write races; merge after)")
@@ -576,11 +582,18 @@ def main() -> None:
                 history = json.load(f).get(key, {}).get("history", [])
         snaps = {} if r0 else {0: (join_uv(u, v), W.copy())}
         pattern = (u[inputs[:, 0]] + v[inputs[:, 1]]) > 0
+        ws_emb = ws_ro = None  # cut sets carried across rounds (grow-only)
         for r in range(r0 + 1, r0 + args.rounds + 1):
             h = pattern * (u[inputs[:, 0]] + v[inputs[:, 1]])
+            if ws_emb is None:
+                hint = h @ W.T
+                hint[np.arange(len(targets)), targets] = -np.inf
+                ws_emb = [list(row)
+                          for row in np.argsort(-hint, axis=1)[:, :args.k0]]
             u_star, v_star, obj, m, info = lp_spread(
                 pattern, inputs, targets, W, shape.input_vocab_size, box_e,
-                logits_hint=h @ W.T, tau=args.tau,
+                logits_hint=h @ W.T, tau=args.tau, k0=args.k0,
+                wrong_sets=ws_emb,
             )
             if u_star is None:
                 print(f"  [stride] LP failed at round {r}: "
@@ -590,9 +603,19 @@ def main() -> None:
                                          args.cap)
             pattern = (u[inputs[:, 0]] + v[inputs[:, 1]]) > 0
             h = np.maximum(u[inputs[:, 0]] + v[inputs[:, 1]], 0.0)
+            if ws_ro is None:
+                means = np.stack([h[targets == c].mean(0)
+                                  if (targets == c).any()
+                                  else np.zeros(h.shape[1])
+                                  for c in range(shape.output_vocab_size)])
+                hint = h @ means.T
+                hint[np.arange(len(targets)), targets] = -np.inf
+                ws_ro = [list(row)
+                         for row in np.argsort(-hint, axis=1)[:, :args.k0]]
             W_new, _, _ = readout_lp_spread(h, targets,
                                             shape.output_vocab_size, box_w,
-                                            tau=args.tau)
+                                            tau=args.tau, k0=args.k0,
+                                            wrong_sets=ws_ro)
             if W_new is not None:
                 W = W_new
             acc = float(((h @ W.T).argmax(1) == targets).mean())
