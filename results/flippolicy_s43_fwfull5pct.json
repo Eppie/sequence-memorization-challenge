@@ -1,0 +1,114 @@
+{
+  "stride_edge_fwfull": {
+    "cap": 0.005,
+    "tau": 0.5,
+    "seed": "edge",
+    "oracle": "fw-full",
+    "history": [
+      {
+        "round": 1,
+        "mean_m": 0.24110473062488505,
+        "step": 0.00028861235165847414,
+        "flips": 253,
+        "acc": 0.32702020202020204,
+        "net_drift": 0.00501104797979798
+      },
+      {
+        "round": 2,
+        "mean_m": -2.6882617141261314,
+        "step": 0.0002578248552646756,
+        "flips": 253,
+        "acc": 0.33585858585858586,
+        "net_drift": 0.00615530303030303
+      },
+      {
+        "round": 3,
+        "mean_m": -2.3093048419809272,
+        "step": 0.0003726910444879887,
+        "flips": 253,
+        "acc": 0.32891414141414144,
+        "net_drift": 0.007832228535353536
+      },
+      {
+        "round": 4,
+        "mean_m": -2.9150225648826598,
+        "step": 0.0004380671490258811,
+        "flips": 253,
+        "acc": 0.273989898989899,
+        "net_drift": 0.009311868686868686
+      }
+    ]
+  },
+  "ascent": {
+    "stride_edge_fwfull_r1": {
+      "best_gamma": 0.0,
+      "metrics": {
+        "accuracy": 0.03156565502285957,
+        "margins": {
+          "median": 0.0,
+          "min": 0.0,
+          "logit_rms": 0.0
+        },
+        "sigma90_weight": 1e-05,
+        "rms_up": 6.0,
+        "rms_down": 6.0
+      }
+    },
+    "stride_edge_fwfull_r2": {
+      "best_gamma": 0.0,
+      "metrics": {
+        "accuracy": 0.03156565502285957,
+        "margins": {
+          "median": 0.0,
+          "min": 0.0,
+          "logit_rms": 0.0
+        },
+        "sigma90_weight": 1e-05,
+        "rms_up": 6.0,
+        "rms_down": 6.0
+      }
+    },
+    "stride_edge_fwfull_r3": {
+      "best_gamma": 0.0,
+      "metrics": {
+        "accuracy": 0.03156565502285957,
+        "margins": {
+          "median": 0.0,
+          "min": 0.0,
+          "logit_rms": 0.0
+        },
+        "sigma90_weight": 1e-05,
+        "rms_up": 6.0,
+        "rms_down": 6.0
+      }
+    },
+    "stride_edge_fwfull_r4": {
+      "best_gamma": 0.0,
+      "metrics": {
+        "accuracy": 0.03156565502285957,
+        "margins": {
+          "median": 0.0,
+          "min": 0.0,
+          "logit_rms": 0.0
+        },
+        "sigma90_weight": 1e-05,
+        "rms_up": 6.0,
+        "rms_down": 6.0
+      }
+    },
+    "stride_edge_fwfull_r0": {
+      "best_gamma": 1.014505127202824,
+      "metrics": {
+        "accuracy": 1.0,
+        "margins": {
+          "median": 1.1102180480957031,
+          "min": 1.0144996643066406,
+          "logit_rms": 41.15178298950195
+        },
+        "sigma90_weight": 0.007602634298367767,
+        "rms_up": 3.0074455738067627,
+        "rms_down": 3.4158542156219482
+      }
+    }
+  }
+}

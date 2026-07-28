@@ -1,0 +1,87 @@
+{
+  "predict": {
+    "init": {
+      "history": [
+        {
+          "step": "start",
+          "gamma": -0.0690216149220421
+        },
+        {
+          "step": "emb-0",
+          "gamma": -3.1175875870524565e-10
+        },
+        {
+          "step": "ro-0",
+          "gamma": 0.0
+        },
+        {
+          "step": "emb-1",
+          "gamma": 0.0
+        }
+      ],
+      "best_gamma": 0.0,
+      "metrics": {
+        "accuracy": 0.015625,
+        "margins": {
+          "median": 0.0,
+          "min": 0.0,
+          "logit_rms": 0.0
+        },
+        "sigma90_weight": 1e-05,
+        "rms_up": 6.0,
+        "rms_down": 6.0
+      }
+    },
+    "random_additive": {
+      "history": [
+        {
+          "step": "start",
+          "gamma": -0.05536711922739064
+        }
+      ],
+      "best_gamma": -0.05536711922739064,
+      "metrics": {
+        "accuracy": 0.07244317978620529,
+        "margins": {
+          "median": -0.01660131849348545,
+          "min": -0.0553671196103096,
+          "logit_rms": 0.01846482791006565
+        },
+        "sigma90_weight": 1e-05,
+        "rms_up": 0.9997100234031677,
+        "rms_down": 0.00167892558965832
+      }
+    },
+    "trained_model_direct": {
+      "accuracy": 1.0,
+      "margins": {
+        "median": 8.706367492675781,
+        "min": 6.9245147705078125,
+        "logit_rms": 52.27793884277344
+      },
+      "sigma90_weight": 0.03172208666476884,
+      "rms_up": 2.696324348449707,
+      "rms_down": 3.88594388961792
+    },
+    "trained": {
+      "history": [
+        {
+          "step": "start",
+          "gamma": 6.924508968837145
+        }
+      ],
+      "best_gamma": 6.924508968837145,
+      "metrics": {
+        "accuracy": 1.0,
+        "margins": {
+          "median": 8.706367492675781,
+          "min": 6.9245147705078125,
+          "logit_rms": 52.27793884277344
+        },
+        "sigma90_weight": 0.03172208666476884,
+        "rms_up": 2.696324348449707,
+        "rms_down": 3.88594388961792
+      }
+    }
+  }
+}
