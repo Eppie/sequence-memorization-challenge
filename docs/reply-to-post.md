@@ -6,6 +6,11 @@ summarizing this repo's results in the order the authors are likely to care abou
 them. Numbers at d=32 unless noted; everything is reproducible from
 <https://github.com/Eppie/sequence-memorization-challenge>.*
 
+*STATUS: DRAFT — do not post until the replication guard (d=64 / second fact
+seed for FINDINGS §§14–23) lands. The entry, robustness, and appendix-B
+sections are already replication-backed; the "what gradient descent builds"
+process results are single-seed.*
+
 ---
 
 I took up the challenge, and I want to report both halves honestly: a construction
@@ -43,38 +48,69 @@ entries lose their advantage and the benchmark tracks your stated goal.
 **What gradient descent actually builds** (each clause is a measurement in the repo):
 a margin-floor-equalized solution of the storage *inequalities* — continued training
 raises the worst per-fact weight-space radius 4.4× faster than the median, the classic
-implicit-bias signature — on magnitude-graded activations (at capacity, binarizing
-trained activations keeps 9% of accuracy; ~5 bits/neuron are needed), read out through
-a high-rank, ladder-free codebook (effective rank ~d/2, essentially zero
-linear-in-class structure), with no stabilizing pedestal because patterns are
-stabilized dynamically. Supporting experiments: (1) fixing the readout to my
-construction's decode and training only the embeddings still reaches the trained
-model's full capacity — the unembedding's `d²` parameters are an optimization aid, not
-storage — and still stalls short of `4d²`, so the gap to the construction is the
-optimizer, not the objective's taste for margin. (2) No standard optimizer beats
-converged Adam (SGD+momentum and L-BFGS both do worse), so the missing capacity is not
-reachable by a better generic trainer. (3) A redundant "digit code" family
-(label digits carried by neuron groups, still ridge-only) recovers about two of the
-three-and-a-half orders of magnitude of the robustness gap at 76% of trained capacity;
-exact max-margin ascent plus a single flip-capped drift step on its gate narrows the
-residual to a measured ~14× — and every attempt to *iterate* that drift, under
-worst-fact or every-fact pressure, destroys the gate, so the last ~14× is
-specifically the value of gradient descent's coupled dynamics, not of margin
-optimization per se. (4) The max-margin
-linear program on a trained model's own frozen pattern and readout reproduces the
-trained model's robustness (σ90 4.6e-2 vs 4.8e-2 at d=16; 1.5e-2 vs 1.6e-2 at d=32) —
-to first order, the trained model *is* the max-margin point of its own active-set
-geometry — while every mixed condition is *infeasible*: a random codebook cannot
-decode the trained pattern, the trained readout cannot separate a random pattern, and
-a random pattern with a random codebook cannot hold even half of trained capacity at
-any positive margin. The capacity lives in the joint adaptation of gate and codebook;
-the margins come free once the geometry is right. (5) That adaptation is visible in
-training: the sign pattern's per-epoch churn collapses 200× within 30 epochs while
-accuracy is still at 21%, yet the finished gate differs from its init in 41% of bits —
-gradient descent rebuilds the gate gradually and substantially while never churning
-fast. In the finished model, gate stability and decision margin sit at the same noise
-scale (within 3×), where my construction's accuracy dies 316× before its gate moves. One
-figure with everything on it: `results/frontier.png`, the capacity-robustness plane.
+implicit-bias signature — on magnitude-graded activations, read out through a
+high-rank, ladder-free codebook, with no stabilizing pedestal because patterns are
+stabilized dynamically. The load-bearing object is the ReLU sign pattern (the "gate"):
+freeze a trained model's gate and the max-margin linear program reproduces its full
+robustness, while every mixed condition (random gate, trained readout; trained gate,
+random readout; random/random) is infeasible outright. So the question "how does
+storage work" reduces to "what makes a gate good, and how is one built" — and I
+chased that to the bottom. The short version:
+
+1. **Gate quality is invisible to every state-level description I could test.**
+   Not magnitude statistics (density, correlations, conditioning — a random gate
+   matches a trained one on all of them and cannot store half the load at any
+   margin), and not *order-structure* statistics either: an additive gate column is
+   exactly a token ordering plus thresholds, and ten rank-space statistics, a joint
+   fragile-bit-placement statistic, and the flip-set's marginals all fail to
+   separate storage-capable gates from worthless ones of matched provenance. The
+   information is there — the gate decides everything — but no first-pass invariant
+   names it.
+
+2. **No one-shot solve builds it, but iterated fit pressure does — and nothing
+   about gradient descent's specifics is needed.** Every single-step direction at a
+   matched flip budget fails (loss gradient, Adam's own next step, fit-pressure and
+   max-margin LP optima). But the same pressure *re-solved every ~0.5%-of-bits
+   step* crosses into storage-feasibility and keeps building. The oracle can be as
+   cheap as a sign-snapped subgradient; backprop-exact gradients, Adam,
+   cross-entropy, and LP-exact directions are all measured as non-load-bearing.
+   What is load-bearing: step granularity, fit pressure in both weight blocks, and
+   a saturation cap so already-fit facts stop pulling.
+
+3. **The seed is constructible too.** A ridge-only recipe (freeze the ReLU pattern,
+   ridge the readout to one-hot targets, per-token ridge sweeps, flip-capped steps
+   — the same moves your construction is allowed) reaches ~60% train accuracy, and
+   from that seed the cheap flow climbs monotonically to σ90 = 3.46e-2 — within
+   ~1.3× of the fully trained model's 4.4e-2, with no gradient descent anywhere in
+   the pipeline's ancestry. From *scratch*, the flow fails: roughly half a fit is a
+   real prerequisite, but ridge regression suffices to build it.
+
+4. **What remains of "only gradient descent can do this" is one bounded number:**
+   at matched iteration count, GD's gate ceiling is ~1.24× higher than the
+   hand-specified flow's, shrinking slowly with flow rounds. Everything else —
+   optimizer specifics, the seed, the claimed special geometry of GD states — is
+   eliminated by construction.
+
+The uncomfortable conclusion I keep failing to escape: the robust solution seems to
+be **process-shaped, not description-shaped**. Three independent results point the
+same way — state statistics are blind in both magnitude and order coordinates, the
+gate-building flip set has no imitable structure (near-boundary cells, uniform over
+columns/labels/tokens, error-agnostic — the *choice* carries the quality), and
+naming a single crossing direction is provably equivalent to solving the
+construction problem itself. I would genuinely love a counterexample: a
+declaratively chosen gate that stores at trained robustness would refute this and
+win your challenge in the strong sense. I could not find one, and I now believe
+the interesting theorem is the lower bound. One figure with everything on it:
+`results/frontier.png`, the capacity-robustness plane.
+
+A note on rules: I do *not* count the iterated-fit-pressure pipeline as a
+hand-coding entry, even though it is gradient-free — iterating solves against the
+task's own margins is training under a different name. The construction ledger I
+defend is: capacity benchmark, the two-sided code (3168 vs 2080 trained at d=32);
+best *declarative* gate under the robustness bar, 2.85e-3 (ridge-built digit code +
+max-margin ascent, ~15× short of trained); best gradient-free *process* artifact,
+3.46e-2 (~1.3× short). The gap between the last two is, as far as we can measure,
+the entire content of what training contributes.
 
 **Your appendix-B outlier.** MLP+Norms+NoRes+NoBias+ReLU: rerunning your model with
 each setting flipped one at a time, the deficit is real (0.68 vs 0.86–1.00 for every

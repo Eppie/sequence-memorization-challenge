@@ -3,14 +3,17 @@
 *Toward the constructive account the challenge is really asking for. Everything here is
 measured on the Figure-4 toy model; sections cite the probe that produced each number.
 Status: the negative half is established — gate quality is real, decisive, not a
-statistic (§14), not one-shot-reachable under any pressure structure or direction
-(§§15, 18) — and the constructive half has turned: gradient descent builds the gate
-in a narrow window at the end of fitting (§16), by trivial free flips (§17), and that
-transition is reproducible by an iterated exact-solve process at matched stride with
-no gradients (§19) — one-shot fails, iteration succeeds. The open question is the
-seed. `docs/theory.md` gives the formal layer: realizability characterized and
-counted, flips proved free, edge geometry = Hamming distance, the stride conjecture
-confirmed.*
+statistic in magnitude (§14) or order (§23) coordinates, not one-shot-reachable
+under any pressure structure or direction (§§15, 18) — and the constructive half
+has closed up to one number: gradient descent builds the gate in a narrow window at
+the end of fitting (§16), by trivial free flips (§17), the transition is
+reproducible by iterated fit pressure at matched stride with no gradients (§19),
+with the cheapest oracle there is (§21), from a ridge-built seed (§22) — no stage
+needs gradient descent, and the GD-free pipeline reaches within ~1.27× of the
+trained ceiling (~1.24× at matched iteration budget). What remains is that
+bounded residue, and the fact that the account is a process, not a description. `docs/theory.md` gives the formal layer: realizability
+characterized and counted, flips proved free, edge geometry = Hamming distance,
+the stride conjecture confirmed, the seed problem resolved.*
 
 The challenge asks for an algorithm that stores facts the way a trained model does. The
 capacity benchmark turned out to be answerable without answering that question — the
@@ -202,31 +205,40 @@ point, respectively.
    — 5.7× the one-shot-era constructed record, ~2.4× from the trained ceiling,
    with no gradients anywhere. One-shot fails, iteration succeeds: the
    irreducible ingredient is the re-solve loop, not the gradient field. The
-   seed question then resolved mostly negatively (`FINDINGS.md` §20): the flow
-   bootstraps from any GD state past ~half-fit (threshold in GD-epochs
-   (50, 100]) but not from scratch, and the constructed digit seed defeats
-   every cheap oracle — its pedestal-stiffened geometry lacks the near-tie
-   reservoir GD-built states maintain (0.5% of bits within ~10⁻³ of zero, ~12×
-   denser than the construction's), the first measurable property separating
-   the two. The oracle ablation (§21) closed the other axis: a subgradient
-   matvec matches or beats the exact LPs on soft geometry (plateau ~2.2e-2, vs
-   1.8e-2 for the LPs), so nothing about gradient descent's specifics is
-   load-bearing — and nothing tested closes GD's residual ~1.8× integrand
-   advantage. The honest ledger therefore keeps the ridge-built gate (ceiling
-   2.85e-3) as the *construction record* and files the flows as process-class
-   analysis. What would finish this item is now precisely posed
-   (`docs/theory.md` problems 6″–6‴): an **ordering invariant** — Theorem 2
-   makes a gate d token-orderings plus thresholds, and only magnitude
-   statistics have ever been refuted, never order-structure statistics — which,
-   if it exists, both describes what gradient descent builds and enables a
-   closed-form construction that *chooses* its orderings; or the
-   incompressibility lower bound saying no state-local description exists.
-2. **Codebook targets instead of digit targets.** §1's readout measurement says trained
-   labels live on ~12–18 random-ish directions, not on `m` ladders. The digit solver
-   generalizes: replace the per-group digit targets with margin *inequality* targets
-   toward a random high-rank codebook and solve by iterated ridge with per-fact
-   reweighting (greedy, rules-legal). That is the construction the measurements point
-   at.
+   oracle ablation (§21) removed GD's specifics — a subgradient matvec matches
+   or beats the exact LPs — and the seed problem then fell outright
+   (`FINDINGS.md` §22): a ridge-built 0.63-fit seed with its readout rescaled
+   to GD's rms bootstraps the same flow past the GD-seeded runs — 3.0–3.2e-2
+   by round 400, no plateau — so **no stage of the pipeline needs gradient
+   descent**. §20's two
+   readings were revised in the process: the cheap flows were gated by the
+   readout's τ-saturation regime (an undersized readout keeps every fit fact
+   pulling — §14's churn), not by embedding stiffness, and the near-tie
+   reservoir is a stabilizer, not the gatekeeper. The honest ledger keeps the
+   ridge-built gate (ceiling 2.85e-3) as the *construction record* and files
+   the flows — which iterate solves against the task's own margins, i.e.
+   training — as process-class analysis; the best fully GD-free artifact now
+   stands at 3.46e-2 (round 800), ~1.27× from trained, ~1.24× at matched
+   iteration budget. The declarative escape narrowed too
+   (`FINDINGS.md` §23): order-structure statistics — the full Theorem-2
+   parameterization — are as blind to quality as §14's magnitude statistics,
+   on the sharpest pair available (the seed and its own flow product), and the
+   building delta has no imitable marginal structure. What would finish this
+   item is either a higher-order invariant no first-pass statistic sees, or
+   the incompressibility lower bound (`docs/theory.md` 6‴, now three-legged)
+   saying none exists.
+2. **Codebook targets instead of digit targets — closed on theory grounds.** §1's
+   readout measurement says trained labels live on ~12–18 random-ish directions,
+   not on `m` ladders, and this item proposed chasing that with codebook targets.
+   The accounting kills both variants: an *equality* code with `m` channels per
+   fact reads out through a rank-`m` decoder and caps capacity at `4d²/m`, so no
+   equality code reaches the trained readout's rank (~d/2) anywhere near
+   capacity — the ladder was never the constraint, the channel count was. And
+   *inequality* targets solved by reweighted ridge are margin iteration — the
+   process class of §§19–22, i.e. training. The trained readout's rank is
+   purchased with inequality slack (~one binding constraint per fact), which is
+   exactly what a declared code cannot spend. This item's content is absorbed
+   into the §§22–23 verdict: the gap is process-shaped, not code-shaped.
 3. **The robustness-qualified benchmark.** Score max facts under weight noise of one
    optimizer step (or report σ90 alongside capacity). Under that metric the account
    above is exactly what a winning entry must reproduce.

@@ -859,6 +859,155 @@ unexplained: from the same seed, gradient descent's own continuation reaches
 process class's one remaining mystery. Caveats as ever: one seed family, one d,
 one load; the replication guard (d=64 / second seed) still gates publication.
 
+## 22. The seed problem falls: half a fit and a GD-scale readout, no gradient descent
+
+`probe_flippolicy.py --phase softseed`, then `--phase stride --stride-seed
+soft:TAG --oracle {fw-full,fw}`. §20 left the constructive question at "the flow
+needs a GD state past half-fit, and constructed geometry refuses the cheap
+oracles" — with softness (the near-tie reservoir) as the candidate separating
+property. Both halves of that verdict are now revised by construction.
+
+**The seed** (`handcode/softseed.py`) is the most boring rules-legal recipe that
+could work: random init at trained density, then freeze-the-pattern rounds of
+ridge fits — readout to one-hot targets, per-token embedding sweeps —
+under twosided's flip-capped step. Fit plateaus at train accuracy **0.63**
+(above the ep100 state's 0.58, which bootstrapped in §20) and no knob in four
+orders of magnitude of ridge strength moves the near-tie profile: every config
+sits at q0.5%/median ≈ 6–9e-3, the Gaussian-init value and the digit
+construction's class. Two post-passes complete the seed, both ridge-only and
+both leaving fit, pattern, and each other untouched: **soften** compresses the
+smallest-|pre| band toward zero by per-column solves until the reservoir matches
+GD's (1.10e-3 vs the edge state's 1.09e-3; 0–1 of 50,688 pattern bits flipped),
+and **w_rms** rescales the readout to GD scale. The sweep's product is a 2×2 of
+seeds — fit {0.52, 0.63} × reservoir {stiff ~7e-3, GD-matched 1.1e-3} — with no
+gradient descent anywhere in the ancestry.
+
+**The readout scale is a regime, not a gauge.** The raw ridge readout comes out
+19× smaller in rms than the ep180 state's (0.067 vs 1.277), which puts *zero*
+facts' logit gaps above the flow's saturation cap τ = 0.5, where the ep180 state
+has 74% above. Below τ every already-fit fact keeps pulling on the oracle —
+§14's margin-churn regime — and measured, it is fatal: without `w_rms`, all six
+seeds collapse under fw-full in one round (acc 0.52–0.63 → 0.22–0.30) and churn
+indefinitely. With the readout at GD scale, every seed climbs. **What §20 read
+as stiff embedding geometry defeating cheap oracles was, at least for
+ridge-family seeds, the readout regime**: fit facts that never saturate drown
+the direction in margin pressure.
+
+**Softness buys stability margin, not crossing.** Under fw-full (cheap readout
+nudges), both high-fit seeds cross into storage-feasibility around round 100 at
+ceiling ~1e-2 — and both eventually lose it; the softened twin holds its
+feasible window longer (rounds 100–200 vs 100–150) and peaks higher (1.13e-2 vs
+1.01e-2). Under fw (exact readout refit), the twins are indistinguishable. The
+near-tie reservoir is a second-order stabilizer, not the gatekeeper §20
+conjectured.
+
+**The headline: the fw flow consolidates from the constructed seed.** Matvec
+direction + exact readout refit, from the 0.63-fit ridge seed, either twin:
+
+| round | ceiling σ90 (stiff / softened) |
+|---|---|
+| 0 | infeasible |
+| 25 | 1.45e-2 / 1.46e-2 — **crossed** |
+| 100 | 1.95e-2 / 1.99e-2 (live accuracy 1.000 from here on) |
+| 200 | 2.31e-2 / 2.40e-2 |
+| 300 | 2.92e-2 / 2.64e-2 |
+| 400 | **3.00e-2 / 3.21e-2**, ~10% net drift |
+| 800 | — / **3.46e-2**, decelerating but still creeping (softened arm) |
+
+The crossing value equals GD's own crossing gate (§19: 1.45e-2); the GD-seeded
+fw numbers (§21: plateau ~2.2e-2, peak 2.33e-2) are passed by round 250–300.
+**Gradient descent is not needed to make the start.** The best fully GD-free
+artifact moves 3.15e-3 → **3.46e-2** — from ~14× short of the trained
+full-budget ceiling (4.40e-2) to **~1.27×** — and the pipeline's every stage is
+understood: ridge seed, subgradient direction, order-statistic step, LP readout
+refit. Two corollaries: §21's "~1.8× integrand edge" was partly round count —
+the flow keeps building long after the horizons those comparisons used — but
+not entirely: at *matched* iteration budget gradient descent holds 4.28e-2
+(epoch 750, §16's curve) against the flow's 3.46e-2 at round 800, a bounded
+**~1.24× matched-budget edge**, shrinking slowly (+8% over rounds 400–800) with
+no sign yet of closing outright. And the fit floor is looser than §20's
+GD-prefix threshold suggested: the 0.52-fit seed also crosses (round ~100) and
+reaches 1.8–1.9e-2 by round 200 on the same monotone climb.
+
+**The scratch cell fails, so the fit requirement is real.** The remaining
+suspicion — that §20's scratch death was also a readout artifact — was
+retested under the revised regime: a rounds-0 seed (random embeddings, ridge
+readout at GD scale, train accuracy 0.126). It does not bootstrap. fw-full
+climbs 0.13 → 0.51 over 400 rounds without ever entering feasibility; the fw
+arm is worse — the exact readout refit on a contentless pattern is destructive
+(live accuracy pinned at ~0.03 for a hundred rounds, 43% churn by round 200,
+infeasible throughout), §20's death mechanism reproduced. The flow's fit floor
+sits between 0.13 and 0.52, the embedding half-fit is a genuine ingredient the
+flow cannot make from nothing at tested budgets — and the point of this
+section stands precisely because it is constructible by ridge. (One honest
+hedge: at matched step counts, Adam fits from scratch far faster than the fw
+flow, so "never" is untested beyond 400 rounds; what is established is that a
+ridge half-fit is the cheap constructible substitute for whatever the early
+fitting phase builds.)
+
+The ledger, unchanged in kind: the flow optimizes the task objective, so this
+remains **process-class analysis, not a challenge entry** — iterating solves
+against a coder-declared equality system (twosided, digit) is construction;
+iterating them against the task's own margins is training with different
+branding. The *construction record* stands at 2.85e-3 (§14). What the result
+changes is the residue: after §21 removed GD's optimizer specifics and this
+section removes its seed, the unexplained remainder is a bounded ~1.2–1.3×
+matched-budget ceiling edge (4.28e-2 at epoch 750 vs 3.46e-2 at round 800),
+shrinking slowly with flow rounds — whether it vanishes at very large budgets
+is open — plus the fact that the whole account is a process, not a
+description. Caveats: one fact seed, one d, one ridge
+init, and the fw-full/fw contrast measured on one seed family; the
+replication guard gates all of it.
+
+## 23. Order-structure statistics are as blind as magnitude statistics
+
+`probe_ordering.py`. Theorem 2 parameterizes every additive gate column as a
+token ordering plus row thresholds, so "gate quality is declaratively
+describable" (theory.md problem 6″) has a natural test bed: statistics of the
+orderings and thresholds alone, invariant to monotone value changes — the
+parameterization §14's refuted magnitude statistics never touched. The zoo now
+contains the sharpest possible contrast: the ridge seed (infeasible, ceiling 0)
+and the fw product grown from it (2.31e-2), 7.6% of bits apart, same ancestry
+class throughout.
+
+Ten statistics — rank-margin softness and quantiles, fact-boundary attention,
+cross-column ordering diversity (Kendall), interleaving runs z, threshold
+dispersion, per-fact active degree, same-label pattern correlation excess, and
+the label share of rank-margin variance — and the result is uniform:
+
+* **No statistic separates good from bad within matched provenance.** The seed
+  (0) and its fw product (2.31e-2) agree to within noise on everything (rank
+  softness 0.065/0.061, fact attention +0.53/+0.58, ordering diversity
+  0.092/0.089, label-R² 0.034/0.035). ep180 (0) vs trained (4.40e-2): same.
+* **What does separate is provenance.** The runs statistic detects GD-trained
+  states (including the worthless ep180); label-correlation excess and label-R²
+  detect fit pressure of any kind (including the worthless seed). The seed row
+  is the control that kills them as quality metrics: it has the "good" label
+  structure and a ceiling of zero.
+* **The building delta is structureless too.** The 3,845 flipped cells between
+  seed and product sit at the staircase boundary (median rank distance 3 vs 18
+  for the population — the order-space restatement of §17's free flips), spread
+  uniformly over columns (top-4 share 0.16 vs 0.125 uniform), labels (CV 0.10),
+  and tokens, error-agnostic (35% on then-wrong facts vs a 37% base rate). The
+  flow's flip policy is gradient descent's flip policy — §17 replicated for a
+  GD-free process — and the choice of *which* boundary cells to flip, where all
+  the quality lives, has no marginal signature a construction could imitate.
+
+One second-order statistic was also tested — per-fact near-boundary *exposure*
+(how many of a fact's d cells sit within 2 rank steps of the staircase edge),
+the natural joint quantity if good gates protected facts by anti-concentrating
+fragile bits. Every gate in the zoo, good and bad alike, matches the
+independent-assignment null CV to two decimals (trained 0.51 vs null 0.53;
+seed 0.55 vs 0.55; fw product 0.55 vs 0.56): no gate structures its fragile-bit
+placement at all.
+
+First pass over the full Theorem-2 parameterization, refuted at the same depth
+as §14: gate quality is invisible to state statistics in either magnitude or
+order coordinates, invisible to the delta's marginals, and invisible to the
+first joint statistic with a robustness story. With §18's Remark 4.1 (naming a
+crossing direction is solving the construction problem), the incompressibility
+position (theory.md 6‴) now rests on three independent legs.
+
 ## Why this matters for the challenge
 
 The post frames its construction and the trained model as differing in *which* neurons

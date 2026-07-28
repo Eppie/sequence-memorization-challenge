@@ -188,28 +188,57 @@ fails, iteration succeeds, and the ingredient is the re-solve loop, not the
 specific field being integrated. Two follow-ups sharpened it further
 (`FINDINGS.md` §§20–21): the oracle can be as cheap as a subgradient matvec
 (exactness is not the ingredient; step granularity is), and the flow's seed
-requirements are now measured — it bootstraps from any GD state past ~half-fit
+requirements were measured — it bootstraps from any GD state past ~half-fit
 (threshold in GD-epochs (50, 100]) but not from scratch, and cheap oracles fail
 outright on stiff constructed geometry, where the near-tie reservoir that
 GD-built states maintain (0.5% of bits within ~10⁻³ of zero, ~12× denser than
 the pedestal construction's) is absent.
 
-**Open problem 6″ (the ordering invariant — the declarative target).** By
-Theorem 2 a gate *is* d token-orderings plus thresholds. §14 refuted
-magnitude/correlation statistics as quality predictors; *order-structure*
-statistics of the permutation ensemble relative to the fact hypergraph have
-never been tested. A quality-predicting invariant here would be the first
-declarative description of what gradient descent builds — and would enable a
-closed-form, rules-legal construction that *chooses* its orderings instead of
-drifting into them. The candidate softness invariant (near-tie density) sits
-beside it: measurable, provenance-separating, quality-relevance untested.
+**Resolution of the seed problem (6′; `FINDINGS.md` §22).** The seed is
+constructible but not dispensable: a rounds-0 seed (random embeddings, GD-scale
+ridge readout, fit 0.13) still fails under every arm at tested budgets, so the
+embedding half-fit is a real ingredient — one that ridge builds. A ridge-built
+state at train accuracy 0.63 (0.52 also works,
+crossing later) with its readout rescaled to GD's rms bootstraps the fw flow
+past the GD-seeded runs — crossing at §19's own 1.45e-2, reaching 3.0–3.2e-2
+by round 400 with no plateau, ≤1.4× from the trained full-budget ceiling —
+with no gradient descent anywhere in the ancestry. Two attributions of §20 are
+thereby revised: the property that gated the cheap flows was the readout's
+τ-saturation regime (a 19×-undersized readout leaves every fit fact below the
+cap, so fit facts never stop pulling — §14's churn), not embedding stiffness;
+and the near-tie reservoir is a second-order stabilizer (longer feasible
+windows under the cheapest readout), not the gatekeeper. What gradient descent
+retains is a bounded ceiling edge of ~1.24× at matched iteration budget
+(4.28e-2 at epoch 750 vs the flow's 3.46e-2 at round 800), shrinking slowly
+with flow rounds — the program's last unexplained number.
 
-**Open problem 6‴ (incompressibility).** The standing alternative: no
-state-local description predicts gate quality, and the process is the shortest
-description of its own fixed point. The missing theorem is a lower bound over a
-natural oracle class — or the invariant of 6″ refuting it. Also open: the ~1.8×
-ceiling advantage gradient descent's own integrand retains over every
-hand-specified flow from the same seed.
+**Open problem 6″ (the ordering invariant — first pass refuted).** By
+Theorem 2 a gate *is* d token-orderings plus thresholds. §14 refuted
+magnitude/correlation statistics as quality predictors; `FINDINGS.md` §23 now
+refutes the first pass over *order-structure* statistics at the same depth: ten
+rank-space statistics (softness, boundary attention, ordering diversity,
+interleaving, threshold dispersion, fact degree, label structure) fail to
+separate good gates from bad within matched provenance — the ridge seed and the
+fw product grown from it (ceiling 0 vs 2.31e-2, 7.6% of bits apart) agree on
+every one, as do ep180 and the trained gate. The statistics that do separate
+detect provenance, not quality, and the seed row kills those as predictors.
+Still open in principle: joint/higher-order statistics of the permutation
+ensemble relative to the fact hypergraph. The candidate softness invariant is
+resolved: a stabilizer, not a quality predictor (§22).
+
+**Open problem 6‴ (incompressibility — now three-legged).** The standing
+alternative: no state-local description predicts gate quality, and the process
+is the shortest description of its own fixed point. Evidence: state statistics
+are blind in both magnitude (§14) and order (§23) coordinates; the building
+delta's marginals are structureless (§23 — near-boundary, uniform over columns,
+labels, and tokens, error-agnostic, for GD's window flips and the GD-free
+flow's alike); and naming a crossing direction is equivalent to solving the
+construction problem (Remark 4.1). The missing theorem is a lower bound over a
+natural oracle class. The companion quantitative question is now bounded: the
+ceiling advantage of gradient descent over hand-specified flows, ~1.8× at §21's
+horizons, is ~1.24× at matched iteration budget (`FINDINGS.md` §22) — partly
+round count, with a small, slowly shrinking residual whose vanishing at large
+budgets is open.
 
 ## 7. What is proved, what is measured, what is open
 
@@ -219,11 +248,16 @@ continuous paths (Lemma 3), and the identification of flip-budget geometry with
 Hamming distance to the feasible realizable set (Lemma 4) — with Remark 4.1
 reducing "find a crossing direction" to the construction problem itself. Measured
 (FINDINGS): where in training the gate becomes good (§16), the triviality of the
-flip policy (§17), the failure of every one-shot direction (§18), and the success
-of the iterated fit-pressure process (§19) — Conjecture 6 confirmed. Open: problem
-6′ (the seed), and beneath it the theorem this program now wants — either an
-efficiency separation between one-shot oracles and re-solved processes (why four
-strides succeed where one budget-matched step cannot), or a construction of the
-87%-fit seed without gradient descent. §18 plus §19 jointly locate the whole
-mystery in the *loop*: direction recomputation after each step's flips is the one
-ingredient every failure lacked and every success has.
+flip policy (§17), the failure of every one-shot direction (§18), the success of
+the iterated fit-pressure process (§19) — Conjecture 6 confirmed — and the
+resolution of the seed problem (§22): a ridge-built half-fit seed with a GD-scale
+readout serves, so no stage of the pipeline needs gradient descent. Open: the
+declarative question, now sharpened to its hard core — first-order state and
+delta statistics are refuted in both coordinates (§§14, 23), so either a
+higher-order invariant exists, or the incompressibility bound (6‴) is a theorem.
+Beneath it, the last quantitative residue: the ~1.8× ceiling edge of gradient
+descent's full trajectory over every hand-specified flow. §18 plus §19 locate
+the mystery in the *loop*; §§22–23 add that the loop needs no privileged seed
+and leaves no statistical fingerprint — direction recomputation after each
+step's flips remains the one ingredient every failure lacked and every success
+has, and nothing measurable about its products yet explains why.

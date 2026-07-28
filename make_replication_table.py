@@ -6,7 +6,6 @@ after any further run keeps the table and the data in step.
 
     uv run python make_replication_table.py
 """
-import glob
 import json
 import os
 

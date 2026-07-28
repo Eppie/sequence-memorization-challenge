@@ -200,6 +200,14 @@ accident while testing LP warm starts.
 ## Traps added this session
 
 * **spawn + module globals** (§2 above). The single most dangerous thing here.
+* **`from probe_gatequality import GATES_DIR` binds the value at import time**,
+  so the name never follows a later `configure()`. This is why the patched
+  probes import the module (`import probe_gatequality as pgq`) and reference
+  `pgq.GATES_DIR` at use sites instead. `probe_ordering.py` (added on main in
+  `5e20f6d`) still does the from-import; harmless today because it takes no cell
+  flags and only ever runs the default cell, but it will silently measure d=32 /
+  seed 42 the moment anyone gives it `--fact-seed`. Convert it at that point,
+  not after.
 * **`pgrep -f <pattern>` matches the waiting shell's own command line**, so
   `until ! pgrep -qf 'foo.py'; do sleep 5; done` can spin forever and a chained
   launch never fires. Cost one silently-never-started experiment. Wait by PID
