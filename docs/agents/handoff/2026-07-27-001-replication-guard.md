@@ -3,9 +3,11 @@
 **Date:** 2026-07-27
 **Repo:** `/Users/eppie/claude_projects/handcode`, worktree
 `.claude/worktrees/replication-guard` on branch `worktree-replication-guard`
-(branched from `main` @ `2ef6b67`, which equals `origin/main`).
-**Local state: UNCOMMITTED.** Two probes patched, 60 tests green, seed-43 runs
-still executing at handoff time.
+(branched from `main` @ `2ef6b67`).
+**Local state (updated 2026-07-28): MERGED INTO `main`** at `2ab3e31` — the two
+probe patches, the result JSONs, `make_replication_table.py` and the draft
+section, plus a merge of main's softseed work (`0c3c4a3`). 69 tests green.
+`main` is 3 commits ahead of `origin/main`; **nothing has been pushed.**
 **Supersedes nothing.** Extends `2026-07-26-001-gate-quality-program.md` item 2
 ("Replication guard"), which is the task this session took on.
 
