@@ -192,9 +192,16 @@ are 13% of the nnz despite being 73% of the rows.
   flat at ~0.33 throughout. So the 5% step does not merely cost a slow
   recovery; within the horizon measured there is no recovery at all, which is a
   stronger statement than §21's published "destroyed in one round".
-* The two ep50 arms rest on unequal evidence. Seed 43 ran 44 rounds with 12
-  ascents, all infeasible; seed 44's first attempt stopped after 3 rounds with a
-  single ascent, so "dies" there rests on the accuracy collapse alone. A
-  matched 44-round seed-44 arm is running.
+* The two ep50 arms rest on unequal evidence, and the gap cannot be closed under
+  this formulation. Seed 43 ran 44 rounds with 12 ascents, all infeasible. Seed
+  44 stops at **3 rounds and 1 ascent**: the spread LP's objective collapses to
+  `mean_m = -0.0000` by round 2, and at round 4 the embedding LP exhausts its
+  900s `time_limit` without converging, which breaks the stride loop. Attempted
+  twice, same round, same message — so this is a property of the collapsed state
+  and not an interrupted run. "Dies" at seed 44 therefore rests on the round-1
+  accuracy collapse (0.33 → 0.027) plus one infeasible ascent, where seed 43 has
+  twelve. Arguably the LP's own failure corroborates death — there is no
+  feasible spread direction left to find — but that is an argument, not the
+  matched measurement, and it is recorded here as the weaker cell it is.
 * §§15, 16, 18 were not re-measured; only the rows named as headline claims
   were.

@@ -214,6 +214,14 @@ accident while testing LP warm starts.
   `until ! pgrep -qf 'foo.py'; do sleep 5; done` can spin forever and a chained
   launch never fires. Cost one silently-never-started experiment. Wait by PID
   (`while kill -0 $PID`) or use a marker file.
+* **A stride run exits 0 after breaking out early.** An LP failure prints
+  `[stride] LP failed at round N` and `break`s; the ascents then run on whatever
+  snapshots exist and the process exits cleanly. **Check the round count in the
+  JSON, never the exit code.** This is the same failure mode that produced the
+  earlier false "S20 does not transfer" — a short run read as a negative result.
+  Seed 44's ep50 arm is the standing example: 900s `time_limit` exhausted at
+  round 4, reproducibly, because the collapsed state's spread LP is degenerate
+  (`mean_m = -0.0000`).
 * **Power mode invalidates timings.** Re-measure anchors after any change;
   a mid-run switch corrupts the run that straddles it.
 * **`time_limit` is not a reliable guard at d=64** — exceeded by >3.5 min and
