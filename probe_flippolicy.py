@@ -68,11 +68,8 @@ import torch
 
 from handcode.data import generate_facts
 from handcode.model import ModelShape, hidden_activations
+import probe_gatequality as pgq
 from probe_gatequality import (
-    CURVE_CKPT_PATH,
-    D,
-    GATES_DIR,
-    N_FACTS,
     RESULTS_DIR,
     ascend_best,
     evaluate_full,
@@ -81,9 +78,21 @@ from probe_gatequality import (
 
 WINDOW_EPOCHS = tuple(range(140, 361, 20))
 NULL_EPOCHS = (500, 700)
-CKPT_PATH = os.path.join(GATES_DIR, "window_checkpoints.npz")
-EDGE_PATH = os.path.join(GATES_DIR, "edge_state.npz")
+CURVE_CKPT_PATH = pgq.CURVE_CKPT_PATH
+CKPT_PATH = os.path.join(pgq.GATES_DIR, "window_checkpoints.npz")
+EDGE_PATH = os.path.join(pgq.GATES_DIR, "edge_state.npz")
 OUT_PATH = os.path.join(RESULTS_DIR, "flippolicy.json")
+
+
+def refresh_paths() -> None:
+    """Re-derive every path after pgq.configure() moved the cell."""
+    global CKPT_PATH, EDGE_PATH, OUT_PATH, CURVE_CKPT_PATH
+    tag = ("" if (pgq.D, pgq.N_FACTS, pgq.FACT_SEED) == (32, 1584, 42)
+           else f"_d{pgq.D}_n{pgq.N_FACTS}_s{pgq.FACT_SEED}")
+    CURVE_CKPT_PATH = pgq.CURVE_CKPT_PATH
+    CKPT_PATH = os.path.join(pgq.GATES_DIR, "window_checkpoints.npz")
+    EDGE_PATH = os.path.join(pgq.GATES_DIR, "edge_state.npz")
+    OUT_PATH = os.path.join(RESULTS_DIR, f"flippolicy{tag}.json")
 EDGE_EPOCH = 180
 EDGE_T = 0.125  # the interp step that crossed the edge (FINDINGS.md 17)
 
@@ -104,9 +113,9 @@ def merge_out(update: dict) -> None:
 
 
 def setup():
-    shape = ModelShape.from_d(D)
-    facts = generate_facts(N_FACTS, shape.input_vocab_size,
-                           shape.output_vocab_size, 42)
+    shape = ModelShape.from_d(pgq.D)
+    facts = generate_facts(pgq.N_FACTS, shape.input_vocab_size,
+                           shape.output_vocab_size, pgq.FACT_SEED)
     return shape, facts
 
 
@@ -144,7 +153,10 @@ def run_ascents(jobs, workers):
     from concurrent.futures import ProcessPoolExecutor, as_completed
 
     rows = {}
-    with ProcessPoolExecutor(max_workers=workers) as ex:
+    with ProcessPoolExecutor(max_workers=workers,
+                             initializer=pgq.configure,
+                             initargs=(pgq.D, pgq.N_FACTS,
+                                       pgq.FACT_SEED)) as ex:
         futures = {ex.submit(ascend_worker, *job): job[0] for job in jobs}
         for fut in as_completed(futures):
             tag = futures[fut]
@@ -441,7 +453,13 @@ def main() -> None:
                              "location varies by realization; pick the "
                              "smallest t whose interpolate is feasible.")
     parser.add_argument("--workers", type=int, default=12)
+    pgq.add_cell_args(parser)
     args = parser.parse_args()
+    pgq.configure(args.d, args.n_facts, args.fact_seed)
+    refresh_paths()
+    print(f"[cell] d={pgq.D} n_facts={pgq.N_FACTS} "
+          f"fact_seed={pgq.FACT_SEED}\n[cell] gates={pgq.GATES_DIR}\n"
+          f"[cell] out={OUT_PATH}", flush=True)
     if args.out:
         OUT_PATH = args.out
 
@@ -573,7 +591,7 @@ def main() -> None:
         seed_name = args.stride_seed
         run_name = (seed_name if args.oracle == "lp"
                     else f"{seed_name}_{args.oracle.replace('-', '')}")
-        state_path = os.path.join(GATES_DIR, f"stride_{run_name}_state.npz")
+        state_path = os.path.join(pgq.GATES_DIR, f"stride_{run_name}_state.npz")
         r0 = 0
         u0_seed = None
         if args.resume and os.path.exists(state_path):

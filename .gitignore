@@ -16,4 +16,9 @@ wheels/
 results/conn_cache/
 # Regenerable: gate zoo + drift snapshot from probe_gatequality.py (deterministic seeds)
 results/gatequality_gates/
+# Same, for off-default replication cells (--d/--n-facts/--fact-seed). Note the
+# stride_*_state.npz in these are resume points costing hours of LP, not minutes
+# of training -- every finished run's results live in the JSONs, but a run
+# interrupted after a cache wipe restarts from round 0.
+results/gatequality_gates_d*_n*_s*/
 reference/__pycache__/

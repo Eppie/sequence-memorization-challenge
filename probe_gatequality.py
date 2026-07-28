@@ -76,6 +76,34 @@ OUT_PATH = os.path.join(RESULTS_DIR, "gatequality.json")
 
 D = 32
 N_FACTS = 1584  # the digit code's capacity point; trained sigma90 here ~4.3e-2
+FACT_SEED = 42
+
+# Everything in FINDINGS 14-21 was measured at (32, 1584, 42). The replication
+# guard needs other cells, so d / n / fact-seed are configurable -- but the
+# DEFAULT cell must keep the original paths, or the published caches and JSONs
+# stop matching. configure() therefore suffixes the paths only off-default.
+#
+# TRAP: ProcessPoolExecutor uses spawn on macOS, so a child re-imports this
+# module and sees the defaults, NOT whatever configure() set in the parent.
+# Every pool must pass initializer=configure with initargs -- otherwise the
+# workers silently ascend the d=32/seed-42 gate and label it seed 43.
+
+
+def configure(d: int = 32, n_facts: int = 1584, fact_seed: int = 42) -> None:
+    """Set the measurement cell and re-derive every cache/output path."""
+    global D, N_FACTS, FACT_SEED, GATES_DIR, OUT_PATH, CURVE_CKPT_PATH
+    D, N_FACTS, FACT_SEED = d, n_facts, fact_seed
+    tag = ("" if (d, n_facts, fact_seed) == (32, 1584, 42)
+           else f"_d{d}_n{n_facts}_s{fact_seed}")
+    GATES_DIR = os.path.join(RESULTS_DIR, f"gatequality_gates{tag}")
+    OUT_PATH = os.path.join(RESULTS_DIR, f"gatequality{tag}.json")
+    CURVE_CKPT_PATH = os.path.join(GATES_DIR, "curve_checkpoints.npz")
+
+
+def add_cell_args(parser) -> None:
+    parser.add_argument("--d", type=int, default=32)
+    parser.add_argument("--n-facts", type=int, default=1584)
+    parser.add_argument("--fact-seed", type=int, default=42)
 
 
 # --------------------------------------------------------------------------
@@ -651,7 +679,7 @@ def curve_ascend_worker(epoch: int) -> dict:
     """Ascend one checkpoint's gate (runs in a worker process)."""
     shape = ModelShape.from_d(D)
     facts = generate_facts(N_FACTS, shape.input_vocab_size,
-                           shape.output_vocab_size, 42)
+                           shape.output_vocab_size, FACT_SEED)
     z = np.load(CURVE_CKPT_PATH)
     up = torch.from_numpy(z[f"up_{epoch}"]).float()
     down = torch.from_numpy(z[f"down_{epoch}"]).float()
@@ -695,11 +723,15 @@ def main() -> None:
                         default="minmax")
     parser.add_argument("--tau", type=float, default=0.5)
     parser.add_argument("--workers", type=int, default=11)
+    add_cell_args(parser)
     args = parser.parse_args()
+    configure(args.d, args.n_facts, args.fact_seed)
 
     shape = ModelShape.from_d(D)
     facts = generate_facts(N_FACTS, shape.input_vocab_size,
-                           shape.output_vocab_size, 42)
+                           shape.output_vocab_size, FACT_SEED)
+    print(f"[cell] d={D} n_facts={N_FACTS} fact_seed={FACT_SEED}\n"
+          f"[cell] gates={GATES_DIR}\n[cell] out={OUT_PATH}", flush=True)
     inputs = facts["inputs"].numpy()
     names = args.gates or list(GATE_BUILDERS)
 
@@ -717,7 +749,7 @@ def main() -> None:
                   f"smin_med={m['smin_median']:.2f} "
                   f"kappa_med={m['kappa_median']:.1f} "
                   f"overlap_cv={m['overlap_cv']:.3f}", flush=True)
-        merge_out({"d": D, "n_facts": N_FACTS, "metrics": rows})
+        merge_out({"d": D, "n_facts": N_FACTS, "fact_seed": FACT_SEED, "metrics": rows})
         print(f"\nwrote {OUT_PATH}")
 
     elif args.phase == "predict":
@@ -772,7 +804,9 @@ def main() -> None:
         }})
 
         rows = {}
-        with ProcessPoolExecutor(max_workers=args.workers) as ex:
+        with ProcessPoolExecutor(max_workers=args.workers,
+                                 initializer=configure,
+                                 initargs=(D, N_FACTS, FACT_SEED)) as ex:
             futures = {ex.submit(curve_ascend_worker, e): e
                        for e in snap_epochs}
             for fut in as_completed(futures):
