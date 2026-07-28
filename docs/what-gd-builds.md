@@ -9,9 +9,9 @@ has closed up to one number: gradient descent builds the gate in a narrow window
 the end of fitting (§16), by trivial free flips (§17), the transition is
 reproducible by iterated fit pressure at matched stride with no gradients (§19),
 with the cheapest oracle there is (§21), from a ridge-built seed (§22) — no stage
-needs gradient descent, and the GD-free pipeline is within ~1.4× of the trained
-ceiling at round 400 with no plateau in sight. What remains is that shrinking
-residue, and the fact that the account is a process, not a description. `docs/theory.md` gives the formal layer: realizability
+needs gradient descent, and the GD-free pipeline reaches within ~1.27× of the
+trained ceiling (~1.24× at matched iteration budget). What remains is that
+bounded residue, and the fact that the account is a process, not a description. `docs/theory.md` gives the formal layer: realizability
 characterized and counted, flips proved free, edge geometry = Hamming distance,
 the stride conjecture confirmed, the seed problem resolved.*
 
@@ -218,7 +218,8 @@ point, respectively.
    ridge-built gate (ceiling 2.85e-3) as the *construction record* and files
    the flows — which iterate solves against the task's own margins, i.e.
    training — as process-class analysis; the best fully GD-free artifact now
-   stands at 3.21e-2, ~1.4× from trained and still climbing at round 400. The declarative escape narrowed too
+   stands at 3.46e-2 (round 800), ~1.27× from trained, ~1.24× at matched
+   iteration budget. The declarative escape narrowed too
    (`FINDINGS.md` §23): order-structure statistics — the full Theorem-2
    parameterization — are as blind to quality as §14's magnitude statistics,
    on the sharpest pair available (the seed and its own flow product), and the

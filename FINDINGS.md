@@ -911,20 +911,39 @@ direction + exact readout refit, from the 0.63-fit ridge seed, either twin:
 | 100 | 1.95e-2 / 1.99e-2 (live accuracy 1.000 from here on) |
 | 200 | 2.31e-2 / 2.40e-2 |
 | 300 | 2.92e-2 / 2.64e-2 |
-| 400 | **3.00e-2 / 3.21e-2** — no plateau yet, ~10% net drift |
+| 400 | **3.00e-2 / 3.21e-2**, ~10% net drift |
+| 800 | — / **3.46e-2**, decelerating but still creeping (softened arm) |
 
 The crossing value equals GD's own crossing gate (§19: 1.45e-2); the GD-seeded
-fw numbers (§21: plateau ~2.2e-2, peak 2.33e-2) are passed by round 250–300;
-and at round 400 the run is still climbing. **Gradient descent is not needed to
-make the start.** The best fully GD-free artifact moves 3.15e-3 → **3.21e-2** —
-from ~14× short of the trained full-budget ceiling (4.40e-2) to **~1.4×, with
-the gap still shrinking** — and the pipeline's every stage is understood: ridge
-seed, subgradient direction, order-statistic step, LP readout refit. Two
-corollaries: §21's "~1.8× integrand edge" was at least partly round count — the
-hand-specified flow keeps building long after the 40–400-round horizons those
-comparisons used — and the fit floor is looser than §20's GD-prefix threshold
-suggested: the 0.52-fit seed also crosses (round ~100) and reaches 1.8–1.9e-2
-by round 200 on the same monotone climb.
+fw numbers (§21: plateau ~2.2e-2, peak 2.33e-2) are passed by round 250–300.
+**Gradient descent is not needed to make the start.** The best fully GD-free
+artifact moves 3.15e-3 → **3.46e-2** — from ~14× short of the trained
+full-budget ceiling (4.40e-2) to **~1.27×** — and the pipeline's every stage is
+understood: ridge seed, subgradient direction, order-statistic step, LP readout
+refit. Two corollaries: §21's "~1.8× integrand edge" was partly round count —
+the flow keeps building long after the horizons those comparisons used — but
+not entirely: at *matched* iteration budget gradient descent holds 4.28e-2
+(epoch 750, §16's curve) against the flow's 3.46e-2 at round 800, a bounded
+**~1.24× matched-budget edge**, shrinking slowly (+8% over rounds 400–800) with
+no sign yet of closing outright. And the fit floor is looser than §20's
+GD-prefix threshold suggested: the 0.52-fit seed also crosses (round ~100) and
+reaches 1.8–1.9e-2 by round 200 on the same monotone climb.
+
+**The scratch cell fails, so the fit requirement is real.** The remaining
+suspicion — that §20's scratch death was also a readout artifact — was
+retested under the revised regime: a rounds-0 seed (random embeddings, ridge
+readout at GD scale, train accuracy 0.126). It does not bootstrap. fw-full
+climbs 0.13 → 0.51 over 400 rounds without ever entering feasibility; the fw
+arm is worse — the exact readout refit on a contentless pattern is destructive
+(live accuracy pinned at ~0.03 for a hundred rounds, 43% churn by round 200,
+infeasible throughout), §20's death mechanism reproduced. The flow's fit floor
+sits between 0.13 and 0.52, the embedding half-fit is a genuine ingredient the
+flow cannot make from nothing at tested budgets — and the point of this
+section stands precisely because it is constructible by ridge. (One honest
+hedge: at matched step counts, Adam fits from scratch far faster than the fw
+flow, so "never" is untested beyond 400 rounds; what is established is that a
+ridge half-fit is the cheap constructible substitute for whatever the early
+fitting phase builds.)
 
 The ledger, unchanged in kind: the flow optimizes the task objective, so this
 remains **process-class analysis, not a challenge entry** — iterating solves
@@ -932,10 +951,11 @@ against a coder-declared equality system (twosided, digit) is construction;
 iterating them against the task's own margins is training with different
 branding. The *construction record* stands at 2.85e-3 (§14). What the result
 changes is the residue: after §21 removed GD's optimizer specifics and this
-section removes its seed, the unexplained remainder is down to ≤1.4× between
-the process class at round 400 and the trained ceiling — still shrinking, and
-possibly nothing but iteration budget — plus the fact that the whole account
-is a process, not a description. Caveats: one fact seed, one d, one ridge
+section removes its seed, the unexplained remainder is a bounded ~1.2–1.3×
+matched-budget ceiling edge (4.28e-2 at epoch 750 vs 3.46e-2 at round 800),
+shrinking slowly with flow rounds — whether it vanishes at very large budgets
+is open — plus the fact that the whole account is a process, not a
+description. Caveats: one fact seed, one d, one ridge
 init, and the fw-full/fw contrast measured on one seed family; the
 replication guard gates all of it.
 
