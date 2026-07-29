@@ -1217,6 +1217,128 @@ are 13% of the nnz despite being 73% of the rows.
 * §§15, 16, 18 were not re-measured; only the rows named as headline claims
   were.
 
+## 25. Rate–distortion: the ceiling's description is ten kilobits with no structure
+
+`probe_ratedistortion.py`. §§14 and 23 asked whether gate quality is
+*describable* and answered no, statistic by statistic. This section asks the
+quantitative version instead: compress the trained solution's *description*
+and measure what each compressed description still buys. The generator is the
+pre-activation embedding pair (u, v) — 4,096 scores, 131,072 bits at float32
+— and each variant's induced pattern is handed to §14's two-LP ascent
+(3 rounds, started from the variant's own embeddings with the trained
+readout), so the weights are re-solved from the pattern and the measurement
+isolates what the *description* names. The baseline reproduces the protocol
+gate exactly (ceiling 4.40e-2, first emb-LP γ = 11.593, §24's value).
+Description lengths are entropy-coded level streams plus the codebook.
+
+**Per-parameter quantization keeps almost everything:**
+
+| levels k | bits/param (quantile) | flips | ceiling | bits/param (linear) | flips | ceiling |
+|---|---|---|---|---|---|---|
+| 2 | 1.01 | 23.9% | infeasible | 1.02 | 22.6% | infeasible |
+| 3 | 1.59 | 15.4% | **4.28e-3** | 1.12 | 22.9% | infeasible |
+| 4 | 2.01 | 10.3% | 2.51e-2 | 1.54 | 17.0% | 5.00e-3 |
+| 6 | 2.58 | 7.2% | 3.87e-2 | 2.15 | 9.7% | 3.27e-2 |
+| 8 | 3.04 | 4.7% | 4.23e-2 | 2.63 | 6.8% | 3.92e-2 |
+| 16 | 4.10 | 3.5% | 4.35e-2 | 3.76 | 3.1% | 4.36e-2 |
+| 32 | 5.23 | 2.1% | 4.37e-2 | 4.93 | 2.6% | 4.39e-2 |
+
+The feasibility edge sits between 1.0 and 1.6 bits/param. A three-level
+alphabet on the 4,096 scores — ~6.5 kilobits, a 20× compression — still names
+a storable pattern **above the construction record** (4.28e-3 vs §14's
+2.85e-3), and 3 bits/param recovers 96% of the trained ceiling. (These are
+compressed *trained* artifacts, not constructions — the record stands; what
+they measure is description length, not buildability.)
+
+**Every structural compression fails, at matched or better distortion.** The
+same trained state, compressed along every cross-parameter axis available:
+SVD truncation of the token matrix is infeasible at every rank tried up to
+r=24 of 32 (9.4% flips); k-means token codebooks are infeasible at every size
+up to c=64 for 128 tokens — merely pairing tokens up (18.2% flips); zeroing
+the smallest half of the weights is infeasible (14.1% flips). Flip fraction
+does not predict survival — quantile k=4 survives 10.3% flips where r=24 dies
+at 9.4%, and linear k=4 survives 17.0% where c=64 dies at 18.2%. What
+predicts it is the perturbation's *direction*: per-parameter rounding bounds
+each token's score error and concentrates flips on near-ties; every
+structural projection moves scores incoherently. The flip-curve control makes
+the geometry explicit — flipping the q fraction of pattern bits nearest zero
+leaves the ceiling intact through q=4%, degrades it to 3.19e-2 at 8%, and
+kills it by 16%, while random flips of matched count kill it at 0.5% and 2%
+(§24's necessity result, now a full curve: the near-tie direction is ≥16×
+more tolerant).
+
+So the trained solution's ceiling-relevant content is compressible along
+exactly one axis — per-scalar precision — and along none of the structural
+axes tried: **4,096 scores × ~2.5 irreplaceable bits each ≈ 10 kilobits of
+co-adaptation with no found redundancy across parameters.** That is
+theory.md 6‴ as a measurement rather than a suspicion. One suggestive
+alignment, offered with its caveat: the fact table itself carries 1584 ×
+log₂32 ≈ 7.9 kilobits of label information, and the pattern's feasibility
+edge lands at 6.5–8.2 kilobits — but the ascent receives the labels, so the
+pattern need not encode them; the near-match invites a counting argument, it
+does not yet make one.
+
+Two side measurements. As a *deployed model* (no re-solve), the same weights
+need ~5 bits/param — k=32 keeps σ90 within noise, k=16 is broken — matching
+§1's activation-side "~32 levels" anchor on the weight side; and the readout
+is full-rank-hungry as deployed (rank 16 of 32 drops accuracy to 0.45), the
+as-built face of §7. Caveats: one cell (32, 1584, 42), one quantizer family
+per axis, k-means as the only clustering tried; and a measurement trap worth
+recording — an emb-LP that hits its `time_limit` on the *first* round records
+as infeasible with nothing proven (linear k=6 was first mis-recorded this way
+under three concurrent LP processes; re-run alone it is feasible at 3.27e-2
+with margin 8.9). Negative verdicts here were accepted only when round-0
+completed with γ* = 0.
+
+## 26. Designed gates: realizability is free, storability is not
+
+`probe_designedgates.py`. §§13–14 built patterns by iterated solves and §22
+by flow; the untried third path is *forward design* — pick the pattern from a
+combinatorial object with distance properties, then one LP pass for weights.
+Theorem 2 (theory.md) makes the design space exact: every additive gate
+column is a token ordering plus thresholds, i.e. any per-neuron score pair
+(a, b) with firing rule 1[a(x₀) + b(x₁) > 0] is realizable by construction,
+and *only* such columns are. So "realizable high-margin patterns are
+exponentially rare" splits cleanly: realizability can be had for free by
+designing in score space; the open question is purely whether any declarative
+score design is storable, given that Gaussian random scores (init,
+random_additive) are not.
+
+Four families, measured under §14's protocol (ridge-seeded readout, 3-round
+ascent):
+
+| family | design | density | ceiling |
+|---|---|---|---|
+| hadamard | Hadamard-row token signatures (pairwise distance 16), AND/NAND gates | 0.499 | infeasible |
+| modular ×2 seeds | per-neuron affine bijections mod 64, fire iff fractional parts sum past 1 | 0.475 | infeasible |
+| thermo ×2 variants | tokens as base-8 digit pairs, thermometer comparisons at 8 thresholds | 0.496 | infeasible |
+| shuffle ×2 seeds | the trained gate's own score columns, token-permuted per neuron | 0.536 | infeasible |
+
+All seven at γ* = 0, the do-nothing point. The thermometer family is the
+inequality-native digit code — distances between fact signatures are literal
+L1 distances between digit vectors, no equality channel anywhere, so the rank
+barrier (`what-gd-builds.md` item 2) does not apply — and it dies with the
+rest. A design-level trap en route: pure-AND Hadamard gates leave 44 facts
+with empty active sets (trivially unstorable before any LP), and only one of
+four mixed variants avoids empty facts at every column roll tried — even
+*nonemptiness* is a designed property in this family.
+
+The control carries the section. The shuffle gate matches every first-order
+per-neuron score statistic of the trained gate — same marginals, same
+densities, same near-tie profile per column — and destroys only the token
+co-adaptation. It is infeasible at both seeds. No per-neuron property,
+however exactly matched, buys storability; what is missing is *which token
+gets which score*, jointly across all 4,096 cells — precisely the ~10
+kilobits §25 measures as structurally incompressible. With §14 (magnitude
+statistics), §23 (order statistics), and §18's Remark 4.1, this is the fourth
+independent leg of 6‴, and the first from the design side: the program
+searched the description space where a construction would have to live, and
+found the trained solution's content absent from every family tried.
+First-pass scope, honestly stated: seven configs, one cell, densities near
+0.5, and no family co-designed with the fact list — co-adapted *declarative*
+design (scores chosen as a function of the specific fact table) is the one
+door this section does not close.
+
 ## Why this matters for the challenge
 
 The post frames its construction and the trained model as differing in *which* neurons

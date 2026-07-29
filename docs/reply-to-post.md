@@ -6,10 +6,11 @@ summarizing this repo's results in the order the authors are likely to care abou
 them. Numbers at d=32 unless noted; everything is reproducible from
 <https://github.com/Eppie/sequence-memorization-challenge>.*
 
-*STATUS: DRAFT — do not post until the replication guard (d=64 / second fact
-seed for FINDINGS §§14–23) lands. The entry, robustness, and appendix-B
-sections are already replication-backed; the "what gradient descent builds"
-process results are single-seed.*
+*STATUS: DRAFT — posting is the maintainer's call. The replication guard
+(FINDINGS §24) has landed: §§14–21's headline rows reproduce at fact seeds 43
+and 44, and the feasibility split holds at d=64; what does not transfer is
+epoch locations, not mechanisms. Still single-seed: the §§22–23 seed/flow
+results and the §§25–26 description-length results.*
 
 ---
 
@@ -92,12 +93,21 @@ chased that to the bottom. The short version:
    eliminated by construction.
 
 The uncomfortable conclusion I keep failing to escape: the robust solution seems to
-be **process-shaped, not description-shaped**. Three independent results point the
+be **process-shaped, not description-shaped**. Four independent results point the
 same way — state statistics are blind in both magnitude and order coordinates, the
 gate-building flip set has no imitable structure (near-boundary cells, uniform over
-columns/labels/tokens, error-agnostic — the *choice* carries the quality), and
-naming a single crossing direction is provably equivalent to solving the
-construction problem itself. I would genuinely love a counterexample: a
+columns/labels/tokens, error-agnostic — the *choice* carries the quality), naming
+a single crossing direction is provably equivalent to solving the construction
+problem itself, and forward-designed gates fail wholesale: Hadamard token
+signatures, hash-balanced staircases, thermometer digit codes, and even the
+trained gate's own per-neuron score distributions with the token assignment
+shuffled are all infeasible at one LP pass. The content also now has a measured
+size: the trained pattern's description compresses to ~2.5 bits per embedding
+score — ~10 kilobits, and a three-level alphabet already names a pattern above my
+own best construction — yet resists every *structural* compression tried (rank,
+token clustering, sparsity) at matched distortion. Ten kilobits of pure
+co-adaptation, with nothing anyone has found to say about them shorter than the
+process that builds them. I would genuinely love a counterexample: a
 declaratively chosen gate that stores at trained robustness would refute this and
 win your challenge in the strong sense. I could not find one, and I now believe
 the interesting theorem is the lower bound. One figure with everything on it:

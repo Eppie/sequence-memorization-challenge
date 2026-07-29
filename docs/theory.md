@@ -226,15 +226,25 @@ Still open in principle: joint/higher-order statistics of the permutation
 ensemble relative to the fact hypergraph. The candidate softness invariant is
 resolved: a stabilizer, not a quality predictor (§22).
 
-**Open problem 6‴ (incompressibility — now three-legged).** The standing
-alternative: no state-local description predicts gate quality, and the process
-is the shortest description of its own fixed point. Evidence: state statistics
-are blind in both magnitude (§14) and order (§23) coordinates; the building
-delta's marginals are structureless (§23 — near-boundary, uniform over columns,
-labels, and tokens, error-agnostic, for GD's window flips and the GD-free
-flow's alike); and naming a crossing direction is equivalent to solving the
-construction problem (Remark 4.1). The missing theorem is a lower bound over a
-natural oracle class. The companion quantitative question is now bounded: the
+**Open problem 6‴ (incompressibility — now four-legged, and quantified).**
+The standing alternative: no state-local description predicts gate quality, and
+the process is the shortest description of its own fixed point. Evidence: state
+statistics are blind in both magnitude (§14) and order (§23) coordinates; the
+building delta's marginals are structureless (§23 — near-boundary, uniform over
+columns, labels, and tokens, error-agnostic, for GD's window flips and the
+GD-free flow's alike); naming a crossing direction is equivalent to solving the
+construction problem (Remark 4.1); and forward design in score space — complete
+by Theorem 2 — fails across every distance-structured family tried, including
+the trained gate's own score marginals with the token assignment permuted
+(`FINDINGS.md` §26). The claim now has a measured size: the ceiling-relevant
+content of the trained state is ~2.5 bits per embedding score (~10 kilobits) —
+compressible per scalar to a three-level alphabet while beating the
+construction record, incompressible along every structural axis tried (rank,
+token clustering, sparsity) at matched distortion (`FINDINGS.md` §25). The
+missing theorem is a lower bound over a natural oracle class — and the
+description-length measurement suggests its form: the storable-pattern
+descriptions found so far are never smaller than the fact table's own ~7.9
+kilobits of label content. The companion quantitative question is now bounded: the
 ceiling advantage of gradient descent over hand-specified flows, ~1.8× at §21's
 horizons, is ~1.24× at matched iteration budget (`FINDINGS.md` §22) — partly
 round count, with a small, slowly shrinking residual whose vanishing at large
