@@ -1007,7 +1007,8 @@ as §14: gate quality is invisible to state statistics in either magnitude or
 order coordinates, invisible to the delta's marginals, and invisible to the
 first joint statistic with a robustness story. With §18's Remark 4.1 (naming a
 crossing direction is solving the construction problem), the incompressibility
-position (theory.md 6‴) now rests on three independent legs.
+position (theory.md 6‴) now rests on three independent legs — a fourth,
+from the design side, arrives in §26.
 
 ## 24. Replication guard: §§14–21 across three fact seeds and two dimensions
 
@@ -1255,7 +1256,7 @@ same trained state, compressed along every cross-parameter axis available:
 SVD truncation of the token matrix is infeasible at every rank tried up to
 r=24 of 32 (9.4% flips); k-means token codebooks are infeasible at every size
 up to c=64 for 128 tokens — merely pairing tokens up (18.2% flips); zeroing
-the smallest half of the weights is infeasible (14.1% flips). Flip fraction
+the smallest half of the embedding weights is infeasible (14.1% flips). Flip fraction
 does not predict survival — quantile k=4 survives 10.3% flips where r=24 dies
 at 9.4%, and linear k=4 survives 17.0% where c=64 dies at 18.2%. What
 predicts it is the perturbation's *direction*: per-parameter rounding bounds
@@ -1319,9 +1320,10 @@ inequality-native digit code — distances between fact signatures are literal
 L1 distances between digit vectors, no equality channel anywhere, so the rank
 barrier (`what-gd-builds.md` item 2) does not apply — and it dies with the
 rest. A design-level trap en route: pure-AND Hadamard gates leave 44 facts
-with empty active sets (trivially unstorable before any LP), and only one of
-four mixed variants avoids empty facts at every column roll tried — even
-*nonemptiness* is a designed property in this family.
+with empty active sets (trivially unstorable before any LP), and of the mixed
+AND/OR and AND/NAND variants at either half-assignment, exactly one finds a
+column roll with no empty fact — even *nonemptiness* is a designed property
+in this family.
 
 The control carries the section. The shuffle gate matches every first-order
 per-neuron score statistic of the trained gate — same marginals, same

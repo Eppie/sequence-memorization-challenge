@@ -103,11 +103,11 @@ signatures, hash-balanced staircases, thermometer digit codes, and even the
 trained gate's own per-neuron score distributions with the token assignment
 shuffled are all infeasible at one LP pass. The content also now has a measured
 size: the trained pattern's description compresses to ~2.5 bits per embedding
-score — ~10 kilobits, and a three-level alphabet already names a pattern above my
-own best construction — yet resists every *structural* compression tried (rank,
-token clustering, sparsity) at matched distortion. Ten kilobits of pure
-co-adaptation, with nothing anyone has found to say about them shorter than the
-process that builds them. I would genuinely love a counterexample: a
+score — a three-level alphabet already names a pattern above my own best
+construction — yet resists every *structural* compression tried (rank, token
+clustering, sparsity) at matched distortion. Ten kilobits of pure co-adaptation,
+with nothing anyone has found to say about them shorter than the process that
+builds them. I would genuinely love a counterexample: a
 declaratively chosen gate that stores at trained robustness would refute this and
 win your challenge in the strong sense. I could not find one, and I now believe
 the interesting theorem is the lower bound. One figure with everything on it:

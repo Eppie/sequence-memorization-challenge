@@ -362,7 +362,7 @@ class Probe:
             tag = f"tie_q{q}"
             if self.skip("tieflip", tag):
                 continue
-            n_flip = int(round(q * self.pattern_t.size))
+            n_flip = round(q * self.pattern_t.size)
             mask = np.zeros(self.pattern_t.size, dtype=bool)
             mask[order[:n_flip]] = True
             pat = self.pattern_t ^ mask.reshape(self.pattern_t.shape)
@@ -374,7 +374,7 @@ class Probe:
             tag = f"rand_q{q}"
             if self.skip("tieflip", tag):
                 continue
-            n_flip = int(round(q * self.pattern_t.size))
+            n_flip = round(q * self.pattern_t.size)
             mask = np.zeros(self.pattern_t.size, dtype=bool)
             mask[rng.choice(self.pattern_t.size, n_flip, replace=False)] = True
             pat = self.pattern_t ^ mask.reshape(self.pattern_t.shape)

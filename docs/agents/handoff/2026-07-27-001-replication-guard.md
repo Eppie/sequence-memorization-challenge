@@ -197,7 +197,8 @@ accident while testing LP warm starts.
 `results/gatequality_d64_n6336_s42.json`,
 `results/flippolicy_s4{3,4}_*.json`, and `make_replication_table.py`
 (regenerates the whole table from the JSONs). Draft section in
-`FINDINGS_22_DRAFT.md` — **not yet merged into FINDINGS.md**.
+`FINDINGS_22_DRAFT.md` — since folded into `FINDINGS.md` as **§24**
+(2026-07-28; the draft file is gone).
 
 ## Traps added this session
 

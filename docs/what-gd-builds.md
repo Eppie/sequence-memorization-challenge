@@ -223,10 +223,14 @@ point, respectively.
    (`FINDINGS.md` §23): order-structure statistics — the full Theorem-2
    parameterization — are as blind to quality as §14's magnitude statistics,
    on the sharpest pair available (the seed and its own flow product), and the
-   building delta has no imitable marginal structure. What would finish this
-   item is either a higher-order invariant no first-pass statistic sees, or
-   the incompressibility lower bound (`docs/theory.md` 6‴, now three-legged)
-   saying none exists.
+   building delta has no imitable marginal structure. Since then the escape
+   narrowed twice more (`FINDINGS.md` §§25–26): forward design in score space
+   fails across every distance-structured family including the trained gate's
+   own shuffled score marginals, and the content has a measured size — ~2.5
+   bits per embedding score, structurally incompressible at matched
+   distortion. What would finish this item is either a higher-order invariant
+   no first-pass statistic sees, or the incompressibility lower bound
+   (`docs/theory.md` 6‴, now four-legged and quantified) saying none exists.
 2. **Codebook targets instead of digit targets — closed on theory grounds.** §1's
    readout measurement says trained labels live on ~12–18 random-ish directions,
    not on `m` ladders, and this item proposed chasing that with codebook targets.
@@ -237,8 +241,12 @@ point, respectively.
    *inequality* targets solved by reweighted ridge are margin iteration — the
    process class of §§19–22, i.e. training. The trained readout's rank is
    purchased with inequality slack (~one binding constraint per fact), which is
-   exactly what a declared code cannot spend. This item's content is absorbed
-   into the §§22–23 verdict: the gap is process-shaped, not code-shaped.
+   exactly what a declared code cannot spend. The inequality-native family the
+   rank barrier does not touch was since built and run anyway — thermometer
+   digit codes over declared gate patterns, one LP pass for weights
+   (`FINDINGS.md` §26) — and it is infeasible outright, the empirical arm of
+   the same closure. This item's content is absorbed into the §§22–23 and §26
+   verdict: the gap is process-shaped, not code-shaped.
 3. **The robustness-qualified benchmark.** Score max facts under weight noise of one
    optimizer step (or report σ90 alongside capacity). Under that metric the account
    above is exactly what a winning entry must reproduce.

@@ -18,7 +18,7 @@ random_additive) are infeasible at this load.
 Families, all deterministic given their seed:
 
   hadamard   token signatures from Sylvester Hadamard rows (pairwise distance
-             exactly V/2); neurons are AND / OR gates on signature bits.
+             exactly V/2); neurons are AND / NAND gates on signature bits.
              Fact signatures inherit code distance.
 
   modular    per-neuron affine bijections of the token index mod V, mapped to
@@ -81,10 +81,12 @@ def sylvester(n: int) -> np.ndarray:
 
 
 def build_hadamard(shape, inputs, mode: str):
-    """Half the neurons AND gates on Hadamard signature bits, half OR
-    ("mix") or NAND ("mixn"). The column roll for the right signature is the
-    smallest in 1..8 leaving no fact with an empty active set (an empty fact
-    is trivially infeasible)."""
+    """Half the neurons AND gates on Hadamard signature bits, half NAND;
+    "mixn2" swaps which half is which. The column roll for the right
+    signature is the smallest in 1..8 leaving no fact with an empty active
+    set (an empty fact is trivially unstorable). Only "mixn" has such a
+    roll — pure AND (44 empty facts), AND/OR, and "mixn2" do not, which is
+    why configs() runs "mixn" alone (FINDINGS §26)."""
     V, d = shape.input_vocab_size, shape.d_mlp
     H = sylvester(d)
     sign = np.where(np.arange(V) < d, 1.0, -1.0)[:, None]
